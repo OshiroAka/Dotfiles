@@ -79,36 +79,32 @@ PanelWindow {
             Transition {
                 from: "collapsed"; to: "expanded"
                 SequentialAnimation {
-                    // Altura com OutBack (overshoot 2)
+                    // 1. Some o conteúdo colapsado rapidamente
+                    NumberAnimation { target: collapsedContent; property: "opacity"; duration: 80; to: 0; easing.type: Easing.InOutCubic }
+                    // 2. Animação de altura
                     NumberAnimation { 
                         target: pill; property: "height"; 
                         duration: 400; 
                         easing.type: Easing.OutBack; 
                         easing.overshoot: 4
                     }
-                    // Largura com OutBack (overshoot 4, duração 420)
+                    // 3. Animação de largura
                     NumberAnimation { 
                         target: pill; property: "width"; 
                         duration: 420; 
                         easing.type: Easing.OutBack; 
                         easing.overshoot: 5
                     }
-                    // Conteúdo aparece suavemente
-                    ParallelAnimation {
-                        NumberAnimation { target: expandedContent; property: "opacity"; duration: 200; easing.type: Easing.InOutCubic }
-                        NumberAnimation { target: collapsedContent; property: "opacity"; duration: 200; easing.type: Easing.InOutCubic }
-                    }
+                    // 4. Aparece o conteúdo expandido suavemente
+                    NumberAnimation { target: expandedContent; property: "opacity"; duration: 200; to: 1; easing.type: Easing.InOutCubic }
                 }
             },
             Transition {
                 from: "expanded"; to: "collapsed"
                 SequentialAnimation {
-                    // Esconde conteúdo rapidamente
-                    ParallelAnimation {
-                        NumberAnimation { target: expandedContent; property: "opacity"; duration: 100; to: 0 }
-                        NumberAnimation { target: collapsedContent; property: "opacity"; duration: 100; to: 1 }
-                    }
-                    // Altura e largura com OutBack (overshoot) ao recolher
+                    // 1. Some o conteúdo expandido rapidamente
+                    NumberAnimation { target: expandedContent; property: "opacity"; duration: 80; to: 0; easing.type: Easing.InOutCubic }
+                    // 2. Animação de altura e largura juntas (parallel)
                     ParallelAnimation {
                         NumberAnimation { 
                             target: pill; property: "height"; 
@@ -123,6 +119,8 @@ PanelWindow {
                             easing.overshoot: 0.7
                         }
                     }
+                    // 3. Aparece o conteúdo colapsado suavemente
+                    NumberAnimation { target: collapsedContent; property: "opacity"; duration: 1000; to: 1; easing.type: Easing.InOutCubic }
                 }
             }
         ]
@@ -267,10 +265,10 @@ PanelWindow {
                 }
             }
 
-            // Linha inferior com os ícones e controles (desce um pouco)
+            // Linha inferior com os ícones e controles
             Row {
                 anchors.bottom: parent.bottom
-                anchors.bottomMargin: -17  // Ajuste para descer mais
+                anchors.bottomMargin: -17
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: 20
                 z: 5
