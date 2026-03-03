@@ -1,6 +1,5 @@
 import Quickshell
 import Quickshell.Services.Mpris
-import Quickshell.Wayland
 import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
@@ -9,12 +8,13 @@ PanelWindow {
     id: win
     anchors.top: true
     margins.top: 8
-    color: Qt.rgba(0, 0, 0, 0.01)
+    color: "transparent"
+
     readonly property int collapsedW: 220
     readonly property int collapsedH: 36
     readonly property int expandedW: 420
     readonly property int expandedH: 118
-    implicitWidth:  pill.width + 2
+    implicitWidth: pill.width + 2
     implicitHeight: pill.height + 2
 
     property MprisPlayer activePlayer: {
@@ -57,80 +57,178 @@ PanelWindow {
         id: pill
         clip: true
         antialiasing: true
-        width:  win.expanded ? win.expandedW : win.collapsedW
-        height: win.expanded ? win.expandedH : win.collapsedH
-        radius: win.expanded ? 34 : height / 2
-        color: "transparent"
 
-        // Expandir: OutBack (estica ao abrir)
-        // Colapsar: InOutCubic (lento->rapido->lento)
-        Behavior on width {
-            NumberAnimation {
-                duration: 1700
-                easing.type: win.expanded ? Easing.OutBack : Easing.InOutCubic
-                easing.overshoot: 3
+        state: win.expanded ? "expanded" : "collapsed"
+
+        states: [
+            State {
+                name: "collapsed"
+                PropertyChanges { target: pill; width: win.collapsedW; height: win.collapsedH; radius: win.collapsedH / 2 }
+                PropertyChanges { target: collapsedContent; opacity: 1 }
+                PropertyChanges { target: expandedContent; opacity: 0 }
+            },
+            State {
+                name: "expanded"
+                PropertyChanges { target: pill; width: win.expandedW; height: win.expandedH; radius: 34 }
+                PropertyChanges { target: collapsedContent; opacity: 0 }
+                PropertyChanges { target: expandedContent; opacity: 1 }
             }
-        }
-        Behavior on height {
-            NumberAnimation {
-                duration: 3000
-                easing.type: win.expanded ? Easing.OutBack : Easing.InOutCubic
-                easing.overshoot: 2
+        ]
+
+        transitions: [
+            Transition {
+                from: "collapsed"; to: "expanded"
+                SequentialAnimation {
+                    // Primeiro altura, depois largura
+                    NumberAnimation { target: pill; property: "height"; duration: 400; easing.type: Easing.OutBack; easing.overshoot: 2 }
+                    NumberAnimation { target: pill; property: "width"; duration: 100; easing.type: Easing.OutBack; easing.overshoot: 3 }
+                    ParallelAnimation {
+                        NumberAnimation { target: expandedContent; property: "opacity"; duration: 200; easing.type: Easing.InOutCubic }
+                        NumberAnimation { target: collapsedContent; property: "opacity"; duration: 200; easing.type: Easing.InOutCubic }
+                    }
+                }
+            },
+            Transition {
+                from: "expanded"; to: "collapsed"
+                SequentialAnimation {
+                    ParallelAnimation {
+                        NumberAnimation { target: expandedContent; property: "opacity"; duration: 100; to: 0 }
+                        NumberAnimation { target: collapsedContent; property: "opacity"; duration: 100; to: 1 }
+                    }
+                    ParallelAnimation {
+                        NumberAnimation { target: pill; property: "height"; duration: 500; easing.type: Easing.InOutCubic }
+                        NumberAnimation { target: pill; property: "width"; duration: 500; easing.type: Easing.InOutCubic }
+                    }
+                }
             }
-        }
+        ]
 
         MouseArea {
             anchors.fill: parent
-            onClicked: win.expanded = !win.expanded
+            onClicked: {
+                win.expanded = !win.expanded
+                mouse.accepted = true
+            }
             cursorShape: Qt.PointingHandCursor
+            z: 0
+            propagateComposedEvents: false
         }
+
         Rectangle {
             anchors.fill: parent; radius: parent.radius
-            color: Qt.rgba(0.08, 0.08, 0.12, 0.45); antialiasing: true
+            color: Qt.rgba(0.08, 0.08, 0.12, 0.8)
+            antialiasing: true
+            z: 1
         }
+
         Rectangle {
             anchors.fill: parent; radius: parent.radius
             color: "transparent"
-            border.color: Qt.rgba(1, 1, 1, 0.01); border.width: 1
+            border.color: Qt.rgba(1, 1, 1, 0.01)
+            border.width: 1
+            z: 2
         }
 
+        // ---------- CONTEÚDO COLAPSADO ----------
         Item {
+            id: collapsedContent
             anchors.fill: parent
             anchors.margins: 10
+            opacity: 1
+            z: 3
 
-            // Capa
             Rectangle {
-                id: cover
-                width:  win.expanded ? 44 : 22
-                height: win.expanded ? 44 : 22
-                radius: win.expanded ? 8 : 11
+                id: coverCollapsed
+                width: 22; height: 22; radius: 11
                 color: "#333"; clip: true; antialiasing: true
                 anchors.left: parent.left
-                anchors.top: win.expanded ? parent.top : undefined
-                anchors.verticalCenter: win.expanded ? undefined : parent.verticalCenter
-                Behavior on width  { NumberAnimation { duration: 400; easing.type: Easing.InOutCubic } }
-                Behavior on height { NumberAnimation { duration: 400; easing.type: Easing.InOutCubic } }
-                Behavior on radius { NumberAnimation { duration: 400; easing.type: Easing.InOutCubic } }
+                anchors.verticalCenter: parent.verticalCenter
                 Image {
                     anchors.fill: parent; source: win.albumArt
                     fillMode: Image.PreserveAspectCrop; visible: win.albumArt !== ""
                 }
                 Text {
                     anchors.centerIn: parent; text: "♪"; color: "white"
-                    font.pixelSize: win.expanded ? 20 : 12; visible: win.albumArt === ""
+                    font.pixelSize: 12; visible: win.albumArt === ""
                 }
             }
 
-            // Titulo + artista (expandido)
+            Item {
+                anchors.left: coverCollapsed.right
+                anchors.leftMargin: 8
+                anchors.verticalCenter: parent.verticalCenter
+                width: parent.width - coverCollapsed.width - 8 - 30
+                height: 20
+                clip: true
+                Text {
+                    id: marqueeText
+                    text: win.songTitle
+                    color: "white"; font.pixelSize: 13; font.weight: Font.Medium
+                    x: 0
+                    SequentialAnimation {
+                        id: marqueeAnim
+                        running: !win.expanded && marqueeText.width > (pill.width - coverCollapsed.width - 70)
+                        loops: Animation.Infinite
+                        PauseAnimation  { duration: 1500 }
+                        NumberAnimation { target: marqueeText; property: "x"; from: 0; to: -(marqueeText.width + 20); duration: marqueeText.width * 18; easing.type: Easing.Linear }
+                        PauseAnimation  { duration: 800 }
+                        NumberAnimation { target: marqueeText; property: "x"; to: 0; duration: 0 }
+                    }
+                    onTextChanged: { x = 0; marqueeAnim.restart() }
+                }
+            }
+
+            Row {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 2
+                opacity: win.isPlaying ? 1 : 0
+                Repeater {
+                    model: 4
+                    Rectangle {
+                        width: 3; height: 8; radius: 1.5; color: "white"
+                        anchors.verticalCenter: parent.verticalCenter
+                        SequentialAnimation on height {
+                            loops: Animation.Infinite
+                            running: win.isPlaying && !win.expanded
+                            NumberAnimation { to: 14; duration: 450 + index * 130; easing.type: Easing.InOutQuad }
+                            NumberAnimation { to: 4;  duration: 450 + index * 130; easing.type: Easing.InOutQuad }
+                        }
+                    }
+                }
+            }
+        }
+
+        // ---------- CONTEÚDO EXPANDIDO ----------
+        Item {
+            id: expandedContent
+            anchors.fill: parent
+            anchors.margins: 10
+            opacity: 0
+            z: 4
+
+            Rectangle {
+                id: coverExpanded
+                width: 44; height: 44; radius: 8
+                color: "#333"; clip: true; antialiasing: true
+                anchors.left: parent.left
+                anchors.top: parent.top
+                Image {
+                    anchors.fill: parent; source: win.albumArt
+                    fillMode: Image.PreserveAspectCrop; visible: win.albumArt !== ""
+                }
+                Text {
+                    anchors.centerIn: parent; text: "♪"; color: "white"
+                    font.pixelSize: 20; visible: win.albumArt === ""
+                }
+            }
+
             Column {
-                anchors.left: cover.right
+                anchors.left: coverExpanded.right
                 anchors.leftMargin: 8
                 anchors.right: parent.right
                 anchors.top: parent.top
                 spacing: 3
-                visible: win.expanded
-                opacity: win.expanded ? 1 : 0
-                Behavior on opacity { NumberAnimation { duration: 200 } }
                 Text {
                     width: parent.width
                     text: win.songTitle
@@ -145,67 +243,12 @@ PanelWindow {
                 }
             }
 
-            // Titulo rolante (colapsado)
-            Item {
-                anchors.left: cover.right
-                anchors.leftMargin: 8
-                anchors.verticalCenter: parent.verticalCenter
-                width: parent.width - cover.width - 8 - 30
-                height: 20
-                clip: true
-                visible: !win.expanded
-                opacity: win.expanded ? 0 : 1
-                Text {
-                    id: marqueeText
-                    text: win.songTitle
-                    color: "white"; font.pixelSize: 13; font.weight: Font.Medium
-                    x: 0
-                    SequentialAnimation {
-                        id: marqueeAnim
-                        running: !win.expanded && marqueeText.width > (pill.width - cover.width - 70)
-                        loops: Animation.Infinite
-                        PauseAnimation  { duration: 1500 }
-                        NumberAnimation { target: marqueeText; property: "x"; from: 0; to: -(marqueeText.width + 20); duration: marqueeText.width * 18; easing.type: Easing.Linear }
-                        PauseAnimation  { duration: 800 }
-                        NumberAnimation { target: marqueeText; property: "x"; to: 0; duration: 0 }
-                    }
-                    onTextChanged: { x = 0; marqueeAnim.restart() }
-                }
-            }
-
-            // Equalizer colapsado — ondas suaves
-            Row {
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: 2
-                opacity: (!win.expanded && win.isPlaying) ? 1 : 0
-                visible: opacity > 0
-                Behavior on opacity { NumberAnimation { duration: 150 } }
-                Repeater {
-                    model: 4
-                    Rectangle {
-                        id: barCollapsed
-                        width: 3; height: 8; radius: 1.5; color: "white"
-                        anchors.verticalCenter: parent.verticalCenter
-                        SequentialAnimation on height {
-                            loops: Animation.Infinite
-                            running: win.isPlaying && !win.expanded
-                            NumberAnimation { to: 14; duration: 450 + index * 130; easing.type: Easing.InOutQuad }
-                            NumberAnimation { to: 4;  duration: 450 + index * 130; easing.type: Easing.InOutQuad }
-                        }
-                    }
-                }
-            }
-
-            // LINHA DE BAIXO
             Row {
                 anchors.bottom: parent.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: 10
-                visible: win.expanded
-                opacity: win.expanded ? 1 : 0
+                z: 5
 
-                // Equalizer expandido — ondas suaves
                 Row {
                     spacing: 2
                     anchors.verticalCenter: parent.verticalCenter
@@ -229,19 +272,23 @@ PanelWindow {
                     iconSource: "../../icons/spotify.svg"
                     bgColor: "#1DB954"
                     pulsing: win.expanded
-                    anchors.verticalCenter: parent.verticalCenter
-                    onClicked: launchSpotify.running = true
+                    enabled: win.expanded
+                    onClicked: {
+                        launchSpotify.running = true
+                        mouse.accepted = true
+                    }
                 }
-
                 AppIcon {
                     iconSource: "../../icons/discord.svg"
                     bgColor: "#5865F2"
                     pulsing: win.expanded
-                    anchors.verticalCenter: parent.verticalCenter
-                    onClicked: launchDiscord.running = true
+                    enabled: win.expanded
+                    onClicked: {
+                        launchDiscord.running = true
+                        mouse.accepted = true
+                    }
                 }
 
-                // Anterior
                 Rectangle {
                     width: 30; height: 30; radius: 15
                     color: prevArea.containsMouse ? Qt.rgba(1,1,1,0.15) : "transparent"
@@ -256,13 +303,18 @@ PanelWindow {
                         Behavior on color { ColorAnimation { duration: 100 } }
                     }
                     MouseArea {
-                        id: prevArea; anchors.fill: parent
-                        hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                        onClicked: win.activePlayer?.previous()
+                        id: prevArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        enabled: win.expanded
+                        onClicked: {
+                            win.activePlayer?.previous()
+                            mouse.accepted = true
+                        }
                     }
                 }
 
-                // Play/Pause
                 Rectangle {
                     width: 36; height: 36; radius: 18
                     color: playArea.containsMouse ? Qt.rgba(1,1,1,0.25) : Qt.rgba(1,1,1,0.15)
@@ -276,13 +328,18 @@ PanelWindow {
                         color: "white"; font.pixelSize: 16
                     }
                     MouseArea {
-                        id: playArea; anchors.fill: parent
-                        hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                        onClicked: win.activePlayer?.togglePlaying()
+                        id: playArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        enabled: win.expanded
+                        onClicked: {
+                            win.activePlayer?.togglePlaying()
+                            mouse.accepted = true
+                        }
                     }
                 }
 
-                // Proxima
                 Rectangle {
                     width: 30; height: 30; radius: 15
                     color: nextArea.containsMouse ? Qt.rgba(1,1,1,0.15) : "transparent"
@@ -297,12 +354,25 @@ PanelWindow {
                         Behavior on color { ColorAnimation { duration: 100 } }
                     }
                     MouseArea {
-                        id: nextArea; anchors.fill: parent
-                        hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                        onClicked: win.activePlayer?.next()
+                        id: nextArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        enabled: win.expanded
+                        onClicked: {
+                            win.activePlayer?.next()
+                            mouse.accepted = true
+                        }
                     }
                 }
             }
         }
+    }
+
+    function formatTime(us) {
+        var totalSeconds = Math.floor(us / 1000000)
+        var minutes = Math.floor(totalSeconds / 60)
+        var seconds = totalSeconds % 60
+        return minutes + ":" + String(seconds).padStart(2, "0")
     }
 }
