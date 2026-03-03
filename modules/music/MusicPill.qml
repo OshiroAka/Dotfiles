@@ -54,6 +54,19 @@ PanelWindow {
         onTriggered: { if (win.activePlayer) win.livePosition = win.activePlayer.position }
     }
 
+    // Extrator de cor da capa
+    ColorExtractor {
+        id: colorEx
+        imageSource: win.albumArt
+    }
+
+    // Cor do equalizer: dominante da capa ou cor do player como fallback
+    readonly property color eqColor: {
+        if (win.albumArt !== "") return colorEx.dominantColor
+        if (win.playerName === "discord") return "#5865F2"
+        return "#1DB954"
+    }
+
     Rectangle {
         id: pill
         clip: true
@@ -257,7 +270,7 @@ PanelWindow {
                         model: 16
                         Rectangle {
                             width: 3; radius: 1.5; height: 8
-                            color: win.playerName === "discord" ? "#5865F2" : "#1DB954"
+                            color: win.eqColor
                             anchors.verticalCenter: parent.verticalCenter
                             SequentialAnimation on height {
                                 loops: Animation.Infinite
