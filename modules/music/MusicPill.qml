@@ -43,15 +43,8 @@ PanelWindow {
     }
     property bool expanded: false
 
-    // Processos para abrir apps
-    Process {
-        id: launchSpotify
-        command: ["spotify"]
-    }
-    Process {
-        id: launchDiscord
-        command: ["discord"]
-    }
+    Process { id: launchSpotify; command: ["spotify"] }
+    Process { id: launchDiscord; command: ["discord"] }
 
     Timer {
         interval: 1000
@@ -68,8 +61,23 @@ PanelWindow {
         height: win.expanded ? win.expandedH : win.collapsedH
         radius: win.expanded ? 34 : height / 2
         color: "transparent"
-        Behavior on width  { NumberAnimation { duration: 300; easing.type: Easing.OutQuart } }
-        Behavior on height { NumberAnimation { duration: 300; easing.type: Easing.OutQuart } }
+
+        // Expandir: OutBack (estica ao abrir)
+        // Colapsar: InOutCubic (lento->rapido->lento)
+        Behavior on width {
+            NumberAnimation {
+                duration: 1700
+                easing.type: win.expanded ? Easing.OutBack : Easing.InOutCubic
+                easing.overshoot: 3
+            }
+        }
+        Behavior on height {
+            NumberAnimation {
+                duration: 3000
+                easing.type: win.expanded ? Easing.OutBack : Easing.InOutCubic
+                easing.overshoot: 2
+            }
+        }
 
         MouseArea {
             anchors.fill: parent
@@ -78,12 +86,12 @@ PanelWindow {
         }
         Rectangle {
             anchors.fill: parent; radius: parent.radius
-            color: Qt.rgba(0.08, 0.08, 0.12, 0.85); antialiasing: true
+            color: Qt.rgba(0.08, 0.08, 0.12, 0.45); antialiasing: true
         }
         Rectangle {
             anchors.fill: parent; radius: parent.radius
             color: "transparent"
-            border.color: Qt.rgba(1, 1, 1, 0.06); border.width: 1
+            border.color: Qt.rgba(1, 1, 1, 0.01); border.width: 1
         }
 
         Item {
@@ -100,9 +108,9 @@ PanelWindow {
                 anchors.left: parent.left
                 anchors.top: win.expanded ? parent.top : undefined
                 anchors.verticalCenter: win.expanded ? undefined : parent.verticalCenter
-                Behavior on width  { NumberAnimation { duration: 300; easing.type: Easing.OutQuart } }
-                Behavior on height { NumberAnimation { duration: 300; easing.type: Easing.OutQuart } }
-                Behavior on radius { NumberAnimation { duration: 300; easing.type: Easing.OutQuart } }
+                Behavior on width  { NumberAnimation { duration: 400; easing.type: Easing.InOutCubic } }
+                Behavior on height { NumberAnimation { duration: 400; easing.type: Easing.InOutCubic } }
+                Behavior on radius { NumberAnimation { duration: 400; easing.type: Easing.InOutCubic } }
                 Image {
                     anchors.fill: parent; source: win.albumArt
                     fillMode: Image.PreserveAspectCrop; visible: win.albumArt !== ""
@@ -122,6 +130,7 @@ PanelWindow {
                 spacing: 3
                 visible: win.expanded
                 opacity: win.expanded ? 1 : 0
+                Behavior on opacity { NumberAnimation { duration: 200 } }
                 Text {
                     width: parent.width
                     text: win.songTitle
@@ -164,7 +173,7 @@ PanelWindow {
                 }
             }
 
-            // Equalizer colapsado
+            // Equalizer colapsado — ondas suaves
             Row {
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
@@ -175,19 +184,20 @@ PanelWindow {
                 Repeater {
                     model: 4
                     Rectangle {
+                        id: barCollapsed
                         width: 3; height: 8; radius: 1.5; color: "white"
                         anchors.verticalCenter: parent.verticalCenter
                         SequentialAnimation on height {
                             loops: Animation.Infinite
                             running: win.isPlaying && !win.expanded
-                            NumberAnimation { to: 14; duration: 250 + index * 90; easing.type: Easing.InOutSine }
-                            NumberAnimation { to: 4;  duration: 250 + index * 90; easing.type: Easing.InOutSine }
+                            NumberAnimation { to: 14; duration: 450 + index * 130; easing.type: Easing.InOutQuad }
+                            NumberAnimation { to: 4;  duration: 450 + index * 130; easing.type: Easing.InOutQuad }
                         }
                     }
                 }
             }
 
-            // ── LINHA DE BAIXO ──────────────────────────────────
+            // LINHA DE BAIXO
             Row {
                 anchors.bottom: parent.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -195,7 +205,7 @@ PanelWindow {
                 visible: win.expanded
                 opacity: win.expanded ? 1 : 0
 
-                // Equalizer expandido
+                // Equalizer expandido — ondas suaves
                 Row {
                     spacing: 2
                     anchors.verticalCenter: parent.verticalCenter
@@ -208,27 +218,25 @@ PanelWindow {
                             SequentialAnimation on height {
                                 loops: Animation.Infinite
                                 running: win.isPlaying && win.expanded
-                                NumberAnimation { to: 16; duration: 250 + index * 90; easing.type: Easing.InOutSine }
-                                NumberAnimation { to: 4;  duration: 250 + index * 90; easing.type: Easing.InOutSine }
+                                NumberAnimation { to: 16; duration: 450 + index * 130; easing.type: Easing.InOutQuad }
+                                NumberAnimation { to: 4;  duration: 450 + index * 130; easing.type: Easing.InOutQuad }
                             }
                         }
                     }
                 }
 
-                // Spotify (componente isolado)
                 AppIcon {
                     iconSource: "../../icons/spotify.svg"
                     bgColor: "#1DB954"
-                    pulsing: win.isPlaying && win.expanded && win.playerName === "spotify"
+                    pulsing: win.expanded
                     anchors.verticalCenter: parent.verticalCenter
                     onClicked: launchSpotify.running = true
                 }
 
-                // Discord (componente isolado)
                 AppIcon {
                     iconSource: "../../icons/discord.svg"
                     bgColor: "#5865F2"
-                    pulsing: win.isPlaying && win.expanded && win.playerName === "discord"
+                    pulsing: win.expanded
                     anchors.verticalCenter: parent.verticalCenter
                     onClicked: launchDiscord.running = true
                 }
@@ -240,7 +248,7 @@ PanelWindow {
                     anchors.verticalCenter: parent.verticalCenter
                     scale: prevArea.pressed ? 0.85 : 1.0
                     Behavior on color { ColorAnimation { duration: 100 } }
-                    Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutQuart } }
+                    Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutBack } }
                     Text {
                         anchors.centerIn: parent; text: "⏮"
                         color: prevArea.containsMouse ? "white" : Qt.rgba(1,1,1,0.65)
@@ -261,7 +269,7 @@ PanelWindow {
                     anchors.verticalCenter: parent.verticalCenter
                     scale: playArea.pressed ? 0.88 : 1.0
                     Behavior on color { ColorAnimation { duration: 100 } }
-                    Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutQuart } }
+                    Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutBack } }
                     Text {
                         anchors.centerIn: parent
                         text: win.isPlaying ? "⏸" : "▶"
@@ -281,7 +289,7 @@ PanelWindow {
                     anchors.verticalCenter: parent.verticalCenter
                     scale: nextArea.pressed ? 0.85 : 1.0
                     Behavior on color { ColorAnimation { duration: 100 } }
-                    Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutQuart } }
+                    Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutBack } }
                     Text {
                         anchors.centerIn: parent; text: "⏭"
                         color: nextArea.containsMouse ? "white" : Qt.rgba(1,1,1,0.65)

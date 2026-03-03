@@ -12,21 +12,39 @@ Rectangle {
     color: bgColor
     antialiasing: true
 
-    // Pulso independente do hover
     property real pulseScale: 1.0
-    SequentialAnimation on pulseScale {
-        loops: Animation.Infinite
-        running: root.pulsing
-        NumberAnimation { to: 1.13; duration: 580; easing.type: Easing.InOutSine }
-        NumberAnimation { to: 1.0;  duration: 580; easing.type: Easing.InOutSine }
-    }
-    onPulsingChanged: { if (!pulsing) pulseScale = 1.0 }
-
-    // Hover independente
     property real hoverScale: 1.0
-    Behavior on hoverScale { NumberAnimation { duration: 140; easing.type: Easing.OutQuad } }
-
     scale: pulseScale * hoverScale
+
+    function startPulse() {
+        pulseAnim.stop()
+        pulseScale = 1.0
+        pulseAnim.start()
+    }
+    function stopPulse() {
+        pulseAnim.stop()
+        pulseScale = 1.0
+    }
+
+    // Dispara quando o valor muda
+    onPulsingChanged: {
+        if (pulsing) startPulse()
+        else stopPulse()
+    }
+
+    // Dispara quando o componente e criado (caso ja comece pulsing=true)
+    Component.onCompleted: {
+        if (pulsing) startPulse()
+    }
+
+    SequentialAnimation {
+        id: pulseAnim
+        loops: Animation.Infinite
+        NumberAnimation { target: root; property: "pulseScale"; to: 1.13; duration: 580; easing.type: Easing.InOutSine }
+        NumberAnimation { target: root; property: "pulseScale"; to: 1.0;  duration: 580; easing.type: Easing.InOutSine }
+    }
+
+    Behavior on hoverScale { NumberAnimation { duration: 140; easing.type: Easing.OutQuad } }
 
     Image {
         anchors.centerIn: parent
