@@ -93,9 +93,9 @@ PanelWindow {
                 from: "collapsed"; to: "expanded"
                 SequentialAnimation {
                     NumberAnimation { target: collapsedContent; property: "opacity"; duration: 80;  to: 0; easing.type: Easing.InOutCubic }
-                    NumberAnimation { target: pill; property: "height"; duration: 400; easing.type: Easing.OutBack; easing.overshoot: 4 }
-                    NumberAnimation { target: pill; property: "width";  duration: 420; easing.type: Easing.OutBack; easing.overshoot: 5 }
-                    NumberAnimation { target: expandedContent;  property: "opacity"; duration: 200; to: 1; easing.type: Easing.InOutCubic }
+                    NumberAnimation { target: pill; property: "height"; duration: 300; easing.type: Easing.OutBack; easing.overshoot: 4 }
+                    NumberAnimation { target: pill; property: "width";  duration: 1; easing.type: Easing.OutBack; easing.overshoot: 5 }
+                    NumberAnimation { target: expandedContent;  property: "opacity"; duration: 2000; to: 1; easing.type: Easing.InOutCubic }
                 }
             },
             Transition {
@@ -104,9 +104,9 @@ PanelWindow {
                     NumberAnimation { target: expandedContent;  property: "opacity"; duration: 80;  to: 0; easing.type: Easing.InOutCubic }
                     ParallelAnimation {
                         NumberAnimation { target: pill; property: "height"; duration: 400; easing.type: Easing.OutBack; easing.overshoot: 2 }
-                        NumberAnimation { target: pill; property: "width";  duration: 420; easing.type: Easing.OutBack; easing.overshoot: 0.7 }
+                        NumberAnimation { target: pill; property: "width";  duration: 1; easing.type: Easing.OutBack; easing.overshoot: 0.7 }
                     }
-                    NumberAnimation { target: collapsedContent; property: "opacity"; duration: 200; to: 1; easing.type: Easing.InOutCubic }
+                    NumberAnimation { target: collapsedContent; property: "opacity"; duration: 600; to: 1; easing.type: Easing.InOutCubic }
                 }
             }
         ]
@@ -215,25 +215,58 @@ PanelWindow {
             z: 4
 
             // DIREITA: Album colado na borda, altura total
+            // Sombra do album (camadas)
+            Repeater {
+                model: 3
+                Rectangle {
+                    width: albumRight.width  + (index + 1) * 6
+                    height: albumRight.height + (index + 1) * 6
+                    radius: albumRight.radius + (index + 1) * 2
+                    anchors.centerIn: albumRight
+                    color: "transparent"
+                    border.color: Qt.rgba(0, 0, 0, 0.18 - index * 0.05)
+                    border.width: 3
+                    z: 3
+                }
+            }
+
+            // Album com bordas arredondadas
             Rectangle {
                 id: albumRight
                 width: height
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
-                radius: 28
-                color: "#222"; clip: true; antialiasing: true
-                // Arredonda só os cantos direitos
+                radius: 24
+                color: "#222"
+                antialiasing: true
+                z: 4
+
+                // Garante clip arredondado
                 layer.enabled: true
+                layer.smooth: true
+
                 Image {
-                    anchors.fill: parent; source: win.albumArt
-                    fillMode: Image.PreserveAspectCrop; visible: win.albumArt !== ""
+                    anchors.fill: parent
+                    source: win.albumArt
+                    fillMode: Image.PreserveAspectCrop
+                    visible: win.albumArt !== ""
+                    layer.enabled: true
+                    layer.smooth: true
                 }
                 Text {
                     anchors.centerIn: parent; text: "♪"
                     color: "white"; font.pixelSize: 32; visible: win.albumArt === ""
                 }
 
+                // Borda brilhante sutil por cima
+                Rectangle {
+                    anchors.fill: parent
+                    radius: parent.radius
+                    color: "transparent"
+                    border.color: Qt.rgba(1, 1, 1, 0.12)
+                    border.width: 1
+                }
             }
 
             // ESQUERDA cima: Visualizer
