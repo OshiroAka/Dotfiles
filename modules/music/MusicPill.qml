@@ -79,9 +79,21 @@ PanelWindow {
             Transition {
                 from: "collapsed"; to: "expanded"
                 SequentialAnimation {
-                    // Primeiro altura, depois largura
-                    NumberAnimation { target: pill; property: "height"; duration: 400; easing.type: Easing.OutBack; easing.overshoot: 2 }
-                    NumberAnimation { target: pill; property: "width"; duration: 100; easing.type: Easing.OutBack; easing.overshoot: 3 }
+                    // Altura com OutBack (overshoot 2)
+                    NumberAnimation { 
+                        target: pill; property: "height"; 
+                        duration: 400; 
+                        easing.type: Easing.OutBack; 
+                        easing.overshoot: 4
+                    }
+                    // Largura com OutBack (overshoot 4, duração 420)
+                    NumberAnimation { 
+                        target: pill; property: "width"; 
+                        duration: 420; 
+                        easing.type: Easing.OutBack; 
+                        easing.overshoot: 5
+                    }
+                    // Conteúdo aparece suavemente
                     ParallelAnimation {
                         NumberAnimation { target: expandedContent; property: "opacity"; duration: 200; easing.type: Easing.InOutCubic }
                         NumberAnimation { target: collapsedContent; property: "opacity"; duration: 200; easing.type: Easing.InOutCubic }
@@ -91,13 +103,25 @@ PanelWindow {
             Transition {
                 from: "expanded"; to: "collapsed"
                 SequentialAnimation {
+                    // Esconde conteúdo rapidamente
                     ParallelAnimation {
                         NumberAnimation { target: expandedContent; property: "opacity"; duration: 100; to: 0 }
                         NumberAnimation { target: collapsedContent; property: "opacity"; duration: 100; to: 1 }
                     }
+                    // Altura e largura com OutBack (overshoot) ao recolher
                     ParallelAnimation {
-                        NumberAnimation { target: pill; property: "height"; duration: 500; easing.type: Easing.InOutCubic }
-                        NumberAnimation { target: pill; property: "width"; duration: 500; easing.type: Easing.InOutCubic }
+                        NumberAnimation { 
+                            target: pill; property: "height"; 
+                            duration: 400; 
+                            easing.type: Easing.OutBack; 
+                            easing.overshoot: 2
+                        }
+                        NumberAnimation { 
+                            target: pill; property: "width"; 
+                            duration: 420; 
+                            easing.type: Easing.OutBack; 
+                            easing.overshoot: 0.7
+                        }
                     }
                 }
             }
@@ -123,8 +147,8 @@ PanelWindow {
 
         Rectangle {
             anchors.fill: parent; radius: parent.radius
-            color: "transparent"
-            border.color: Qt.rgba(1, 1, 1, 0.01)
+            color: "gray"
+            border.color: Qt.rgba(0, 0, 0, 0.65)
             border.width: 1
             z: 2
         }
@@ -133,7 +157,7 @@ PanelWindow {
         Item {
             id: collapsedContent
             anchors.fill: parent
-            anchors.margins: 10
+            anchors.margins: 15
             opacity: 1
             z: 3
 
@@ -148,7 +172,7 @@ PanelWindow {
                     fillMode: Image.PreserveAspectCrop; visible: win.albumArt !== ""
                 }
                 Text {
-                    anchors.centerIn: parent; text: "♪"; color: "white"
+                    anchors.centerIn: parent; text: "♪"; color: "black"
                     font.pixelSize: 12; visible: win.albumArt === ""
                 }
             }
@@ -163,7 +187,7 @@ PanelWindow {
                 Text {
                     id: marqueeText
                     text: win.songTitle
-                    color: "white"; font.pixelSize: 13; font.weight: Font.Medium
+                    color: "black"; font.pixelSize: 13; font.weight: Font.Medium
                     x: 0
                     SequentialAnimation {
                         id: marqueeAnim
@@ -186,7 +210,7 @@ PanelWindow {
                 Repeater {
                     model: 4
                     Rectangle {
-                        width: 3; height: 8; radius: 1.5; color: "white"
+                        width: 3; height: 8; radius: 1.5; color: "black"
                         anchors.verticalCenter: parent.verticalCenter
                         SequentialAnimation on height {
                             loops: Animation.Infinite
@@ -203,14 +227,14 @@ PanelWindow {
         Item {
             id: expandedContent
             anchors.fill: parent
-            anchors.margins: 10
+            anchors.margins: 20
             opacity: 0
             z: 4
 
             Rectangle {
                 id: coverExpanded
                 width: 44; height: 44; radius: 8
-                color: "#333"; clip: true; antialiasing: true
+                color: "white"; clip: true; antialiasing: true
                 anchors.left: parent.left
                 anchors.top: parent.top
                 Image {
@@ -218,42 +242,44 @@ PanelWindow {
                     fillMode: Image.PreserveAspectCrop; visible: win.albumArt !== ""
                 }
                 Text {
-                    anchors.centerIn: parent; text: "♪"; color: "white"
+                    anchors.centerIn: parent; text: "♪"; color: "black"
                     font.pixelSize: 20; visible: win.albumArt === ""
                 }
             }
 
             Column {
                 anchors.left: coverExpanded.right
-                anchors.leftMargin: 8
+                anchors.leftMargin: 12
                 anchors.right: parent.right
                 anchors.top: parent.top
                 spacing: 3
                 Text {
                     width: parent.width
                     text: win.songTitle
-                    color: "white"; font.pixelSize: 14; font.weight: Font.SemiBold
+                    color: "black"; font.pixelSize: 14; font.weight: Font.SemiBold
                     elide: Text.ElideRight
                 }
                 Text {
                     width: parent.width
                     text: win.songArtist
-                    color: Qt.rgba(1,1,1,0.55); font.pixelSize: 12
+                    color: Qt.rgba(1,1,1,0.90); font.pixelSize: 12
                     elide: Text.ElideRight
                 }
             }
 
+            // Linha inferior com os ícones e controles (desce um pouco)
             Row {
                 anchors.bottom: parent.bottom
+                anchors.bottomMargin: -17  // Ajuste para descer mais
                 anchors.horizontalCenter: parent.horizontalCenter
-                spacing: 10
+                spacing: 20
                 z: 5
 
                 Row {
                     spacing: 2
                     anchors.verticalCenter: parent.verticalCenter
                     Repeater {
-                        model: 4
+                        model: 16
                         Rectangle {
                             width: 3; radius: 1.5; height: 8
                             color: win.playerName === "discord" ? "#5865F2" : "#1DB954"
@@ -298,7 +324,7 @@ PanelWindow {
                     Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutBack } }
                     Text {
                         anchors.centerIn: parent; text: "⏮"
-                        color: prevArea.containsMouse ? "white" : Qt.rgba(1,1,1,0.65)
+                        color: prevArea.containsMouse ? "black" : Qt.rgba(56, 40, 40, 0.65)
                         font.pixelSize: 15
                         Behavior on color { ColorAnimation { duration: 100 } }
                     }
@@ -325,7 +351,7 @@ PanelWindow {
                     Text {
                         anchors.centerIn: parent
                         text: win.isPlaying ? "⏸" : "▶"
-                        color: "white"; font.pixelSize: 16
+                        color: "black"; font.pixelSize: 16
                     }
                     MouseArea {
                         id: playArea
@@ -349,7 +375,7 @@ PanelWindow {
                     Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutBack } }
                     Text {
                         anchors.centerIn: parent; text: "⏭"
-                        color: nextArea.containsMouse ? "white" : Qt.rgba(1,1,1,0.65)
+                        color: nextArea.containsMouse ? "black" : Qt.rgba(1,1,1,0.65)
                         font.pixelSize: 15
                         Behavior on color { ColorAnimation { duration: 100 } }
                     }
