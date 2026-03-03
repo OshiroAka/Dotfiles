@@ -3,14 +3,17 @@ import Quickshell.Services.Mpris
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Wayland
+import Qt5Compat.GraphicalEffects
 
-LayerShellWindow {
+PanelWindow {
     id: win
 
+    // Posição e transparência da janela
     anchors.top: true
     margins.top: 8
-    color: "transparent"
+    color: Qt.rgba(0, 0, 0, 0.01)
 
+    // Tamanhos predefinidos
     readonly property int collapsedW: 220
     readonly property int collapsedH: 36
     readonly property int expandedW: 400
@@ -19,6 +22,7 @@ LayerShellWindow {
     width: pill.width + 2
     height: pill.height + 2
 
+    // Player ativo (Spotify, etc.)
     property MprisPlayer activePlayer: {
         for (var i = 0; i < Mpris.players.values.length; i++) {
             var p = Mpris.players.values[i]
@@ -31,44 +35,66 @@ LayerShellWindow {
     readonly property string songTitle: activePlayer?.trackTitle ?? "Nenhuma musica"
     readonly property string songArtist: activePlayer?.trackArtist ?? "-"
     readonly property string albumArt: activePlayer?.trackArtUrl ?? ""
+
+    // Posição simulada (para players que não atualizam sozinhos)
     property real livePosition: 0
+
+    // Duração total (convertida para microssegundos)
     readonly property real duration: {
-        if (!activePlayer || activePlayer.trackLength <= 0)
-            return 1
+        if (!activePlayer || activePlayer.trackLength <= 0) return 1
         return activePlayer.trackLength * 1000
-}
+    }
+
+    // Controle de hover/expansão
     property bool hovered: false
     property bool expanded: hovered && activePlayer !== null
 
+    // ------------------------------------------------------------
+    // Componente principal: pill arredondado
+    // ------------------------------------------------------------
     Rectangle {
         id: pill
+        clip: true   // Garante que nada vaze dos cantos
+
+        width: win.expanded ? win.expandedW : win.collapsedW
+        height: win.expanded ? win.expandedH : win.collapsedH
+        radius: win.expanded ? 34 : height / 2
+        color: "transparent"
 
         Behavior on width {
-    NumberAnimation {
-        duration: 220
+         NumberAnimation {
+        duration: 300
         easing.type: Easing.InOutCubic
     }
 }
-
-Behavior on height {
-    NumberAnimation {
-        duration: 220
+        Behavior on height {
+         NumberAnimation {
+        duration: 300
         easing.type: Easing.InOutCubic
     }
 }
-
-        width:  win.expanded ? win.expandedW : win.collapsedW
-        height: win.expanded ? win.expandedH : win.collapsedH
-        radius: win.expanded ? 34 : height / 1
-        color: Qt.rgba(0.08, 0.08, 0.12, 0.3)
-        border.color: Qt.rgba(1, 1, 1, 0.012)
-        border.width: 1
 
         HoverHandler {
             onHoveredChanged: win.hovered = hovered
         }
 
-        // --- COLAPSADO ---
+        // Fundo sólido com transparência (ajuste o alpha para mais ou menos transparência)
+        Rectangle {
+            anchors.fill: parent
+            radius: parent.radius
+            color: Qt.rgba(0.08, 0.08, 0.12, 0.3)   // Quanto menor o último valor, mais transparente
+        }
+
+        // Borda extremamente suave (opcional – comente se não quiser)
+        Rectangle {
+            anchors.fill: parent
+            radius: parent.radius
+            color: "transparent"
+            border.color: Qt.rgba(1, 1, 1, 0.02)   // Quase invisível
+            border.width: 1
+        }
+
+        // ========== MODO COLAPSADO ==========
         RowLayout {
             anchors.fill: parent
             anchors.leftMargin: 10
@@ -76,8 +102,8 @@ Behavior on height {
             spacing: 8
             opacity: win.expanded ? 0 : 1
             Behavior on opacity { NumberAnimation { duration: 180 } }
-            opacity: win.expanded ? 1 : 0
 
+            // Ícone/Album art pequeno
             Rectangle {
                 width: 22; height: 22; radius: 11
                 color: "#333"; clip: true
@@ -93,6 +119,7 @@ Behavior on height {
                 }
             }
 
+            // Título da música
             Text {
                 Layout.fillWidth: true
                 text: win.songTitle
@@ -101,14 +128,15 @@ Behavior on height {
                 elide: Text.ElideRight
             }
 
+            // Barrinhas animadas (quando está tocando)
             Row {
                 spacing: 2
                 visible: win.isPlaying
                 Repeater {
                     model: 3
                     Rectangle {
-                        width: 3; color: "#ffffff"; radius: 1.5
-                        height: 8
+                        width: 3; height: 8; radius: 1.5
+                        color: "#ffffff"
                         anchors.verticalCenter: parent.verticalCenter
                         SequentialAnimation on height {
                             loops: Animation.Infinite
@@ -121,7 +149,7 @@ Behavior on height {
             }
         }
 
-        // --- EXPANDIDO ---
+        // ========== MODO EXPANDIDO ==========
         Item {
             anchors.fill: parent
             anchors.margins: 14
@@ -129,113 +157,78 @@ Behavior on height {
             Behavior on opacity { NumberAnimation { duration: 200 } }
             visible: opacity > 0
 
-            RowLayout {
-                id: topRow
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
+            ColumnLayout {
+                anchors.fill: parent
                 spacing: 10
 
-                Rectangle {
-                    width: 44; height: 44; radius: 8
-                    color: "#222"; clip: true
-                    Image {
-                        anchors.fill: parent
-                        source: win.albumArt
-                        fillMode: Image.PreserveAspectCrop
-                    }
-                    Text {
-                        anchors.centerIn: parent
-                        text: "♪"; color: "#888"; font.pixelSize: 20
-                        visible: win.albumArt === ""
-                    }
-                }
+                // Linha superior: album + título/artista
+                RowLayout {
+                    spacing: 10
 
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 2
-                    Text {
-                        Layout.fillWidth: true
-                        text: win.songTitle; color: "white"
-                        font.pixelSize: 14; font.weight: Font.SemiBold
-                        elide: Text.ElideRight
-                    }
-                    Text {
-                        Layout.fillWidth: true
-                        text: win.songArtist
-                        color: Qt.rgba(1,1,1,0.55); font.pixelSize: 12
-                        elide: Text.ElideRight
-                    }
-                }
-            }
-
-            RowLayout {
-                anchors.top: topRow.bottom
-                anchors.topMargin: 8
-                anchors.horizontalCenter: parent.horizontalCenter
-                spacing: 20
-
-                ControlBtn { icon: "\u23ee"; onClicked: win.activePlayer?.previous() }
-
-                Rectangle {
-                    width: 36; height: 36; radius: 18
-                    color: Qt.rgba(1,1,1,0.12)
-                    Text {
-                        anchors.centerIn: parent
-                        text: win.isPlaying ? "\u23f8" : "\u25b6"
-                        color: "white"; font.pixelSize: 16
-                    }
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: win.activePlayer?.togglePlaying()
-                        cursorShape: Qt.PointingHandCursor
-                    }
-                }
-
-                ControlBtn { icon: "\u23ed"; onClicked: win.activePlayer?.next() }
-            }
-
-            Item {
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
-                height: 20
-
-                Text {
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: formatTime(win.livePosition)
-                    color: Qt.rgba(1,1,1,0.4); font.pixelSize: 10
-                }
-               Text {
-                     anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                      text: formatTime(win.duration)
-                      color: Qt.rgba(1,1,1,0.4)
-                    font.pixelSize: 10
-                    }   
-
-                Item {
-                    anchors.left: parent.left; anchors.right: parent.right
-                    anchors.leftMargin: 30; anchors.rightMargin: 30
-                    anchors.verticalCenter: parent.verticalCenter
-                    height: 4
-
-                    Rectangle { anchors.fill: parent; radius: 2; color: Qt.rgba(1,1,1,0.15) }
                     Rectangle {
-                        width: parent.width * (win.duration > 0 ? Math.min(win.livePosition / win.duration, 1) : 0)
-                        height: parent.height; radius: 2; color: "#e06c75"
-                        Behavior on width { NumberAnimation { duration: 500 } }
+                        width: 44; height: 44; radius: 8
+                        color: "#222"; clip: true
+                        Image {
+                            anchors.fill: parent
+                            source: win.albumArt
+                            fillMode: Image.PreserveAspectCrop
+                        }
+                        Text {
+                            anchors.centerIn: parent
+                            text: "♪"; color: "#888"; font.pixelSize: 20
+                            visible: win.albumArt === ""
+                        }
                     }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 2
+                        Text {
+                            Layout.fillWidth: true
+                            text: win.songTitle; color: "white"
+                            font.pixelSize: 14; font.weight: Font.SemiBold
+                            elide: Text.ElideRight
+                        }
+                        Text {
+                            Layout.fillWidth: true
+                            text: win.songArtist
+                            color: Qt.rgba(1,1,1,0.55); font.pixelSize: 12
+                            elide: Text.ElideRight
+                        }
+                    }
+                }
+
+                // Controles (play/pause, anterior, próximo)
+                RowLayout {
+                    Layout.alignment: Qt.AlignHCenter
+                    spacing: 20
+
+                    ControlBtn { icon: "\u23ee"; onClicked: win.activePlayer?.previous() }
+
                     Rectangle {
-                        x: parent.width * (win.duration > 0 ? Math.min(win.livePosition / win.duration, 1) : 0) - 5
-                        y: -3; width: 10; height: 10; radius: 5; color: "white"
+                        width: 36; height: 36; radius: 18
+                        color: Qt.rgba(1,1,1,0.12)
+                        Text {
+                            anchors.centerIn: parent
+                            text: win.isPlaying ? "\u23f8" : "\u25b6"
+                            color: "white"; font.pixelSize: 16
+                        }
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: win.activePlayer?.togglePlaying()
+                            cursorShape: Qt.PointingHandCursor
+                        }
                     }
+
+                    ControlBtn { icon: "\u23ed"; onClicked: win.activePlayer?.next() }
                 }
             }
         }
     }
 
+    // ------------------------------------------------------------
+    // Função para formatar tempo (µs → mm:ss)
+    // ------------------------------------------------------------
     function formatTime(us) {
         var totalSeconds = Math.floor(us / 1000000)
         var minutes = Math.floor(totalSeconds / 60)
@@ -243,11 +236,11 @@ Behavior on height {
         return minutes + ":" + String(seconds).padStart(2, "0")
     }
 
+    // Timer para atualizar a posição (caso o player não envie updates)
     Timer {
         interval: 1000
         running: win.isPlaying
         repeat: true
-
         onTriggered: {
             if (win.activePlayer)
                 win.livePosition = win.activePlayer.position
