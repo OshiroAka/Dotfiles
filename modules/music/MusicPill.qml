@@ -2,11 +2,11 @@ import Quickshell
 import Quickshell.Services.Mpris
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Wayland
 
-PanelWindow {
+LayerShellWindow {
     id: win
 
-    // Sem layer/exclusiveZone por agora -- so pra testar
     anchors.top: true
     margins.top: 8
     color: "transparent"
@@ -32,21 +32,36 @@ PanelWindow {
     readonly property string songArtist: activePlayer?.trackArtist ?? "-"
     readonly property string albumArt: activePlayer?.trackArtUrl ?? ""
     property real livePosition: 0
-    readonly property real duration: activePlayer?.trackLength ?? 1
+    readonly property real duration: {
+        if (!activePlayer || activePlayer.trackLength <= 0)
+            return 1
+        return activePlayer.trackLength * 1000
+}
     property bool hovered: false
     property bool expanded: hovered && activePlayer !== null
 
     Rectangle {
         id: pill
 
-        Behavior on width  { NumberAnimation { duration: 100; easing.type: Easing.OutExpo } }
-        Behavior on height { NumberAnimation { duration: 100; easing.type: Easing.OutExpo } }
+        Behavior on width {
+    NumberAnimation {
+        duration: 220
+        easing.type: Easing.InOutCubic
+    }
+}
+
+Behavior on height {
+    NumberAnimation {
+        duration: 220
+        easing.type: Easing.InOutCubic
+    }
+}
 
         width:  win.expanded ? win.expandedW : win.collapsedW
         height: win.expanded ? win.expandedH : win.collapsedH
-        radius: height / 2
-        color: Qt.rgba(0.08, 0.08, 0.12, 0.92)
-        border.color: Qt.rgba(1, 1, 1, 0.07)
+        radius: win.expanded ? 34 : height / 1
+        color: Qt.rgba(0.08, 0.08, 0.12, 0.3)
+        border.color: Qt.rgba(1, 1, 1, 0.012)
         border.width: 1
 
         HoverHandler {
@@ -61,7 +76,7 @@ PanelWindow {
             spacing: 8
             opacity: win.expanded ? 0 : 1
             Behavior on opacity { NumberAnimation { duration: 180 } }
-            visible: opacity > 0
+            opacity: win.expanded ? 1 : 0
 
             Rectangle {
                 width: 22; height: 22; radius: 11
@@ -189,15 +204,16 @@ PanelWindow {
                 Text {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: formatTime(win.position)
+                    text: formatTime(win.livePosition)
                     color: Qt.rgba(1,1,1,0.4); font.pixelSize: 10
                 }
-                Text {
-                    anchors.right: parent.right
+               Text {
+                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    text: formatTime(win.duration)
-                    color: Qt.rgba(1,1,1,0.4); font.pixelSize: 10
-                }
+                      text: formatTime(win.duration)
+                      color: Qt.rgba(1,1,1,0.4)
+                    font.pixelSize: 10
+                    }   
 
                 Item {
                     anchors.left: parent.left; anchors.right: parent.right
@@ -207,12 +223,12 @@ PanelWindow {
 
                     Rectangle { anchors.fill: parent; radius: 2; color: Qt.rgba(1,1,1,0.15) }
                     Rectangle {
-                        width: parent.width * Math.min(win.position / win.duration, 1)
+                        width: parent.width * (win.duration > 0 ? Math.min(win.livePosition / win.duration, 1) : 0)
                         height: parent.height; radius: 2; color: "#e06c75"
                         Behavior on width { NumberAnimation { duration: 500 } }
                     }
                     Rectangle {
-                        x: parent.width * Math.min(win.position / win.duration, 1) - 5
+                        x: parent.width * (win.duration > 0 ? Math.min(win.livePosition / win.duration, 1) : 0) - 5
                         y: -3; width: 10; height: 10; radius: 5; color: "white"
                     }
                 }
