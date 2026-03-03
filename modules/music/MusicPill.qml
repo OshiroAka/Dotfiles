@@ -230,35 +230,7 @@ PanelWindow {
                 }
             }
 
-            // Album com bordas arredondadas
-            Rectangle {
-                id: albumRight
-                width: height
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.right: parent.right
-                radius: 24
-                color: "#222"
-                antialiasing: true
-                z: 4
-
-                // Garante clip arredondado
-                layer.enabled: true
-                layer.smooth: true
-
-                Image {
-                    anchors.fill: parent
-                    source: win.albumArt
-                    fillMode: Image.PreserveAspectCrop
-                    visible: win.albumArt !== ""
-                    layer.enabled: true
-                    layer.smooth: true
-                }
-                Text {
-                    anchors.centerIn: parent; text: "♪"
-                    color: "white"; font.pixelSize: 32; visible: win.albumArt === ""
-                }
-
+           
                 // Borda brilhante sutil por cima
                 Rectangle {
                     anchors.fill: parent
