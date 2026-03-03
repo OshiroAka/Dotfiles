@@ -1,0 +1,6 @@
+import Quickshell
+import Quickshell.Wayland
+
+Item {
+    Component.onCompleted: console.log(Object.keys(Quickshell.Wayland))
+}

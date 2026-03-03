@@ -3,6 +3,7 @@ import Quickshell.Services.Mpris
 import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Wayland
 
 PanelWindow {
     id: win
@@ -57,6 +58,7 @@ PanelWindow {
         id: pill
         clip: true
         antialiasing: true
+        color: "transparent"
 
         state: win.expanded ? "expanded" : "collapsed"
 
@@ -79,48 +81,21 @@ PanelWindow {
             Transition {
                 from: "collapsed"; to: "expanded"
                 SequentialAnimation {
-                    // 1. Some o conteúdo colapsado rapidamente
                     NumberAnimation { target: collapsedContent; property: "opacity"; duration: 80; to: 0; easing.type: Easing.InOutCubic }
-                    // 2. Animação de altura
-                    NumberAnimation { 
-                        target: pill; property: "height"; 
-                        duration: 400; 
-                        easing.type: Easing.OutBack; 
-                        easing.overshoot: 4
-                    }
-                    // 3. Animação de largura
-                    NumberAnimation { 
-                        target: pill; property: "width"; 
-                        duration: 420; 
-                        easing.type: Easing.OutBack; 
-                        easing.overshoot: 5
-                    }
-                    // 4. Aparece o conteúdo expandido suavemente
+                    NumberAnimation { target: pill; property: "height"; duration: 400; easing.type: Easing.OutBack; easing.overshoot: 4 }
+                    NumberAnimation { target: pill; property: "width"; duration: 420; easing.type: Easing.OutBack; easing.overshoot: 5 }
                     NumberAnimation { target: expandedContent; property: "opacity"; duration: 200; to: 1; easing.type: Easing.InOutCubic }
                 }
             },
             Transition {
                 from: "expanded"; to: "collapsed"
                 SequentialAnimation {
-                    // 1. Some o conteúdo expandido rapidamente
                     NumberAnimation { target: expandedContent; property: "opacity"; duration: 80; to: 0; easing.type: Easing.InOutCubic }
-                    // 2. Animação de altura e largura juntas (parallel)
                     ParallelAnimation {
-                        NumberAnimation { 
-                            target: pill; property: "height"; 
-                            duration: 400; 
-                            easing.type: Easing.OutBack; 
-                            easing.overshoot: 2
-                        }
-                        NumberAnimation { 
-                            target: pill; property: "width"; 
-                            duration: 420; 
-                            easing.type: Easing.OutBack; 
-                            easing.overshoot: 0.7
-                        }
+                        NumberAnimation { target: pill; property: "height"; duration: 400; easing.type: Easing.OutBack; easing.overshoot: 2 }
+                        NumberAnimation { target: pill; property: "width"; duration: 420; easing.type: Easing.OutBack; easing.overshoot: 0.7 }
                     }
-                    // 3. Aparece o conteúdo colapsado suavemente
-                    NumberAnimation { target: collapsedContent; property: "opacity"; duration: 1000; to: 1; easing.type: Easing.InOutCubic }
+                    NumberAnimation { target: collapsedContent; property: "opacity"; duration: 200; to: 1; easing.type: Easing.InOutCubic }
                 }
             }
         ]
@@ -136,17 +111,19 @@ PanelWindow {
             propagateComposedEvents: false
         }
 
+        // Fundo translúcido (ajuste o alpha conforme desejar)
         Rectangle {
             anchors.fill: parent; radius: parent.radius
-            color: Qt.rgba(0.08, 0.08, 0.12, 0.8)
+            color: Qt.rgba(0.08, 0.08, 0.12, 0.35)
             antialiasing: true
             z: 1
         }
 
+        // Borda sutil
         Rectangle {
             anchors.fill: parent; radius: parent.radius
-            color: "gray"
-            border.color: Qt.rgba(0, 0, 0, 0.65)
+            color: "transparent"
+            border.color: Qt.rgba(1, 1, 1, 0.05)
             border.width: 1
             z: 2
         }
@@ -232,7 +209,7 @@ PanelWindow {
             Rectangle {
                 id: coverExpanded
                 width: 44; height: 44; radius: 8
-                color: "white"; clip: true; antialiasing: true
+                color: "#333"; clip: true; antialiasing: true
                 anchors.left: parent.left
                 anchors.top: parent.top
                 Image {
