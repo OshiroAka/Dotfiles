@@ -1,0 +1,1 @@
+/home/oshiro/.config/quickshell/plugin/liboshiro.so

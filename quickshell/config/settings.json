@@ -1,0 +1,8 @@
+{
+  "panelOpacity": 0.35,
+  "animSpeed": 1.0,
+  "blurEnabled": true,
+  "wallpaperEngine": "swww",
+  "wallpaperType": "static",
+  "wallpaperDir": "~/Pictures/Wallpapers"
+}

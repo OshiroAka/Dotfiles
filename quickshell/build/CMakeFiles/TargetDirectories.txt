@@ -1,0 +1,9 @@
+/home/oshiro/.config/quickshell/build/CMakeFiles/oshiro.dir
+/home/oshiro/.config/quickshell/build/CMakeFiles/edit_cache.dir
+/home/oshiro/.config/quickshell/build/CMakeFiles/rebuild_cache.dir
+/home/oshiro/.config/quickshell/build/CMakeFiles/list_install_components.dir
+/home/oshiro/.config/quickshell/build/CMakeFiles/install.dir
+/home/oshiro/.config/quickshell/build/CMakeFiles/install/local.dir
+/home/oshiro/.config/quickshell/build/CMakeFiles/install/strip.dir
+/home/oshiro/.config/quickshell/build/CMakeFiles/oshiro_autogen_timestamp_deps.dir
+/home/oshiro/.config/quickshell/build/CMakeFiles/oshiro_autogen.dir

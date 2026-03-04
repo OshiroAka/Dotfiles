@@ -1,0 +1,9 @@
+# ninja log v7
+1	370	1772666575614354914	oshiro_autogen/timestamp	8d13e4ca27cf5212
+1	370	1772666575614354914	oshiro_autogen/mocs_compilation.cpp	8d13e4ca27cf5212
+1	370	1772666575614354914	/home/oshiro/.config/quickshell/build/oshiro_autogen/timestamp	8d13e4ca27cf5212
+1	370	1772666575614354914	/home/oshiro/.config/quickshell/build/oshiro_autogen/mocs_compilation.cpp	8d13e4ca27cf5212
+371	2291	1772666575630355001	CMakeFiles/oshiro.dir/oshiro_autogen/mocs_compilation.cpp.o	e6793fbdccb94151
+371	2596	1772666575631319148	CMakeFiles/oshiro.dir/plugin/WaylandRegion.cpp.o	cde08705ea7244bf
+371	3112	1772666575631456458	CMakeFiles/oshiro.dir/plugin/Plugin.cpp.o	63305a97ac91b7ca
+3112	3408	1772666578371369877	liboshiro.so	721f08b0fc9ed267
