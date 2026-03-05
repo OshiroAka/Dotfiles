@@ -7,4 +7,7 @@ Singleton {
 
     function animDuration(ms) { return Math.round(ms * animSpeed) }
     function toggle() { overlayOpen = !overlayOpen }
+
+    signal closeDone()
+    function overlayFullyClosed() { closeDone() }
 }

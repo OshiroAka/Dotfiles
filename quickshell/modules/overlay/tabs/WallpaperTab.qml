@@ -1,102 +1,113 @@
 import QtQuick
-import QtQuick.Controls
 import Quickshell.Io
-import "../../shared"
 
 Item {
     id: root
 
-    // Carrega wallpapers da pasta
     property var wallpapers: []
     property int currentIndex: 0
-    property string wallpaperDir: {
-        var t = AppState.wallpaperType === "live" ? "live" : "static"
-        return Qt.resolvedUrl("file://" + QS.env("HOME") + "/Pictures/Wallpapers/" + t + "/")
-    }
 
+    // Carrega wallpapers da pasta
     FileView {
         id: dirView
-        path: wallpaperDir.replace("file://", "")
+        path: (QS.env("HOME") ?? "/root") + "/Pictures/Wallpapers/static"
         onFilesChanged: {
             var imgs = []
             for (var i = 0; i < files.length; i++) {
                 var f = files[i]
-                if (/\.(jpg|jpeg|png|gif|mp4|webm)$/i.test(f))
-                    imgs.push(wallpaperDir + f)
+                if (/\.(jpg|jpeg|png|webp)$/i.test(f))
+                    imgs.push(path + "/" + f)
             }
             root.wallpapers = imgs
+            if (imgs.length > 0) root.currentIndex = 0
         }
+    }
+
+    // Aplica wallpaper via swww
+    Process {
+        id: applyProc
+        running: false
+    }
+
+    function applyWallpaper(idx) {
+        if (idx < 0 || idx >= wallpapers.length) return
+        currentIndex = idx
+        applyProc.command = ["swww", "img", wallpapers[idx],
+            "--transition-type", "grow",
+            "--transition-duration", "1"]
+        applyProc.running = true
     }
 
     // Navegacao por teclado
-    Keys.onUpPressed:   applyWallpaper(Math.max(0, currentIndex - 1))
-    Keys.onDownPressed: applyWallpaper(Math.min(wallpapers.length - 1, currentIndex + 1))
-    focus: AppState.overlayOpen && AppState.activeTab === "wallpaper"
+    Keys.onLeftPressed:  root.applyWallpaper(Math.max(0, currentIndex - 1))
+    Keys.onRightPressed: root.applyWallpaper(Math.min(wallpapers.length - 1, currentIndex + 1))
+    focus: true
 
-    function applyWallpaper(idx) {
-        currentIndex = idx
-        var path = wallpapers[idx].replace("file://", "")
-        var engine = AppState.wallpaperEngine
-        if (engine === "swww") {
-            swwwProcess.command = ["swww", "img", path, "--transition-type", "grow", "--transition-duration", "1"]
-            swwwProcess.running = true
-        } else {
-            mpvProcess.command = ["mpvpaper", "*", path, "--loop"]
-            mpvProcess.running = true
-        }
+    // Placeholder se pasta vazia
+    Text {
+        anchors.centerIn: parent
+        text: wallpapers.length === 0 ?
+            "Adicione imagens em\n~/Pictures/Wallpapers/static/" :
+            ""
+        color: Qt.rgba(1,1,1,0.3)
+        font.pixelSize: 13
+        horizontalAlignment: Text.AlignHCenter
     }
-
-    Process { id: swwwProcess; running: false }
-    Process { id: mpvProcess;  running: false }
 
     // Carrossel
     ListView {
+        id: carousel
         anchors.fill: parent
+        anchors.margins: 12
         model: root.wallpapers
         orientation: ListView.Horizontal
-        spacing: 12
+        spacing: 10
         clip: true
+        interactive: true
 
-        // Centraliza no item atual
-        preferredHighlightBegin: width/2 - 160
-        preferredHighlightEnd:   width/2 + 160
+        preferredHighlightBegin: width / 2 - 130
+        preferredHighlightEnd:   width / 2 + 130
         highlightRangeMode: ListView.StrictlyEnforceRange
         currentIndex: root.currentIndex
 
         Behavior on contentX {
-            SmoothedAnimation { duration: AppState.animDuration(300); easing.type: Easing.InOutCubic }
+            SmoothedAnimation { duration: 300; easing.type: Easing.InOutCubic }
         }
 
         delegate: Item {
-            width: 300; height: parent.height
-            // Efeito de escala e escurecimento nos lados
-            property bool isActive: index === root.currentIndex
-            scale: isActive ? 1.0 : 0.82
-            opacity: isActive ? 1.0 : 0.45
+            width: 200; height: carousel.height
+            property bool active: index === root.currentIndex
 
-            Behavior on scale   { NumberAnimation { duration: AppState.animDuration(250); easing.type: Easing.OutCubic } }
-            Behavior on opacity { NumberAnimation { duration: AppState.animDuration(250) } }
+            scale:   active ? 1.0 : 0.80
+            opacity: active ? 1.0 : 0.45
+
+            Behavior on scale   { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+            Behavior on opacity { NumberAnimation { duration: 250 } }
 
             Rectangle {
                 anchors.fill: parent
-                radius: 16
+                anchors.margins: 4
+                radius: 12
                 color: "#111"
                 clip: true
-                layer.enabled: true
 
                 Image {
                     anchors.fill: parent
-                    source: modelData
+                    source: "file://" + modelData
                     fillMode: Image.PreserveAspectCrop
                     smooth: true
                     asynchronous: true
                 }
 
-                // Overlay escuro nos nao selecionados
+                // Borda no ativo
                 Rectangle {
                     anchors.fill: parent
-                    color: Qt.rgba(0,0,0, isActive ? 0 : 0.35)
-                    Behavior on color { ColorAnimation { duration: AppState.animDuration(250) } }
+                    radius: parent.radius
+                    color: "transparent"
+                    border.color: parent.parent.active ?
+                        Qt.rgba(1,1,1,0.5) : Qt.rgba(1,1,1,0.1)
+                    border.width: parent.parent.active ? 2 : 1
+                    Behavior on border.color { ColorAnimation { duration: 200 } }
                 }
             }
 
@@ -104,35 +115,6 @@ Item {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: root.applyWallpaper(index)
-            }
-        }
-    }
-
-    // Indicador de tipo (static/live)
-    Row {
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 8
-        anchors.horizontalCenter: parent.horizontalCenter
-        spacing: 8
-
-        Repeater {
-            model: ["static", "live"]
-            Rectangle {
-                width: 60; height: 24; radius: 12
-                color: AppState.wallpaperType === modelData ?
-                    Qt.rgba(1,1,1,0.2) : Qt.rgba(1,1,1,0.06)
-                Behavior on color { ColorAnimation { duration: 180 } }
-                Text {
-                    anchors.centerIn: parent
-                    text: modelData
-                    color: AppState.wallpaperType === modelData ? "white" : Qt.rgba(1,1,1,0.4)
-                    font.pixelSize: 11
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: AppState.wallpaperType = modelData
-                }
             }
         }
     }
