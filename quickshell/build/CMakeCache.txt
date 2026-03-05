@@ -348,6 +348,9 @@ Qt6Gui_DIR:PATH=/usr/lib/cmake/Qt6Gui
 //The directory containing a CMake configuration file for Qt6Network.
 Qt6Network_DIR:PATH=/usr/lib/cmake/Qt6Network
 
+//The directory containing a CMake configuration file for Qt6OpenGL.
+Qt6OpenGL_DIR:PATH=/usr/lib/cmake/Qt6OpenGL
+
 //The directory containing a CMake configuration file for Qt6QmlAssetDownloader.
 Qt6QmlAssetDownloader_DIR:PATH=/usr/lib/cmake/Qt6QmlAssetDownloader
 
@@ -357,11 +360,26 @@ Qt6QmlCompilerPlusPrivateTools_DIR:PATH=Qt6QmlCompilerPlusPrivateTools_DIR-NOTFO
 //The directory containing a CMake configuration file for Qt6QmlIntegration.
 Qt6QmlIntegration_DIR:PATH=/usr/lib/cmake/Qt6QmlIntegration
 
+//The directory containing a CMake configuration file for Qt6QmlMeta.
+Qt6QmlMeta_DIR:PATH=/usr/lib/cmake/Qt6QmlMeta
+
+//The directory containing a CMake configuration file for Qt6QmlModels.
+Qt6QmlModels_DIR:PATH=/usr/lib/cmake/Qt6QmlModels
+
 //The directory containing a CMake configuration file for Qt6QmlTools.
 Qt6QmlTools_DIR:PATH=/usr/lib/cmake/Qt6QmlTools
 
+//The directory containing a CMake configuration file for Qt6QmlWorkerScript.
+Qt6QmlWorkerScript_DIR:PATH=/usr/lib/cmake/Qt6QmlWorkerScript
+
 //The directory containing a CMake configuration file for Qt6Qml.
 Qt6Qml_DIR:PATH=/usr/lib/cmake/Qt6Qml
+
+//The directory containing a CMake configuration file for Qt6QuickTools.
+Qt6QuickTools_DIR:PATH=/usr/lib/cmake/Qt6QuickTools
+
+//The directory containing a CMake configuration file for Qt6Quick.
+Qt6Quick_DIR:PATH=/usr/lib/cmake/Qt6Quick
 
 //The directory containing a CMake configuration file for Qt6.
 Qt6_DIR:PATH=/usr/lib/cmake/Qt6
@@ -1075,22 +1093,34 @@ QT_FEATURE_publicsuffix_system:INTERNAL=ON
 QT_FEATURE_qml_animation:INTERNAL=ON
 //Qt feature: qml_debug (from target Qt6::Qml)
 QT_FEATURE_qml_debug:INTERNAL=ON
+//Qt feature: qml_delegate_model (from target Qt6::QmlModels)
+QT_FEATURE_qml_delegate_model:INTERNAL=ON
 //Qt feature: qml_itemmodel (from target Qt6::Qml)
 QT_FEATURE_qml_itemmodel:INTERNAL=ON
 //Qt feature: qml_jit (from target Qt6::Qml)
 QT_FEATURE_qml_jit:INTERNAL=ON
+//Qt feature: qml_list_model (from target Qt6::QmlModels)
+QT_FEATURE_qml_list_model:INTERNAL=ON
 //Qt feature: qml_locale (from target Qt6::Qml)
 QT_FEATURE_qml_locale:INTERNAL=ON
 //Qt feature: qml_network (from target Qt6::Qml)
 QT_FEATURE_qml_network:INTERNAL=ON
+//Qt feature: qml_object_model (from target Qt6::QmlModels)
+QT_FEATURE_qml_object_model:INTERNAL=ON
 //Qt feature: qml_preview (from target Qt6::Qml)
 QT_FEATURE_qml_preview:INTERNAL=ON
 //Qt feature: qml_profiler (from target Qt6::Qml)
 QT_FEATURE_qml_profiler:INTERNAL=ON
 //Qt feature: qml_python (from target Qt6::Qml)
 QT_FEATURE_qml_python:INTERNAL=ON
+//Qt feature: qml_sfpm_model (from target Qt6::QmlModels)
+QT_FEATURE_qml_sfpm_model:INTERNAL=ON
 //Qt feature: qml_ssl (from target Qt6::Qml)
 QT_FEATURE_qml_ssl:INTERNAL=ON
+//Qt feature: qml_table_model (from target Qt6::QmlModels)
+QT_FEATURE_qml_table_model:INTERNAL=ON
+//Qt feature: qml_tree_model (from target Qt6::QmlModels)
+QT_FEATURE_qml_tree_model:INTERNAL=ON
 //Qt feature: qml_type_loader_thread (from target Qt6::Qml)
 QT_FEATURE_qml_type_loader_thread:INTERNAL=ON
 //Qt feature: qml_worker_script (from target Qt6::Qml)
@@ -1105,6 +1135,45 @@ QT_FEATURE_qqnx_imf:INTERNAL=OFF
 QT_FEATURE_qqnx_pps:INTERNAL=OFF
 //Qt feature: qtgui_threadpool (from target Qt6::Gui)
 QT_FEATURE_qtgui_threadpool:INTERNAL=ON
+//Qt feature: quick_animatedimage (from target Qt6::Quick)
+QT_FEATURE_quick_animatedimage:INTERNAL=ON
+//Qt feature: quick_canvas (from target Qt6::Quick)
+QT_FEATURE_quick_canvas:INTERNAL=ON
+//Qt feature: quick_designer (from target Qt6::Quick)
+QT_FEATURE_quick_designer:INTERNAL=ON
+//Qt feature: quick_draganddrop (from target Qt6::Quick)
+QT_FEATURE_quick_draganddrop:INTERNAL=ON
+//Qt feature: quick_flipable (from target Qt6::Quick)
+QT_FEATURE_quick_flipable:INTERNAL=ON
+//Qt feature: quick_gridview (from target Qt6::Quick)
+QT_FEATURE_quick_gridview:INTERNAL=ON
+//Qt feature: quick_itemview (from target Qt6::Quick)
+QT_FEATURE_quick_itemview:INTERNAL=ON
+//Qt feature: quick_listview (from target Qt6::Quick)
+QT_FEATURE_quick_listview:INTERNAL=ON
+//Qt feature: quick_particles (from target Qt6::Quick)
+QT_FEATURE_quick_particles:INTERNAL=ON
+//Qt feature: quick_path (from target Qt6::Quick)
+QT_FEATURE_quick_path:INTERNAL=ON
+//Qt feature: quick_pathview (from target Qt6::Quick)
+QT_FEATURE_quick_pathview:INTERNAL=ON
+//Qt feature: quick_pixmap_cache_threaded_download (from target
+// Qt6::Quick)
+QT_FEATURE_quick_pixmap_cache_threaded_download:INTERNAL=ON
+//Qt feature: quick_positioners (from target Qt6::Quick)
+QT_FEATURE_quick_positioners:INTERNAL=ON
+//Qt feature: quick_repeater (from target Qt6::Quick)
+QT_FEATURE_quick_repeater:INTERNAL=ON
+//Qt feature: quick_shadereffect (from target Qt6::Quick)
+QT_FEATURE_quick_shadereffect:INTERNAL=ON
+//Qt feature: quick_sprite (from target Qt6::Quick)
+QT_FEATURE_quick_sprite:INTERNAL=ON
+//Qt feature: quick_tableview (from target Qt6::Quick)
+QT_FEATURE_quick_tableview:INTERNAL=ON
+//Qt feature: quick_treeview (from target Qt6::Quick)
+QT_FEATURE_quick_treeview:INTERNAL=ON
+//Qt feature: quick_viewtransitions (from target Qt6::Quick)
+QT_FEATURE_quick_viewtransitions:INTERNAL=ON
 //Qt feature: raster_64bit (from target Qt6::Gui)
 QT_FEATURE_raster_64bit:INTERNAL=ON
 //Qt feature: raster_fp (from target Qt6::Gui)

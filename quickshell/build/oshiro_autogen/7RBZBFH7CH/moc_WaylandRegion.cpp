@@ -41,7 +41,7 @@ template <> constexpr inline auto WaylandRegion::qt_create_metaobjectdata<qt_met
         "WaylandRegion",
         "apply",
         "",
-        "QWindow*",
+        "QQuickWindow*",
         "window",
         "x",
         "y",
@@ -52,12 +52,12 @@ template <> constexpr inline auto WaylandRegion::qt_create_metaobjectdata<qt_met
 
     QtMocHelpers::UintData qt_methods {
         // Method 'apply'
-        QtMocHelpers::MethodData<void(QWindow *, int, int, int, int)>(1, 2, QMC::AccessPublic, QMetaType::Void, {{
+        QtMocHelpers::MethodData<void(QQuickWindow *, int, int, int, int)>(1, 2, QMC::AccessPublic, QMetaType::Void, {{
             { 0x80000000 | 3, 4 }, { QMetaType::Int, 5 }, { QMetaType::Int, 6 }, { QMetaType::Int, 7 },
             { QMetaType::Int, 8 },
         }}),
         // Method 'clear'
-        QtMocHelpers::MethodData<void(QWindow *)>(9, 2, QMC::AccessPublic, QMetaType::Void, {{
+        QtMocHelpers::MethodData<void(QQuickWindow *)>(9, 2, QMC::AccessPublic, QMetaType::Void, {{
             { 0x80000000 | 3, 4 },
         }}),
     };
@@ -83,8 +83,8 @@ void WaylandRegion::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
     auto *_t = static_cast<WaylandRegion *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: _t->apply((*reinterpret_cast<std::add_pointer_t<QWindow*>>(_a[1])),(*reinterpret_cast<std::add_pointer_t<int>>(_a[2])),(*reinterpret_cast<std::add_pointer_t<int>>(_a[3])),(*reinterpret_cast<std::add_pointer_t<int>>(_a[4])),(*reinterpret_cast<std::add_pointer_t<int>>(_a[5]))); break;
-        case 1: _t->clear((*reinterpret_cast<std::add_pointer_t<QWindow*>>(_a[1]))); break;
+        case 0: _t->apply((*reinterpret_cast<std::add_pointer_t<QQuickWindow*>>(_a[1])),(*reinterpret_cast<std::add_pointer_t<int>>(_a[2])),(*reinterpret_cast<std::add_pointer_t<int>>(_a[3])),(*reinterpret_cast<std::add_pointer_t<int>>(_a[4])),(*reinterpret_cast<std::add_pointer_t<int>>(_a[5]))); break;
+        case 1: _t->clear((*reinterpret_cast<std::add_pointer_t<QQuickWindow*>>(_a[1]))); break;
         default: ;
         }
     }
@@ -95,14 +95,14 @@ void WaylandRegion::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType(); break;
             case 0:
-                *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType::fromType< QWindow* >(); break;
+                *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType::fromType< QQuickWindow* >(); break;
             }
             break;
         case 1:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType(); break;
             case 0:
-                *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType::fromType< QWindow* >(); break;
+                *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType::fromType< QQuickWindow* >(); break;
             }
             break;
         }

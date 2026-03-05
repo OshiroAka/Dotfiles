@@ -22,10 +22,20 @@
   /usr/include/bits/errno.h \
   /usr/include/bits/floatn-common.h \
   /usr/include/bits/floatn.h \
+  /usr/include/bits/flt-eval-method.h \
+  /usr/include/bits/fp-fast.h \
+  /usr/include/bits/fp-logb.h \
+  /usr/include/bits/iscanonical.h \
   /usr/include/bits/libc-header-start.h \
+  /usr/include/bits/libm-simd-decl-stubs.h \
   /usr/include/bits/local_lim.h \
   /usr/include/bits/locale.h \
   /usr/include/bits/long-double.h \
+  /usr/include/bits/math-vector.h \
+  /usr/include/bits/mathcalls-helper-functions.h \
+  /usr/include/bits/mathcalls-macros.h \
+  /usr/include/bits/mathcalls-narrow.h \
+  /usr/include/bits/mathcalls.h \
   /usr/include/bits/posix1_lim.h \
   /usr/include/bits/posix2_lim.h \
   /usr/include/bits/pthread_stack_min-dynamic.h \
@@ -257,6 +267,7 @@
   /usr/include/features.h \
   /usr/include/gnu/stubs-64.h \
   /usr/include/gnu/stubs.h \
+  /usr/include/inttypes.h \
   /usr/include/limits.h \
   /usr/include/linux/errno.h \
   /usr/include/linux/limits.h \
@@ -265,11 +276,16 @@
   /usr/include/linux/stddef.h \
   /usr/include/linux/types.h \
   /usr/include/locale.h \
+  /usr/include/math.h \
   /usr/include/pthread.h \
   /usr/include/qt6/QtCore/QEvent \
+  /usr/include/qt6/QtCore/QList \
   /usr/include/qt6/QtCore/QMargins \
   /usr/include/qt6/QtCore/QObject \
   /usr/include/qt6/QtCore/QRect \
+  /usr/include/qt6/QtCore/QRectF \
+  /usr/include/qt6/QtCore/QSize \
+  /usr/include/qt6/QtCore/QSizeF \
   /usr/include/qt6/QtCore/QUrl \
   /usr/include/qt6/QtCore/q17memory.h \
   /usr/include/qt6/QtCore/q20algorithm.h \
@@ -312,6 +328,8 @@
   /usr/include/qt6/QtCore/qcontainerinfo.h \
   /usr/include/qt6/QtCore/qcontainertools_impl.h \
   /usr/include/qt6/QtCore/qcontiguouscache.h \
+  /usr/include/qt6/QtCore/qcoreapplication.h \
+  /usr/include/qt6/QtCore/qcoreapplication_platform.h \
   /usr/include/qt6/QtCore/qcoreevent.h \
   /usr/include/qt6/QtCore/qdarwinhelpers.h \
   /usr/include/qt6/QtCore/qdatastream.h \
@@ -331,6 +349,7 @@
   /usr/include/qt6/QtCore/qglobalstatic.h \
   /usr/include/qt6/QtCore/qhash.h \
   /usr/include/qt6/QtCore/qhashfunctions.h \
+  /usr/include/qt6/QtCore/qiodevice.h \
   /usr/include/qt6/QtCore/qiodevicebase.h \
   /usr/include/qt6/QtCore/qiterable.h \
   /usr/include/qt6/QtCore/qiterator.h \
@@ -423,25 +442,42 @@
   /usr/include/qt6/QtCore/qversiontagging.h \
   /usr/include/qt6/QtCore/qxptype_traits.h \
   /usr/include/qt6/QtCore/qyieldcpu.h \
-  /usr/include/qt6/QtGui/QWindow \
+  /usr/include/qt6/QtGui/QMatrix4x4 \
+  /usr/include/qt6/QtGui/QTransform \
   /usr/include/qt6/QtGui/qbitmap.h \
   /usr/include/qt6/QtGui/qcolor.h \
   /usr/include/qt6/QtGui/qcursor.h \
+  /usr/include/qt6/QtGui/qevent.h \
+  /usr/include/qt6/QtGui/qeventpoint.h \
+  /usr/include/qt6/QtGui/qgenericmatrix.h \
+  /usr/include/qt6/QtGui/qguiapplication.h \
+  /usr/include/qt6/QtGui/qguiapplication_platform.h \
   /usr/include/qt6/QtGui/qicon.h \
   /usr/include/qt6/QtGui/qimage.h \
+  /usr/include/qt6/QtGui/qinputdevice.h \
+  /usr/include/qt6/QtGui/qinputmethod.h \
+  /usr/include/qt6/QtGui/qkeysequence.h \
+  /usr/include/qt6/QtGui/qmatrix4x4.h \
   /usr/include/qt6/QtGui/qpaintdevice.h \
   /usr/include/qt6/QtGui/qpixelformat.h \
   /usr/include/qt6/QtGui/qpixmap.h \
+  /usr/include/qt6/QtGui/qpointingdevice.h \
   /usr/include/qt6/QtGui/qpolygon.h \
   /usr/include/qt6/QtGui/qregion.h \
   /usr/include/qt6/QtGui/qrgb.h \
   /usr/include/qt6/QtGui/qrgba64.h \
+  /usr/include/qt6/QtGui/qscreen.h \
+  /usr/include/qt6/QtGui/qscreen_platform.h \
   /usr/include/qt6/QtGui/qsurface.h \
   /usr/include/qt6/QtGui/qsurfaceformat.h \
   /usr/include/qt6/QtGui/qtgui-config.h \
   /usr/include/qt6/QtGui/qtguiexports.h \
   /usr/include/qt6/QtGui/qtguiglobal.h \
   /usr/include/qt6/QtGui/qtransform.h \
+  /usr/include/qt6/QtGui/qvector2d.h \
+  /usr/include/qt6/QtGui/qvector3d.h \
+  /usr/include/qt6/QtGui/qvector4d.h \
+  /usr/include/qt6/QtGui/qvectornd.h \
   /usr/include/qt6/QtGui/qwindow.h \
   /usr/include/qt6/QtGui/qwindowdefs.h \
   /usr/include/qt6/QtNetwork/qtnetwork-config.h \
@@ -461,6 +497,7 @@
   /usr/include/qt6/QtQml/qqmlerror.h \
   /usr/include/qt6/QtQml/qqmlextensioninterface.h \
   /usr/include/qt6/QtQml/qqmlextensionplugin.h \
+  /usr/include/qt6/QtQml/qqmlinfo.h \
   /usr/include/qt6/QtQml/qqmllist.h \
   /usr/include/qt6/QtQml/qqmlparserstatus.h \
   /usr/include/qt6/QtQml/qqmlprivate.h \
@@ -470,6 +507,14 @@
   /usr/include/qt6/QtQml/qtqmlexports.h \
   /usr/include/qt6/QtQml/qtqmlglobal.h \
   /usr/include/qt6/QtQmlIntegration/qqmlintegration.h \
+  /usr/include/qt6/QtQuick/QQuickWindow \
+  /usr/include/qt6/QtQuick/qquickwindow.h \
+  /usr/include/qt6/QtQuick/qsggeometry.h \
+  /usr/include/qt6/QtQuick/qsgnode.h \
+  /usr/include/qt6/QtQuick/qsgrendererinterface.h \
+  /usr/include/qt6/QtQuick/qtquick-config.h \
+  /usr/include/qt6/QtQuick/qtquickexports.h \
+  /usr/include/qt6/QtQuick/qtquickglobal.h \
   /usr/include/sched.h \
   /usr/include/stdc-predef.h \
   /usr/include/stdint.h \
@@ -482,7 +527,13 @@
   /usr/include/sys/single_threaded.h \
   /usr/include/sys/types.h \
   /usr/include/time.h \
+  /usr/include/wayland-client-core.h \
+  /usr/include/wayland-client-protocol.h \
+  /usr/include/wayland-client.h \
+  /usr/include/wayland-util.h \
+  /usr/include/wayland-version.h \
   /usr/include/wchar.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/float.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stdarg.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stdbool.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stddef.h
