@@ -11,7 +11,16 @@ Item {
     property int activeRow: AppState.activeWallRow
 
     Component.onCompleted: { root.forceActiveFocus(); findStatic.running = true; findEngine.running = true }
-    onVisibleChanged: if (visible) root.forceActiveFocus()
+    onVisibleChanged: {
+        if (visible) {
+            root.forceActiveFocus()
+            // Pula para posicao salva sem animacao
+            Qt.callLater(function() {
+                staticList.positionViewAtIndex(root.staticIdx, ListView.Center)
+                liveList.positionViewAtIndex(root.liveIdx, ListView.Center)
+            })
+        }
+    }
 
     Process {
         id: findStatic; running: false
@@ -43,11 +52,20 @@ Item {
         id: liveDebounce
         interval: 700; repeat: false
         onTriggered: {
+            var w = root.liveWalls[root.liveIdx]
+            // 1. Mostra preview estatico imediatamente via swww
+            if (w.preview !== "") {
+                applyStatic.running = false
+                applyStatic.command = ["swww", "img", w.preview,
+                    "--transition-type", "fade", "--transition-duration", "0.4", "--transition-fps", "60"]
+                applyStatic.running = true
+            }
+            // 2. Inicia engine em paralelo (demora ~1s para aparecer)
             applyLive.running = false
             applyLive.command = [
                 "linux-wallpaperengine",
                 "--screen-root", "eDP-1",
-                "--bg", root.liveWalls[root.liveIdx].path
+                "--bg", w.path
             ]
             applyLive.running = true
         }
@@ -86,125 +104,159 @@ Item {
         else applyLiveWall(Math.min(liveWalls.length - 1, liveIdx + 1))
     }
 
-    Column {
-        anchors.fill: parent; anchors.margins: 8; spacing: 8
+    // Altura de cada row = altura total (uma por vez)
+    property real rowH: height
 
-        // ── Static row ──
-        Row {
+    // Offset vertical animado: 0 = Static, -rowH = Live
+    property real rowOffset: activeRow === 0 ? 0 : -rowH
+    Behavior on rowOffset { NumberAnimation { duration: 300; easing.type: Easing.InOutCubic } }
+
+    Item {
+        anchors.fill: parent
+        clip: true
+
+        Column {
             width: parent.width
-            height: (parent.height - 8) / 2
-            spacing: 8
+            y: root.rowOffset
+            spacing: 0
 
-            Text {
-                text: "Static"
-                color: root.activeRow === 0 ? "white" : Qt.rgba(1,1,1,0.35)
-                font.pixelSize: 11; font.weight: Font.Medium
-                anchors.verticalCenter: parent.verticalCenter; width: 40
-                Behavior on color { ColorAnimation { duration: 150 } }
-            }
+            // ── Static row ──
+            Item {
+                width: parent.width
+                height: root.rowH
 
-            ListView {
-                id: staticList
-                width: parent.width - 48; height: parent.height
-                orientation: ListView.Horizontal
-                spacing: 8; clip: true
-                model: root.staticWalls
-                cacheBuffer: Math.max(0, Math.round(height * 16/9) * 3)
-                property real cardW: Math.round(height * 16/9)
-                currentIndex: root.staticIdx
-                highlightRangeMode: ListView.StrictlyEnforceRange
-                preferredHighlightBegin: width/2 - cardW/2
-                preferredHighlightEnd:   width/2 + cardW/2
-                Behavior on contentX { SmoothedAnimation { duration: 300; easing.type: Easing.InOutCubic } }
+                Row {
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    spacing: 8
 
-                delegate: Item {
-                    id: sDelegate
-                    width: staticList.cardW; height: staticList.height
-                    property bool active: index === root.staticIdx && root.activeRow === 0
-                    property bool shouldLoad: Math.abs(index - root.staticIdx) <= 3
-                    scale:   active ? 1.10 : 0.80
-                    opacity: active ? 1.0 : 0.50
-                    Behavior on scale   { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
-                    Behavior on opacity { NumberAnimation { duration: 280 } }
-                    Rectangle {
-                        anchors.fill: parent; radius: 12; color: "#111"; clip: true
-                        antialiasing: true
-                        Image {
-                            anchors.fill: parent
-                            source: sDelegate.shouldLoad ? "file://" + modelData : ""
-                            fillMode: Image.PreserveAspectCrop; smooth: true; asynchronous: true
-                            opacity: status === Image.Ready ? 1 : 0
-                            Behavior on opacity { NumberAnimation { duration: 250 } }
+                    Column {
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 4
+                        Text {
+                            text: "Static"
+                            color: "white"; font.pixelSize: 12; font.weight: Font.Medium
                         }
-                        Rectangle {
-                            anchors.fill: parent; radius: parent.radius; color: "transparent"
-                            border.color: sDelegate.active ? Qt.rgba(1,1,1,0.65) : Qt.rgba(1,1,1,0.06)
-                            border.width: sDelegate.active ? 2 : 1
-                            Behavior on border.color { ColorAnimation { duration: 200 } }
+                        Text {
+                            text: "↓ Live"
+                            color: Qt.rgba(1,1,1,0.3); font.pixelSize: 10
+                            visible: root.activeRow === 0
                         }
                     }
-                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                        onClicked: root.applyStaticWall(index) }
+
+                    ListView {
+                        id: staticList
+                        width: parent.width - 60; height: parent.height
+                        orientation: ListView.Horizontal
+                        spacing: 10; clip: true
+                        model: root.staticWalls
+                        cacheBuffer: Math.max(0, Math.round(height * 16/9) * 3)
+                        property real cardW: Math.round(height * 16/9)
+                        currentIndex: root.staticIdx
+                        highlightRangeMode: ListView.StrictlyEnforceRange
+                        preferredHighlightBegin: width/2 - cardW/2
+                        preferredHighlightEnd:   width/2 + cardW/2
+                        Behavior on contentX { SmoothedAnimation { duration: 300; easing.type: Easing.InOutCubic } }
+
+                        delegate: Item {
+                            id: sd
+                            width: staticList.cardW; height: staticList.height
+                            property bool active: index === root.staticIdx && root.activeRow === 0
+                            property bool shouldLoad: Math.abs(index - root.staticIdx) <= 3
+                            scale:   active ? 1.08 : 0.82
+                            opacity: active ? 1.0  : 0.45
+                            Behavior on scale   { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
+                            Behavior on opacity { NumberAnimation { duration: 280 } }
+                            Rectangle {
+                                anchors.fill: parent; radius: 16; color: "#111"; clip: true
+                                Image {
+                                    anchors.fill: parent
+                                    source: sd.shouldLoad ? "file://" + modelData : ""
+                                    fillMode: Image.PreserveAspectCrop; smooth: true; asynchronous: true
+                                    opacity: status === Image.Ready ? 1 : 0
+                                    Behavior on opacity { NumberAnimation { duration: 250 } }
+                                }
+                                Rectangle {
+                                    anchors.fill: parent; radius: parent.radius; color: "transparent"
+                                    border.color: sd.active ? Qt.rgba(1,1,1,0.65) : Qt.rgba(1,1,1,0.06)
+                                    border.width: sd.active ? 2 : 1
+                                    Behavior on border.color { ColorAnimation { duration: 200 } }
+                                }
+                            }
+                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                onClicked: root.applyStaticWall(index) }
+                        }
+                    }
                 }
             }
-        }
 
-        // ── Live row ──
-        Row {
-            width: parent.width
-            height: (parent.height - 8) / 2
-            spacing: 8
+            // ── Live row ──
+            Item {
+                width: parent.width
+                height: root.rowH
 
-            Text {
-                text: "Live"
-                color: root.activeRow === 1 ? "white" : Qt.rgba(1,1,1,0.35)
-                font.pixelSize: 11; font.weight: Font.Medium
-                anchors.verticalCenter: parent.verticalCenter; width: 40
-                Behavior on color { ColorAnimation { duration: 150 } }
-            }
+                Row {
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    spacing: 8
 
-            ListView {
-                id: liveList
-                width: parent.width - 48; height: parent.height
-                orientation: ListView.Horizontal
-                spacing: 8; clip: true
-                model: root.liveWalls
-                cacheBuffer: Math.max(0, Math.round(height * 16/9) * 3)
-                property real cardW: Math.round(height * 16/9)
-                currentIndex: root.liveIdx
-                highlightRangeMode: ListView.StrictlyEnforceRange
-                preferredHighlightBegin: width/2 - cardW/2
-                preferredHighlightEnd:   width/2 + cardW/2
-                Behavior on contentX { SmoothedAnimation { duration: 300; easing.type: Easing.InOutCubic } }
-
-                delegate: Item {
-                    id: lDelegate
-                    width: liveList.cardW; height: liveList.height
-                    property bool active: index === root.liveIdx && root.activeRow === 1
-                    property bool shouldLoad: Math.abs(index - root.liveIdx) <= 3
-                    scale:   active ? 1.10 : 0.80
-                    opacity: active ? 1.0 : 0.50
-                    Behavior on scale   { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
-                    Behavior on opacity { NumberAnimation { duration: 280 } }
-                    Rectangle {
-                        anchors.fill: parent; radius: 12; color: "#111"; clip: true
-                        antialiasing: true
-                        Image {
-                            anchors.fill: parent
-                            source: lDelegate.shouldLoad && modelData.preview !== "" ? "file://" + modelData.preview : ""
-                            fillMode: Image.PreserveAspectCrop; smooth: true; asynchronous: true
-                            opacity: status === Image.Ready ? 1 : 0
-                            Behavior on opacity { NumberAnimation { duration: 250 } }
+                    Column {
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 4
+                        Text {
+                            text: "↑ Static"
+                            color: Qt.rgba(1,1,1,0.3); font.pixelSize: 10
+                            visible: root.activeRow === 1
                         }
-                        Rectangle {
-                            anchors.fill: parent; radius: parent.radius; color: "transparent"
-                            border.color: lDelegate.active ? Qt.rgba(1,1,1,0.65) : Qt.rgba(1,1,1,0.06)
-                            border.width: lDelegate.active ? 2 : 1
-                            Behavior on border.color { ColorAnimation { duration: 200 } }
+                        Text {
+                            text: "Live"
+                            color: "white"; font.pixelSize: 12; font.weight: Font.Medium
                         }
                     }
-                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                        onClicked: root.applyLiveWall(index) }
+
+                    ListView {
+                        id: liveList
+                        width: parent.width - 60; height: parent.height
+                        orientation: ListView.Horizontal
+                        spacing: 10; clip: true
+                        model: root.liveWalls
+                        cacheBuffer: Math.max(0, Math.round(height * 16/9) * 3)
+                        property real cardW: Math.round(height * 16/9)
+                        currentIndex: root.liveIdx
+                        highlightRangeMode: ListView.StrictlyEnforceRange
+                        preferredHighlightBegin: width/2 - cardW/2
+                        preferredHighlightEnd:   width/2 + cardW/2
+                        Behavior on contentX { SmoothedAnimation { duration: 300; easing.type: Easing.InOutCubic } }
+
+                        delegate: Item {
+                            id: ld
+                            width: liveList.cardW; height: liveList.height
+                            property bool active: index === root.liveIdx && root.activeRow === 1
+                            property bool shouldLoad: Math.abs(index - root.liveIdx) <= 3
+                            scale:   active ? 1.08 : 0.82
+                            opacity: active ? 1.0  : 0.45
+                            Behavior on scale   { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
+                            Behavior on opacity { NumberAnimation { duration: 280 } }
+                            Rectangle {
+                                anchors.fill: parent; radius: 16; color: "#111"; clip: true
+                                Image {
+                                    anchors.fill: parent
+                                    source: ld.shouldLoad && modelData.preview !== "" ? "file://" + modelData.preview : ""
+                                    fillMode: Image.PreserveAspectCrop; smooth: true; asynchronous: true
+                                    opacity: status === Image.Ready ? 1 : 0
+                                    Behavior on opacity { NumberAnimation { duration: 250 } }
+                                }
+                                Rectangle {
+                                    anchors.fill: parent; radius: parent.radius; color: "transparent"
+                                    border.color: ld.active ? Qt.rgba(1,1,1,0.65) : Qt.rgba(1,1,1,0.06)
+                                    border.width: ld.active ? 2 : 1
+                                    Behavior on border.color { ColorAnimation { duration: 200 } }
+                                }
+                            }
+                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                onClicked: root.applyLiveWall(index) }
+                        }
+                    }
                 }
             }
         }
