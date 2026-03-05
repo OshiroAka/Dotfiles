@@ -9,16 +9,12 @@ Item {
     property int staticIdx: AppState.staticWallIdx
     property int liveIdx: AppState.liveWallIdx
     property int activeRow: AppState.activeWallRow
-    property real rowH: height
 
-    Component.onCompleted: {
-        forceActiveFocus()
-        findStatic.running = true
-        findEngine.running = true
-    }
+    Component.onCompleted: { root.forceActiveFocus(); findStatic.running = true; findEngine.running = true }
     onVisibleChanged: {
         if (visible) {
-            forceActiveFocus()
+            root.forceActiveFocus()
+            // Pula para posicao salva sem animacao
             Qt.callLater(function() {
                 staticList.positionViewAtIndex(root.staticIdx, ListView.Center)
                 liveList.positionViewAtIndex(root.liveIdx, ListView.Center)
@@ -52,54 +48,50 @@ Item {
         }
     }
 
-    Process { id: applyStatic; running: false }
-    Process {
-        id: applyLive; running: false
-    }
-    Process {
-        id: killLive; running: false
-        command: ["bash", "-c", "pkill -f linux-wallpaperengine 2>/dev/null; true"]
-    }
-
     Timer {
         id: liveDebounce
         interval: 700; repeat: false
         onTriggered: {
             var w = root.liveWalls[root.liveIdx]
+            // 1. Mostra preview estatico imediatamente via swww
             if (w.preview !== "") {
                 applyStatic.running = false
                 applyStatic.command = ["swww", "img", w.preview,
                     "--transition-type", "fade", "--transition-duration", "0.4", "--transition-fps", "60"]
                 applyStatic.running = true
             }
+            // 2. Inicia engine em paralelo (demora ~1s para aparecer)
             applyLive.running = false
-            applyLive.command = ["linux-wallpaperengine", "--screen-root", "eDP-1", "--bg", w.path]
+            applyLive.command = [
+                "linux-wallpaperengine",
+                "--screen-root", "eDP-1",
+                "--bg", w.path
+            ]
             applyLive.running = true
         }
     }
 
+    Process { id: applyStatic; running: false }
+    Process { id: applyLive; running: false }
+    Process { id: killLive; running: false
+        command: ["bash", "-c", "pkill -f linux-wallpaperengine 2>/dev/null; pkill -f mpvpaper 2>/dev/null; true"] }
+
     function applyStaticWall(idx) {
         if (idx < 0 || idx >= staticWalls.length) return
-        AppState.staticWallIdx = idx
-        liveDebounce.stop()
-        applyLive.running = false
-        killLive.running = false
-        killLive.running = true
+        staticIdx = idx
         applyStatic.running = false
         applyStatic.command = ["swww", "img", staticWalls[idx],
             "--transition-type", "grow", "--transition-duration", "1", "--transition-fps", "60"]
-        applyStatic.running = true
-    }
-
-    function applyLiveWall(idx) {
-        if (idx < 0 || idx >= liveWalls.length) return
-        AppState.liveWallIdx = idx
-        applyLive.running = false
-        liveDebounce.restart()
-    }
+        Qt.callLater(function() { applyStatic.running = true })
+  
+ function applyStaticWall(idx) {
+    if (idx < 0 || idx >= staticWalls.length) return
+    staticIdx = idx
+    killLive.running = false
+    killLive.running = true
+    applyStatic.running = false
 
     Keys.enabled: true
-    Keys.onEscapePressed: AppState.overlayCurrentTab = ""
     Keys.onUpPressed:   AppState.activeWallRow = 0
     Keys.onDownPressed: AppState.activeWallRow = 1
     Keys.onLeftPressed: {
@@ -111,6 +103,10 @@ Item {
         else applyLiveWall(Math.min(liveWalls.length - 1, liveIdx + 1))
     }
 
+    // Altura de cada row = altura total (uma por vez)
+    property real rowH: height
+
+    // Offset vertical animado: 0 = Static, -rowH = Live
     property real rowOffset: activeRow === 0 ? 0 : -rowH
     Behavior on rowOffset { NumberAnimation { duration: 300; easing.type: Easing.InOutCubic } }
 
@@ -123,20 +119,35 @@ Item {
             y: root.rowOffset
             spacing: 0
 
-            // Static row
+            // ── Static row ──
             Item {
-                width: parent.width; height: root.rowH
+                width: parent.width
+                height: root.rowH
+
                 Row {
-                    anchors.fill: parent; anchors.margins: 8; spacing: 8
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    spacing: 8
+
                     Column {
-                        anchors.verticalCenter: parent.verticalCenter; spacing: 4; width: 50
-                        Text { text: "Static"; color: "white"; font.pixelSize: 12; font.weight: Font.Medium }
-                        Text { text: "↓ Live"; color: Qt.rgba(1,1,1,0.3); font.pixelSize: 10; visible: root.activeRow === 0 }
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 4
+                        Text {
+                            text: "Static"
+                            color: "white"; font.pixelSize: 12; font.weight: Font.Medium
+                        }
+                        Text {
+                            text: "↓ Live"
+                            color: Qt.rgba(1,1,1,0.3); font.pixelSize: 10
+                            visible: root.activeRow === 0
+                        }
                     }
+
                     ListView {
                         id: staticList
                         width: parent.width - 60; height: parent.height
-                        orientation: ListView.Horizontal; spacing: 10; clip: true
+                        orientation: ListView.Horizontal
+                        spacing: 10; clip: true
                         model: root.staticWalls
                         cacheBuffer: Math.max(0, Math.round(height * 16/9) * 3)
                         property real cardW: Math.round(height * 16/9)
@@ -145,12 +156,14 @@ Item {
                         preferredHighlightBegin: width/2 - cardW/2
                         preferredHighlightEnd:   width/2 + cardW/2
                         Behavior on contentX { SmoothedAnimation { duration: 300; easing.type: Easing.InOutCubic } }
+
                         delegate: Item {
                             id: sd
                             width: staticList.cardW; height: staticList.height
                             property bool active: index === root.staticIdx && root.activeRow === 0
                             property bool shouldLoad: Math.abs(index - root.staticIdx) <= 3
-                            scale: active ? 1.08 : 0.82; opacity: active ? 1.0 : 0.45
+                            scale:   active ? 1.08 : 0.82
+                            opacity: active ? 1.0  : 0.45
                             Behavior on scale   { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
                             Behavior on opacity { NumberAnimation { duration: 280 } }
                             Rectangle {
@@ -176,20 +189,35 @@ Item {
                 }
             }
 
-            // Live row
+            // ── Live row ──
             Item {
-                width: parent.width; height: root.rowH
+                width: parent.width
+                height: root.rowH
+
                 Row {
-                    anchors.fill: parent; anchors.margins: 8; spacing: 8
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    spacing: 8
+
                     Column {
-                        anchors.verticalCenter: parent.verticalCenter; spacing: 4; width: 50
-                        Text { text: "↑ Static"; color: Qt.rgba(1,1,1,0.3); font.pixelSize: 10; visible: root.activeRow === 1 }
-                        Text { text: "Live"; color: "white"; font.pixelSize: 12; font.weight: Font.Medium }
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 4
+                        Text {
+                            text: "↑ Static"
+                            color: Qt.rgba(1,1,1,0.3); font.pixelSize: 10
+                            visible: root.activeRow === 1
+                        }
+                        Text {
+                            text: "Live"
+                            color: "white"; font.pixelSize: 12; font.weight: Font.Medium
+                        }
                     }
+
                     ListView {
                         id: liveList
                         width: parent.width - 60; height: parent.height
-                        orientation: ListView.Horizontal; spacing: 10; clip: true
+                        orientation: ListView.Horizontal
+                        spacing: 10; clip: true
                         model: root.liveWalls
                         cacheBuffer: Math.max(0, Math.round(height * 16/9) * 3)
                         property real cardW: Math.round(height * 16/9)
@@ -198,12 +226,14 @@ Item {
                         preferredHighlightBegin: width/2 - cardW/2
                         preferredHighlightEnd:   width/2 + cardW/2
                         Behavior on contentX { SmoothedAnimation { duration: 300; easing.type: Easing.InOutCubic } }
+
                         delegate: Item {
                             id: ld
                             width: liveList.cardW; height: liveList.height
                             property bool active: index === root.liveIdx && root.activeRow === 1
                             property bool shouldLoad: Math.abs(index - root.liveIdx) <= 3
-                            scale: active ? 1.08 : 0.82; opacity: active ? 1.0 : 0.45
+                            scale:   active ? 1.08 : 0.82
+                            opacity: active ? 1.0  : 0.45
                             Behavior on scale   { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
                             Behavior on opacity { NumberAnimation { duration: 280 } }
                             Rectangle {
