@@ -14,6 +14,7 @@ PanelWindow {
     implicitWidth:  900
     implicitHeight: 320
     visible: true
+    focusable: true
 
     WaylandRegion { id: region }
     Item { id: wb; visible: false }
@@ -162,7 +163,8 @@ PanelWindow {
             Loader {
                 anchors.fill: parent
                 source: "tabs/WallpaperTab.qml"
-                active: morph.showContent
+                active: true
+                visible: morph.showContent
             }
         }
     }
