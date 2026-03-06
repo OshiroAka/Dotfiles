@@ -263,14 +263,14 @@ PanelWindow {
                 AnimatedImage {
                     id: gifImg
                     anchors.right: parent.right; anchors.rightMargin: 32
-                    anchors.top: dt.bottom; anchors.topMargin: 8
-                    width: 120; height: 80; fillMode: Image.PreserveAspectFit
+                    anchors.bottom: parent.bottom; anchors.bottomMargin: 8
+                    width: 180; height: 120; fillMode: Image.PreserveAspectFit
                     playing: morph.showContent && win.currentTab===""; asynchronous: true; smooth: true; source: ""
                     Component.onCompleted: {
                         Qt.createQmlObject('
                             import Quickshell.Io
                             Process { running: true
-                                command: ["bash","-c","ls ~/Pictures/gif/*.gif 2>/dev/null | head -1"]
+                                command: ["bash","-c","ls /home/oshiro/Pictures/gif/*.gif 2>/dev/null | head -1"]
                                 stdout: SplitParser { onRead: data => { var f=data.trim(); if(f.length>0) gifImg.source="file://"+f } }
                             }
                         ', gifImg)
