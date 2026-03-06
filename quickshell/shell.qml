@@ -9,6 +9,7 @@ ShellRoot {
     MusicPill {}
     Overlay {}
     WallpaperOverlay {}
+    MenuOverlay {}
 
     IpcHandler {
         target: "shell"

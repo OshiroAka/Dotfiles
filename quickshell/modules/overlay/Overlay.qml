@@ -79,10 +79,15 @@ PanelWindow {
     Timer { interval: 500; running: true; repeat: false; onTriggered: colorProc.running = true }
 
     property bool pendingWallpaper: false
+    property bool pendingMenu: false
     property string currentTab: AppState.overlayCurrentTab
+    Connections {
+        target: AppState
+        function onSelectedGifChanged() { gifImg.source = "file://" + AppState.selectedGif }
+    }
     onCurrentTabChanged: if (currentTab === "") keyItem.forceActiveFocus()
     property int catHov: 0
-    property var cats: ["Wallpaper", "Configs", "Apps", "Performance", "Sobre"]
+    property var cats: ["Wallpaper", "Menu", "Configs", "Apps", "Performance", "Sobre"]
 
     // Esconde pill quando wallpaper aberto
     Connections {
@@ -100,6 +105,11 @@ PanelWindow {
             if (!AppState.overlayOpen && win.pendingWallpaper) {
                 win.pendingWallpaper=false
                 AppState.wallpaperOpen=true
+                return
+            }
+            if (!AppState.overlayOpen && win.pendingMenu) {
+                win.pendingMenu=false
+                AppState.menuOpen=true
                 return
             }
             if (AppState.overlayOpen) {
@@ -129,6 +139,7 @@ PanelWindow {
             AppState.overlayOpen=false
         }}
     }
+
 
     SequentialAnimation {
         id: openAnim
@@ -264,7 +275,7 @@ PanelWindow {
                     id: gifImg
                     anchors.right: parent.right; anchors.rightMargin: 32
                     anchors.bottom: parent.bottom; anchors.bottomMargin: 8
-                    width: 180; height: 120; fillMode: Image.PreserveAspectFit
+                    width: AppState.gifSize; height: Math.round(AppState.gifSize * 0.67); fillMode: Image.PreserveAspectFit
                     playing: morph.showContent && win.currentTab===""; asynchronous: true; smooth: true; source: ""
                     Component.onCompleted: {
                         Qt.createQmlObject('
@@ -312,7 +323,7 @@ PanelWindow {
                 Loader {
                     anchors.fill: parent; anchors.topMargin: 30; anchors.margins: 8
                     active: true; visible: morph.showContent
-                    source: win.currentTab==="Wallpaper" ? "tabs/WallpaperTab.qml" : ""
+                    source: win.currentTab==="Wallpaper" ? "tabs/WallpaperTab.qml" : win.currentTab==="Menu" ? "tabs/MenuTab.qml" : ""
                     onLoaded: item.forceActiveFocus()
                 }
             }
