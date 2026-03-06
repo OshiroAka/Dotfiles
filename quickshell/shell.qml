@@ -8,6 +8,7 @@ import "./modules/shared"
 ShellRoot {
     MusicPill {}
     Overlay {}
+    WallpaperOverlay {}
 
     IpcHandler {
         target: "shell"

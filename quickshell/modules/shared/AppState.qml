@@ -3,6 +3,8 @@ pragma Singleton
 
 Singleton {
     property bool overlayOpen: false
+    signal wallpaperFullyClosed()
+    property bool wallpaperOpen: false
     property string overlayCurrentTab: ""
     property int staticWallIdx: 0
     property int liveWallIdx: 0
