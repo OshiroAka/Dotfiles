@@ -161,10 +161,14 @@ PanelWindow {
 
     SequentialAnimation {
         id: openAnim
-        // começa como pill largo (continuidade do menu geral)
-        NumberAnimation { target: morph; property: "height"; to: 260; duration: 480; easing.type: Easing.InOutCubic }
-        NumberAnimation { target: morph; property: "width";  to: 920; duration: 200; easing.type: Easing.OutCubic }
-        NumberAnimation { target: morph; property: "width";  to: 860; duration: 160; easing.type: Easing.InOutCubic }
+        // largura encolhe (espelho do menu geral fechando)
+        NumberAnimation { target: morph; property: "width";  to: 4;   duration: 200; easing.type: Easing.InCubic }
+        // altura abre
+        NumberAnimation { target: morph; property: "height"; to: 260; duration: 460; easing.type: Easing.InOutCubic }
+        // largura abre com bounce
+        NumberAnimation { target: morph; property: "width";  to: 920; duration: 240; easing.type: Easing.OutCubic }
+        NumberAnimation { target: morph; property: "width";  to: 840; duration: 120; easing.type: Easing.InOutCubic }
+        NumberAnimation { target: morph; property: "width";  to: 860; duration: 100; easing.type: Easing.OutCubic }
         ScriptAction { script: { var w=wb.Window.window; if(w) region.clear(w); morph.showContent=true } }
         PauseAnimation { duration: 50 }
         ScriptAction { script: {
@@ -175,9 +179,12 @@ PanelWindow {
     }
     SequentialAnimation {
         id: closeAnim
-        NumberAnimation { target: morph; property: "height"; to: 32;  duration: 400; easing.type: Easing.InOutCubic }
+        // altura encolhe
+        NumberAnimation { target: morph; property: "height"; to: 32;  duration: 380; easing.type: Easing.InOutCubic }
+        // largura encolhe
         NumberAnimation { target: morph; property: "width";  to: 4;   duration: 180; easing.type: Easing.InCubic }
-        NumberAnimation { target: morph; property: "width";  to: 260; duration: 160; easing.type: Easing.OutBack }
+        // abre como pill
+        NumberAnimation { target: morph; property: "width";  to: 300; duration: 200; easing.type: Easing.OutBack }
         ScriptAction { script: {
             morph.visible=false
             var w=wb.Window.window; if(w) region.apply(w,0,0,860,260)
@@ -404,6 +411,7 @@ PanelWindow {
                             Image {
                                 anchors.fill: parent; source: ld.previewSrc
                                 fillMode: Image.PreserveAspectCrop; smooth: true; asynchronous: true
+                                cache: false
                                 opacity: status===Image.Ready ? 1 : 0
                                 Behavior on opacity { NumberAnimation { duration: 180 } }
                             }

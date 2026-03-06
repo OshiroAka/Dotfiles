@@ -120,6 +120,17 @@ PanelWindow {
     }
 
     SequentialAnimation {
+        id: wallpaperExitAnim
+        // altura encolhe sincronizado com WallpaperOverlay abrindo
+        NumberAnimation { target: morph; property: "height"; to: 32;  duration: 200; easing.type: Easing.InCubic }
+        NumberAnimation { target: morph; property: "width";  to: 900; duration: 60;  easing.type: Easing.OutCubic }
+        ScriptAction { script: {
+            morph.visible=false
+            AppState.overlayOpen=false
+        }}
+    }
+
+    SequentialAnimation {
         id: openAnim
         NumberAnimation { target: morph; property: "width";  to: 4;   duration: 160; easing.type: Easing.InCubic }
         NumberAnimation { target: morph; property: "height"; to: 320; duration: 500; easing.type: Easing.InOutCubic }
