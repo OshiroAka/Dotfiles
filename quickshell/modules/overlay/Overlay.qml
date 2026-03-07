@@ -258,14 +258,13 @@ PanelWindow {
                     onTriggered: { cavaProc.running=false; cavaProc.running=true }
                 }
 
-                // ── Visualizador topo ──
+                // ── Visualizador — borda inferior, atrás do blur ──
                 Row {
                     id: vizRow
-                    anchors.top: parent.top; anchors.topMargin: 8
+                    anchors.bottom: parent.bottom
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width - 40
-                    height: 24
-                    spacing: 2
+                    height: 28; spacing: 2; z: -1
 
                     Repeater {
                         model: 40
@@ -287,7 +286,7 @@ PanelWindow {
 
                 // ── Separador ──
                 Rectangle {
-                    anchors.top: vizRow.bottom; anchors.topMargin: 6
+                    anchors.top: parent.top; anchors.topMargin: 6
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width - 60; height: 1
                     gradient: Gradient { orientation: Gradient.Horizontal
@@ -298,15 +297,16 @@ PanelWindow {
                     }
                 }
 
-                // ── Relógio — centro absoluto ──
+                // ── Relógio — centro ──
                 Item {
                     id: clkBlock
                     anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: vizRow.bottom; anchors.topMargin: 16
-                    width: clkMain.width; height: clkMain.height + catLabel.height + 6
+                    anchors.top: parent.top; anchors.topMargin: 14
+                    width: clkMain.width; height: clkMain.height + 30
 
                     property string t: Qt.formatTime(new Date(),"hh:mm:ss")
-                    Timer { interval:1000; running:true; repeat:true; onTriggered: parent.t=Qt.formatTime(new Date(),"hh:mm:ss") }
+                    Timer { interval:1000; running:true; repeat:true
+                        onTriggered: clkBlock.t = Qt.formatTime(new Date(),"hh:mm:ss") }
 
                     Text {
                         text: clkBlock.t
@@ -322,33 +322,73 @@ PanelWindow {
                         font.pixelSize: 88; font.weight: Font.Black
                         color: win.tc; opacity: 0.92
                     }
-                    Text {
+
+                    // Marcador invisível para posição da categoria
+                    Item {
                         id: catLabel
                         anchors.horizontalCenter: clkMain.horizontalCenter
-                        anchors.top: clkMain.bottom; anchors.topMargin: 6
-                        text: win.cats[win.catHov]
-                        color: win.tc; font.pixelSize: 16; font.weight: Font.Bold; opacity: 0.85
-                        Behavior on text { }
-                        scale: 1.0
-                        SequentialAnimation on scale {
-                            running: false; id: catAnim
-                            NumberAnimation { to: 0.75; duration: 80; easing.type: Easing.InCubic }
-                            NumberAnimation { to: 1.0;  duration: 200; easing.type: Easing.OutBack }
-                        }
-                        onTextChanged: catAnim.running = true
+                        anchors.top: clkMain.bottom; anchors.topMargin: 8
+                        width: 1; height: 20
                     }
                 }
 
+                // ── Categoria — anima do catRow até abaixo do relógio ──
+                Text {
+                    id: catDisplay
+                    anchors.horizontalCenter: clkBlock.horizontalCenter
+                    visible: false; opacity: 0; scale: 0.7; z: 20
+                    y: 0; text: ""; color: win.tc
+                    font.pixelSize: 16; font.weight: Font.Bold
+
+                    Component.onCompleted: {
+                        text = win.cats[win.catHov]
+                        y = catRow.y + catRow.height/2 - 8
+                        visible = true
+                        enterAnim.start()
+                    }
+
+                    Connections {
+                        target: win
+                        function onCatHovChanged() { exitAnim.start() }
+                    }
+
+                    property real destY: clkBlock.y + catLabel.y + catLabel.anchors.topMargin
+
+                    SequentialAnimation {
+                        id: exitAnim
+                        NumberAnimation { target: catDisplay; property: "opacity"; to: 0; duration: 100; easing.type: Easing.InCubic }
+                        ScriptAction { script: {
+                            catDisplay.text = win.cats[win.catHov]
+                            catDisplay.y = catRow.y + catRow.height/2 - 8
+                            catDisplay.scale = 0.7
+                        }}
+                        ParallelAnimation {
+                            NumberAnimation { target: catDisplay; property: "y"; to: catDisplay.destY; duration: 380; easing.type: Easing.OutBack }
+                            NumberAnimation { target: catDisplay; property: "opacity"; to: 1.0; duration: 260; easing.type: Easing.OutCubic }
+                            NumberAnimation { target: catDisplay; property: "scale"; to: 1.0; duration: 380; easing.type: Easing.OutBack }
+                        }
+                    }
+                    SequentialAnimation {
+                        id: enterAnim
+                        ParallelAnimation {
+                            NumberAnimation { target: catDisplay; property: "y"; to: catDisplay.destY; duration: 400; easing.type: Easing.OutBack }
+                            NumberAnimation { target: catDisplay; property: "opacity"; to: 1.0; duration: 280; easing.type: Easing.OutCubic }
+                            NumberAnimation { target: catDisplay; property: "scale"; to: 1.0; duration: 400; easing.type: Easing.OutBack }
+                        }
+                    }
+                }
 
                 // ── Data + ShiraOS ──
                 Column {
                     anchors.right: parent.right; anchors.rightMargin: 20
-                    anchors.verticalCenter: clkBlock.verticalCenter
+                    anchors.top: parent.top; anchors.topMargin: 20
+                    spacing: 4
 
                     Text {
                         anchors.right: parent.right
                         property string d: Qt.formatDate(new Date(),"dddd, d MMMM")
-                        Timer { interval:60000; running:true; repeat:true; onTriggered: parent.d=Qt.formatDate(new Date(),"dddd, d MMMM") }
+                        Timer { interval:60000; running:true; repeat:true
+                            onTriggered: parent.d = Qt.formatDate(new Date(),"dddd, d MMMM") }
                         text: d; color: win.tcd; font.pixelSize: 11
                     }
                     Text {
@@ -380,19 +420,11 @@ PanelWindow {
                             Behavior on opacity { NumberAnimation { duration: 200 } }
                             scale: isActive ? 1.1 : Math.abs(dist)===1 ? 0.88 : 0.75
                             Behavior on scale { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+
                             Text {
                                 id: tabLbl; text: modelData
-                                color: isActive ? win.tc : win.tcd
-                                font.pixelSize: isActive ? 13 : 11
-                                font.weight: isActive ? Font.Bold : Font.Normal
-                                Behavior on color { ColorAnimation { duration: 160 } }
-                            }
-                            Rectangle {
-                                anchors.horizontalCenter: tabLbl.horizontalCenter
-                                anchors.top: tabLbl.bottom; anchors.topMargin: 3
-                                width: isActive ? tabLbl.width * 0.6 : 0; height: 2; radius: 1
-                                color: win.tc; opacity: 0.75
-                                Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+                                color: win.tcd
+                                font.pixelSize: 11; font.weight: Font.Normal
                             }
                             MouseArea {
                                 anchors.fill: tabLbl; anchors.margins: -10
@@ -401,42 +433,22 @@ PanelWindow {
                                 onClicked: {
                                     win.catHov = index
                                     var cat = win.cats[index]
-                                    if (cat==="Wallpaper") { win.pendingWallpaper=true; openAnim.stop(); closeAnim.stop(); morph.showContent=false; wallpaperExitAnim.start()
-                                    } else if (cat==="Menu") { win.pendingMenu=true; openAnim.stop(); closeAnim.stop(); morph.showContent=false; wallpaperExitAnim.start()
-                                    } else AppState.overlayCurrentTab = cat
+                                    if (cat==="Wallpaper") {
+                                        win.pendingWallpaper=true; openAnim.stop(); closeAnim.stop()
+                                        morph.showContent=false; wallpaperExitAnim.start()
+                                    } else if (cat==="Menu") {
+                                        win.pendingMenu=true; openAnim.stop(); closeAnim.stop()
+                                        morph.showContent=false; wallpaperExitAnim.start()
+                                    } else {
+                                        AppState.overlayCurrentTab = cat
+                                    }
                                 }
                             }
-                        }
-                    }
-                    Rectangle {
-                        anchors.left: parent.left; anchors.top: parent.top; anchors.bottom: parent.bottom
-                        gradient: Gradient { orientation: Gradient.Horizontal
-                            GradientStop { position:0.0; color: Qt.rgba(win.gc1.r,win.gc1.g,win.gc1.b,0.98) }
-                            GradientStop { position:1.0; color: Qt.rgba(win.gc1.r,win.gc1.g,win.gc1.b,0.0) }
-                        }
-                    }
-                    Rectangle {
-                        anchors.right: parent.right; anchors.top: parent.top; anchors.bottom: parent.bottom
-                        gradient: Gradient { orientation: Gradient.Horizontal
-                            GradientStop { position:0.0; color: Qt.rgba(win.gc4.r,win.gc4.g,win.gc4.b,0.0) }
-                            GradientStop { position:1.0; color: Qt.rgba(win.gc4.r,win.gc4.g,win.gc4.b,0.98) }
                         }
                     }
                 }
             }
 
-
-
-
-
-            // TAB CONTENT
-            Loader {
-                anchors.fill: parent
-                active: win.currentTab !== ""
-                opacity: win.currentTab!=="" ? 1 : 0
-                Behavior on opacity { NumberAnimation { duration: 180 } }
-                source: win.currentTab==="Menu" ? "tabs/MenuTab.qml" : ""
-            }
-        }
-    }
+}
+}
 }
