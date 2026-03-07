@@ -60,8 +60,19 @@ PanelWindow {
     property var engineWalls: []
     property var liveWalls:   []
     property int staticIdx: AppState.staticWallIdx
+    onStaticIdxChanged: AppState.staticWallIdx = win.staticIdx
     property int engineIdx: 0
     property int liveIdx:   AppState.liveWallIdx
+
+    // Centraliza ao carregar as listas
+    onStaticWallsChanged: if (staticWalls.length > 0 && staticIdx === 0) {
+        win.staticIdx = Math.floor(staticWalls.length / 2)
+        AppState.staticWallIdx = win.staticIdx
+    }
+    onLiveWallsChanged: if (liveWalls.length > 0 && liveIdx === 0) {
+        win.liveIdx = Math.floor(liveWalls.length / 2)
+        AppState.liveWallIdx = win.liveIdx
+    }
 
     Process {
         id: findStatic; running: false
@@ -117,6 +128,8 @@ PanelWindow {
     function applyStaticWall(idx) {
         if (idx<0||idx>=staticWalls.length) return
         AppState.staticWallIdx=idx
+        win.staticIdx=idx
+
         killEngine.running=false; killEngine.running=true
         killLiveProc.running=false; killLiveProc.running=true
         applyStatic.command=["swww","img",staticWalls[idx],"--transition-type","grow","--transition-duration","1","--transition-fps","60"]
@@ -131,6 +144,9 @@ PanelWindow {
     function applyLiveWall(idx) {
         if (idx<0||idx>=liveWalls.length) return
         AppState.liveWallIdx=idx
+
+        win.liveIdx=idx
+        liveList.positionViewAtIndex(idx, ListView.Center)
         killEngine.running=false; killEngine.running=true
         liveDebounce.restart()
     }
@@ -161,36 +177,33 @@ PanelWindow {
 
     SequentialAnimation {
         id: openAnim
-        // largura encolhe (espelho do menu geral fechando)
-        NumberAnimation { target: morph; property: "width";  to: 4;   duration: 200; easing.type: Easing.InCubic }
-        // altura abre
-        NumberAnimation { target: morph; property: "height"; to: 260; duration: 460; easing.type: Easing.InOutCubic }
-        // largura abre com bounce
-        NumberAnimation { target: morph; property: "width";  to: 920; duration: 240; easing.type: Easing.OutCubic }
-        NumberAnimation { target: morph; property: "width";  to: 840; duration: 120; easing.type: Easing.InOutCubic }
-        NumberAnimation { target: morph; property: "width";  to: 860; duration: 100; easing.type: Easing.OutCubic }
-        ScriptAction { script: { var w=wb.Window.window; if(w) region.clear(w); morph.showContent=true } }
-        PauseAnimation { duration: 50 }
         ScriptAction { script: {
+            morph.width=860; morph.height=260
+            morph.visible=true; morph.showContent=false
+            var w=wb.Window.window; if(w) region.clear(w)
+        }}
+        PauseAnimation { duration: 130 }
+        ScriptAction { script: {
+            morph.showContent=true
             keyItem.forceActiveFocus()
-            staticList.positionViewAtIndex(win.staticIdx, ListView.Center)
-            liveList.positionViewAtIndex(win.liveIdx, ListView.Center)
-        } }
+            // Posiciona via contentX para respeitar Behavior
+        }}
     }
+
+    
     SequentialAnimation {
         id: closeAnim
-        // altura encolhe
-        NumberAnimation { target: morph; property: "height"; to: 32;  duration: 380; easing.type: Easing.InOutCubic }
-        // largura encolhe
-        NumberAnimation { target: morph; property: "width";  to: 4;   duration: 180; easing.type: Easing.InCubic }
-        // abre como pill
-        NumberAnimation { target: morph; property: "width";  to: 300; duration: 200; easing.type: Easing.OutBack }
+        ScriptAction { script: {
+            morph.showContent=false
+        }}
+        PauseAnimation { duration: 100 }
         ScriptAction { script: {
             morph.visible=false
             var w=wb.Window.window; if(w) region.apply(w,0,0,860,260)
         }}
     }
 
+    
     Item {
         id: morph
         anchors.horizontalCenter: parent.horizontalCenter
@@ -218,7 +231,7 @@ PanelWindow {
         }
 
         Item { id: keyItem; anchors.fill: parent; focus: true; Keys.enabled: true
-            Keys.onEscapePressed: AppState.wallpaperOpen=false
+            Keys.onEscapePressed: { AppState.wallpaperOpen=false; AppState.overlayOpen=true }
             Keys.onUpPressed:    AppState.activeWallRow=Math.max(0,AppState.activeWallRow-1)
             Keys.onDownPressed:  AppState.activeWallRow=Math.min(2,AppState.activeWallRow+1)
             Keys.onLeftPressed: {
@@ -274,48 +287,53 @@ PanelWindow {
                 property real smallH: height * 0.20
 
                 // ── Row Estética ──
-                ListView {
-                    id: staticList
+                // ── Row Estética — carrossel manual ──
+                Item {
+                    id: staticCarousel
                     width: parent.width
                     height: AppState.activeWallRow===0 ? carouselArea.bigH : carouselArea.smallH
                     anchors.top: parent.top
                     z: AppState.activeWallRow===0 ? 3 : 1
+                    clip: true
                     Behavior on height { NumberAnimation { duration: 300; easing.type: Easing.InOutCubic } }
-                    orientation: ListView.Horizontal; spacing: 8; clip: true
-                    model: win.staticWalls
-                    currentIndex: win.staticIdx
-                    highlightRangeMode: ListView.StrictlyEnforceRange
-                    preferredHighlightBegin: width/2 - cardW/2
-                    preferredHighlightEnd:   width/2 + cardW/2
-                    property real cardW: Math.round(height * 16/9)
-                    Behavior on contentX { SmoothedAnimation { duration: 300 } }
-                    delegate: Item {
-                        id: sd
-                        width: staticList.cardW; height: staticList.height
-                        property bool active: index===win.staticIdx && AppState.activeWallRow===0
-                        property bool near: Math.abs(index-win.staticIdx)===1
-                        property bool shouldLoad: Math.abs(index-win.staticIdx)<=3
-                        opacity: active ? 1.0 : near ? 0.55 : 0.25
-                        scale:   active ? 1.0 : near ? 0.88 : 0.78
-                        Behavior on opacity { NumberAnimation { duration: 220 } }
-                        Behavior on scale   { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
-                        Rectangle {
-                            anchors.fill: parent; radius: 14; color: "#0a0a0a"; clip: true
-                            Image {
-                                anchors.fill: parent
-                                source: sd.shouldLoad ? "file://"+modelData : ""
-                                fillMode: Image.PreserveAspectCrop; smooth: true; asynchronous: true
-                                opacity: status===Image.Ready ? 1 : 0
-                                Behavior on opacity { NumberAnimation { duration: 180 } }
-                            }
+                    property real cardW: Math.round(height * 16/9) + 8
+
+                    Repeater {
+                        model: win.staticWalls
+                        Item {
+                            id: sd
+                            required property string modelData
+                            required property int index
+                            property int dist: index - AppState.staticWallIdx
+                            property bool active: dist===0 && AppState.activeWallRow===0
+                            property bool near: Math.abs(dist)===1
+                            property bool shouldLoad: Math.abs(dist)<=3
+                            width: staticCarousel.cardW - 8; height: staticCarousel.height
+                            x: staticCarousel.width/2 - width/2 + dist * staticCarousel.cardW
+                            Behavior on x { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
+                            opacity: active ? 1.0 : near ? 0.55 : Math.abs(dist)===2 ? 0.25 : 0.0
+                            scale:   active ? 1.0 : near ? 0.88 : 0.78
+                            Behavior on opacity { NumberAnimation { duration: 280; easing.type: Easing.InOutCubic } }
+                            Behavior on scale   { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
                             Rectangle {
-                                anchors.fill: parent; radius: parent.radius; color: "transparent"
-                                border.color: sd.active ? Qt.rgba(1,1,1,0.75) : "transparent"
-                                border.width: 2
+                                anchors.fill: parent; radius: 14; color: "#0a0a0a"; clip: true
+                                Image {
+                                    anchors.fill: parent
+                                    source: sd.shouldLoad ? "file://"+modelData : ""
+                                    fillMode: Image.PreserveAspectCrop; smooth: true; asynchronous: true
+                                    opacity: status===Image.Ready ? 1 : 0
+                                    Behavior on opacity { NumberAnimation { duration: 180 } }
+                                }
+                                Rectangle {
+                                    anchors.fill: parent; radius: parent.radius; color: "transparent"
+                                    border.color: sd.active ? Qt.rgba(1,1,1,0.90) : "transparent"
+                                    border.width: sd.active ? 2 : 0
+                                    Behavior on border.color { ColorAnimation { duration: 220 } }
+                                }
                             }
+                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                onClicked: win.applyStaticWall(index) }
                         }
-                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                            onClicked: win.applyStaticWall(index) }
                     }
                 }
 
@@ -330,11 +348,8 @@ PanelWindow {
                     orientation: ListView.Horizontal; spacing: 8; clip: true
                     model: win.engineWalls
                     currentIndex: win.engineIdx
-                    highlightRangeMode: ListView.StrictlyEnforceRange
-                    preferredHighlightBegin: width/2 - cardW/2
-                    preferredHighlightEnd:   width/2 + cardW/2
                     property real cardW: Math.round(height * 16/9)
-                    Behavior on contentX { SmoothedAnimation { duration: 300 } }
+                    
                     delegate: Item {
                         id: ed
                         width: engineList.cardW; height: engineList.height
@@ -343,8 +358,8 @@ PanelWindow {
                         property bool shouldLoad: Math.abs(index-win.engineIdx)<=3
                         opacity: active ? 1.0 : near ? 0.55 : 0.25
                         scale:   active ? 1.0 : near ? 0.88 : 0.78
-                        Behavior on opacity { NumberAnimation { duration: 220 } }
-                        Behavior on scale   { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+                        Behavior on opacity { NumberAnimation { duration: 280; easing.type: Easing.InOutCubic } }
+                        Behavior on scale   { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
                         Rectangle {
                             anchors.fill: parent; radius: 14; color: "#0a0a0a"; clip: true
                             Image {
@@ -384,12 +399,9 @@ PanelWindow {
                     Behavior on height { NumberAnimation { duration: 300; easing.type: Easing.InOutCubic } }
                     orientation: ListView.Horizontal; spacing: 8; clip: true
                     model: win.liveWalls
-                    currentIndex: win.liveIdx
-                    highlightRangeMode: ListView.StrictlyEnforceRange
-                    preferredHighlightBegin: width/2 - cardW/2
-                    preferredHighlightEnd:   width/2 + cardW/2
+                    currentIndex: AppState.liveWallIdx
                     property real cardW: Math.round(height * 16/9)
-                    Behavior on contentX { SmoothedAnimation { duration: 300 } }
+                    
                     delegate: Item {
                         id: ld
                         width: liveList.cardW; height: liveList.height
@@ -400,18 +412,20 @@ PanelWindow {
                             if (!shouldLoad) return ""
                             var f=modelData
                             var base=f.replace(/.*\//,"").replace(/\.[^.]+$/,"")
-                            return "file:///tmp/qs_mpv_thumb_"+base+".jpg"
+                            return "file:///home/oshiro/.cache/qs_mpv_thumb_"+base+".jpg"
                         }
                         opacity: active ? 1.0 : near ? 0.55 : 0.25
                         scale:   active ? 1.0 : near ? 0.88 : 0.78
-                        Behavior on opacity { NumberAnimation { duration: 220 } }
-                        Behavior on scale   { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+                        Behavior on opacity { NumberAnimation { duration: 280; easing.type: Easing.InOutCubic } }
+                        Behavior on scale   { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
                         Rectangle {
                             anchors.fill: parent; radius: 14; color: "#0a0a0a"; clip: true
                             Image {
+                                id: liveImg
                                 anchors.fill: parent; source: ld.previewSrc
                                 fillMode: Image.PreserveAspectCrop; smooth: true; asynchronous: true
                                 cache: false
+                                Timer { interval: 1500; running: liveImg.status===Image.Error; repeat: false; onTriggered: { var s=liveImg.source; liveImg.source=""; liveImg.source=s } }
                                 opacity: status===Image.Ready ? 1 : 0
                                 Behavior on opacity { NumberAnimation { duration: 180 } }
                             }
