@@ -62,16 +62,29 @@ PanelWindow {
     property int staticIdx: AppState.staticWallIdx
     onStaticIdxChanged: AppState.staticWallIdx = win.staticIdx
     property int engineIdx: 0
+    Connections {
+        target: AppState
+        function onWallpaperOpenChanged() {
+            if (AppState.wallpaperOpen) {
+                Qt.callLater(function() {
+                    // Seta contentX direto sem animação — evita o voo visual
+                    var sw = staticList.cardW + 8
+                    staticList.contentX = Math.max(0, AppState.staticWallIdx * sw - staticList.width/2 + staticList.cardW/2)
+                    var lw = liveList.cardW + 8
+                    liveList.contentX = Math.max(0, AppState.liveWallIdx * lw - liveList.width/2 + liveList.cardW/2)
+                    engineList.positionViewAtIndex(win.engineIdx, ListView.Center)
+                })
+            }
+        }
+    }
     property int liveIdx:   AppState.liveWallIdx
 
-    // Centraliza ao carregar as listas
-    onStaticWallsChanged: if (staticWalls.length > 0 && staticIdx === 0) {
-        win.staticIdx = Math.floor(staticWalls.length / 2)
-        AppState.staticWallIdx = win.staticIdx
+    // Ao carregar — posiciona ListView no índice salvo
+    onStaticWallsChanged: if (staticWalls.length > 0) {
+        Qt.callLater(function() { staticList.positionViewAtIndex(AppState.staticWallIdx, ListView.Center) })
     }
-    onLiveWallsChanged: if (liveWalls.length > 0 && liveIdx === 0) {
-        win.liveIdx = Math.floor(liveWalls.length / 2)
-        AppState.liveWallIdx = win.liveIdx
+    onLiveWallsChanged: if (liveWalls.length > 0) {
+        Qt.callLater(function() { liveList.positionViewAtIndex(AppState.liveWallIdx, ListView.Center) })
     }
 
     Process {
@@ -287,57 +300,51 @@ PanelWindow {
                 property real smallH: height * 0.20
 
                 // ── Row Estética ──
-                // ── Row Estética — carrossel manual ──
-                Item {
-                    id: staticCarousel
+                ListView {
+                    id: staticList
                     width: parent.width
                     height: AppState.activeWallRow===0 ? carouselArea.bigH : carouselArea.smallH
                     anchors.top: parent.top
                     z: AppState.activeWallRow===0 ? 3 : 1
-                    clip: true
                     Behavior on height { NumberAnimation { duration: 300; easing.type: Easing.InOutCubic } }
-                    property real cardW: Math.round(height * 16/9) + 8
+                    orientation: ListView.Horizontal; spacing: 8; clip: true
+                    model: win.staticWalls
+                    currentIndex: AppState.staticWallIdx
+                    property real cardW: Math.round(height * 16/9)
 
-                    Repeater {
-                        model: win.staticWalls
-                        Item {
-                            id: sd
-                            required property string modelData
-                            required property int index
-                            property int dist: index - AppState.staticWallIdx
-                            property bool active: dist===0 && AppState.activeWallRow===0
-                            property bool near: Math.abs(dist)===1
-                            property bool shouldLoad: Math.abs(dist)<=3
-                            width: staticCarousel.cardW - 8; height: staticCarousel.height
-                            x: staticCarousel.width/2 - width/2 + dist * staticCarousel.cardW
-                            Behavior on x { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
-                            opacity: active ? 1.0 : near ? 0.55 : Math.abs(dist)===2 ? 0.25 : 0.0
-                            scale:   active ? 1.0 : near ? 0.88 : 0.78
-                            Behavior on opacity { NumberAnimation { duration: 280; easing.type: Easing.InOutCubic } }
-                            Behavior on scale   { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
-                            Rectangle {
-                                anchors.fill: parent; radius: 14; color: "#0a0a0a"; clip: true
-                                Image {
-                                    anchors.fill: parent
-                                    source: sd.shouldLoad ? "file://"+modelData : ""
-                                    fillMode: Image.PreserveAspectCrop; smooth: true; asynchronous: true
-                                    opacity: status===Image.Ready ? 1 : 0
-                                    Behavior on opacity { NumberAnimation { duration: 180 } }
-                                }
-                                Rectangle {
-                                    anchors.fill: parent; radius: parent.radius; color: "transparent"
-                                    border.color: sd.active ? Qt.rgba(1,1,1,0.90) : "transparent"
-                                    border.width: sd.active ? 2 : 0
-                                    Behavior on border.color { ColorAnimation { duration: 220 } }
-                                }
+
+                    delegate: Item {
+                        id: sd
+                        width: staticList.cardW; height: staticList.height
+                        property bool active: index===AppState.staticWallIdx && AppState.activeWallRow===0
+                        property bool near: Math.abs(index-AppState.staticWallIdx)===1
+                        property bool shouldLoad: Math.abs(index-AppState.staticWallIdx)<=3
+                        opacity: active ? 1.0 : near ? 0.55 : 0.25
+                        scale:   active ? 1.0 : near ? 0.88 : 0.78
+                        Behavior on opacity { NumberAnimation { duration: 280; easing.type: Easing.InOutCubic } }
+                        Behavior on scale   { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
+                        Rectangle {
+                            anchors.fill: parent; radius: 14; color: "#0a0a0a"; clip: true
+                            Image {
+                                anchors.fill: parent
+                                source: sd.shouldLoad ? "file://"+modelData : ""
+                                fillMode: Image.PreserveAspectCrop; smooth: true; asynchronous: true
+                                opacity: status===Image.Ready ? 1 : 0
+                                Behavior on opacity { NumberAnimation { duration: 180 } }
                             }
-                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                onClicked: win.applyStaticWall(index) }
+                            Rectangle {
+                                anchors.fill: parent; radius: parent.radius; color: "transparent"
+                                border.color: sd.active ? Qt.rgba(1,1,1,0.90) : "transparent"
+                                border.width: sd.active ? 2 : 0
+                                Behavior on border.color { ColorAnimation { duration: 220 } }
+                            }
                         }
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                            onClicked: win.applyStaticWall(index) }
                     }
                 }
 
-                // ── Row EnginePaper ──
+                                // ── Row EnginePaper ──
                 ListView {
                     id: engineList
                     width: parent.width

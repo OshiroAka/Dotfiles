@@ -274,11 +274,23 @@ PanelWindow {
                             height: Math.max(3, vizRow.height * homeScreen.vizBars[index])
                             anchors.bottom: parent ? parent.bottom : undefined
                             radius: 2
-                            color: Qt.rgba(
-                                win.gc2.r * 0.2 + 0.7,
-                                win.gc2.g * 0.2 + 0.6,
-                                win.gc2.b * 0.2 + 0.9,
-                                0.4 + homeScreen.vizBars[index] * 0.5)
+                            color: {
+                                var t = index / 39.0
+                                // Pega gc interpolado e amplifica para cor vibrante
+                                var r1 = win.gc1.r, g1 = win.gc1.g, b1 = win.gc1.b
+                                var r4 = win.gc4.r, g4 = win.gc4.g, b4 = win.gc4.b
+                                var ri = r1*(1-t) + r4*t
+                                var gi = g1*(1-t) + g4*t
+                                var bi = b1*(1-t) + b4*t
+                                // Normaliza e amplifica: divide pelo max para saturar
+                                var mx = Math.max(ri, gi, bi, 0.001)
+                                var scale = 1.0 / mx
+                                ri = Math.min(1, ri * scale * 0.9 + 0.1)
+                                gi = Math.min(1, gi * scale * 0.9 + 0.1)
+                                bi = Math.min(1, bi * scale * 0.9 + 0.1)
+                                var bh = homeScreen.vizBars[index]
+                                return Qt.rgba(ri, gi, bi, 0.45 + bh * 0.55)
+                            }
                             Behavior on height { NumberAnimation { duration: 80 } }
                         }
                     }
@@ -310,7 +322,7 @@ PanelWindow {
 
                     Text {
                         text: clkBlock.t
-                        font.pixelSize: 88; font.weight: Font.Black
+                        font.pixelSize: 110; font.weight: Font.Black; font.family: "JetBrains Mono"
                         color: "transparent"; style: Text.Outline
                         styleColor: Qt.rgba(win.tc.r,win.tc.g,win.tc.b,0.08)
                         anchors.centerIn: clkMain
@@ -319,8 +331,15 @@ PanelWindow {
                     Text {
                         id: clkMain
                         text: clkBlock.t
-                        font.pixelSize: 88; font.weight: Font.Black
-                        color: win.tc; opacity: 0.92
+                        font.pixelSize: 110; font.weight: Font.Black; font.family: "JetBrains Mono"
+                        color: {
+                            var r=(win.gc1.r+win.gc2.r+win.gc3.r+win.gc4.r)/4
+                            var g=(win.gc1.g+win.gc2.g+win.gc3.g+win.gc4.g)/4
+                            var b=(win.gc1.b+win.gc2.b+win.gc3.b+win.gc4.b)/4
+                            var mx=Math.max(r,g,b,0.001); var s=1.0/mx
+                            return Qt.rgba(Math.min(1,r*s*0.7+0.3), Math.min(1,g*s*0.7+0.3), Math.min(1,b*s*0.7+0.3), 1)
+                        }
+                        opacity: 0.95
                     }
 
                     // Marcador invisível para posição da categoria
