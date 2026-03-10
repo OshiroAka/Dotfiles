@@ -72,8 +72,15 @@ PanelWindow {
                     var r = Math.min(parseFloat(p[0]) * 0.8, 0.45)
                     var g = Math.min(parseFloat(p[1]) * 0.8, 0.45)
                     var b = Math.min(parseFloat(p[2]) * 0.8, 0.45)
-                    if (colorProc.lc === 0) win.gc1 = Qt.rgba(r, g, b, 1)
-                    else                    win.gc2 = Qt.rgba(r, g, b, 1)
+                    if (colorProc.lc === 0) {
+                        win.gc1 = Qt.rgba(r, g, b, 1)
+                        AppState.accentColor  = Qt.rgba(r, g, b, 1.0)
+                        AppState.accentPill   = Qt.rgba(r, g, b, 0.30)
+                        AppState.accentBorder = Qt.rgba(r, g, b, 0.18)
+                    } else {
+                        win.gc2 = Qt.rgba(r, g, b, 1)
+                        AppState.accentDark = Qt.rgba(r, g, b, 0.90)
+                    }
                     colorProc.lc++
                 }
             }
@@ -245,15 +252,15 @@ PanelWindow {
         Rectangle {
             anchors.fill: parent; radius: 16
             color: "transparent"
-            border.color: Qt.rgba(1,1,1,0.09); border.width: 1
+            border.color: Qt.rgba(1,1,1,0.10); border.width: 1
 
             // Gradiente adaptativo ao wallpaper
             Rectangle {
                 anchors.fill: parent; radius: parent.radius
                 gradient: Gradient {
                     orientation: Gradient.Vertical
-                    GradientStop { position: 0.0; color: Qt.rgba(win.gc1.r, win.gc1.g, win.gc1.b, 0.90) }
-                    GradientStop { position: 1.0; color: Qt.rgba(win.gc2.r, win.gc2.g, win.gc2.b, 0.90) }
+                    GradientStop { position: 0.0; color: Qt.rgba(win.gc1.r, win.gc1.g, win.gc1.b, 0.40) }
+                    GradientStop { position: 1.0; color: Qt.rgba(win.gc2.r, win.gc2.g, win.gc2.b, 0.40) }
                 }
                 Behavior on gradient { }
             }
@@ -298,7 +305,7 @@ PanelWindow {
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: 8; height: 24
                     Text {
-                        text: "\u2039"; color: Qt.rgba(1,1,1,0.5); font.pixelSize: 18
+                        text: "\u2039"; color: Qt.rgba(0, 0, 0, 0.5); font.pixelSize: 18
                         anchors.verticalCenter: parent.verticalCenter
                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
                             onClicked: { AppState.activeWallRow=(AppState.activeWallRow+2)%3; wallList.smoothScrollTo(win.currentIdx) }
@@ -348,7 +355,7 @@ PanelWindow {
                         width: wallList.width; height: wallList.thumbH
                         property bool isActive: index === win.currentIdx
                         scale:   isActive ? 1.0 : 0.94
-                        opacity: isActive ? 1.0 : 0.55
+                        opacity: isActive ? 1.0 : 0.73
                         Behavior on scale   { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
                         Behavior on opacity { NumberAnimation { duration: 200 } }
 
@@ -379,7 +386,7 @@ PanelWindow {
 
                             Rectangle {
                                 anchors.fill: parent; radius: parent.radius; color: "transparent"
-                                border.color: card.isActive ? Qt.rgba(1,1,1,0.85) : Qt.rgba(1,1,1,0.10)
+                                border.color: card.isActive ? Qt.rgba(1,1,1,1) : Qt.rgba(1,1,1,0)
                                 border.width: card.isActive ? 2 : 1
                                 Behavior on border.color { ColorAnimation { duration: 200 } }
                             }

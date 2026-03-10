@@ -97,7 +97,7 @@ PanelWindow {
         width:   260
         height:  36
         radius:  height / 2
-        color:   Qt.rgba(0.07, 0.07, 0.10, 0.6)
+        color:   Qt.rgba(0.07, 0.07, 0.10, 0.4)
         border.color: Qt.rgba(1,1,1,0.30); border.width: 1
 
         opacity:         win.pillOpacity
