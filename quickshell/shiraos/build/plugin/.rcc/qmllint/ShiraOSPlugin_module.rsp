@@ -1,0 +1,10 @@
+-I
+/home/oshiro/.config/quickshell/shiraos/build/plugin
+-I
+/home/oshiro/.config/quickshell/shiraos/build/plugin
+-I
+/usr/lib/qt6/qml
+--resource
+/home/oshiro/.config/quickshell/shiraos/build/plugin/.qt/rcc/qmake_ShiraOS.qrc
+--module
+ShiraOS

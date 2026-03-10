@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/ShiraOS">
+    <file alias="qmldir">/home/oshiro/.config/quickshell/shiraos/build/plugin/qmldir</file>
+  </qresource>
+</RCC>
+

@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/">
+    <file alias="/ShiraOS">/home/oshiro/.config/quickshell/shiraos/build/plugin</file>
+
+  </qresource>
+</RCC>
