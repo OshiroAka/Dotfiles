@@ -70,7 +70,7 @@ PanelWindow {
     property int  overviewSel: 0   // categoria selecionada no overview (0-2 das menores)
 
     function catExpandH(c) { return c === 1 ? 240 : 96 }
-    function catExpandW(c) { return c === 1 ? 440 : 360 }
+    function catExpandW(c) { return c === 1 ? 600 : 360 }
     function catName(c)    { return ["Relógio","Música","CPU","Clima"][c] }
     function catIcon(c)    { return ["🕐","♫","⚡","☁"][c] }
 
@@ -95,7 +95,7 @@ PanelWindow {
         id: openAnim
         PauseAnimation { duration: 80 }
         NumberAnimation { target: win; property: "pillOp"; to: 1.0; duration: 100; easing.type: Easing.OutCubic }
-        NumberAnimation { target: win; id: openW; property: "pillW";  to: 360; duration: 180; easing.type: Easing.OutExpo }
+        NumberAnimation { target: win; id: openW; property: "pillW";  to: 600; duration: 180; easing.type: Easing.OutExpo }
         NumberAnimation { id: openH; target: win; property: "pillH"; duration: 300; easing.type: Easing.OutBack; easing.overshoot: 1.3 }
         ScriptAction { script: keyItem.forceActiveFocus() }
     }
@@ -555,7 +555,6 @@ PanelWindow {
             anchors.fill: parent
             clip: true
 
-            // Sem player
             Column {
                 visible: !mpris.hasPlayer
                 anchors.centerIn: parent; spacing: 6
@@ -563,146 +562,170 @@ PanelWindow {
                 Text { anchors.horizontalCenter:parent.horizontalCenter; text:"Nenhuma mídia"; color:Qt.rgba(1,1,1,0.3); font.pixelSize:11 }
             }
 
-            // Com player
             Item {
                 visible: mpris.hasPlayer
                 anchors.fill: parent
 
-                // ── Disco (esquerda, centralizado verticalmente) ──────────
+                Text {
+                    anchors.top: parent.top; anchors.right: parent.right
+                    anchors.topMargin: 6; anchors.rightMargin: 10
+                    text: "✦ Vinyl ✦"
+                    color: Qt.rgba(win.accentCol().r, win.accentCol().g, win.accentCol().b, 0.75)
+                    font.pixelSize: 11; font.italic: true; font.letterSpacing: 1.5
+                }
+
                 Item {
-                    id: discItem
+                    id: vinylDisc
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.left: parent.left
-                    anchors.leftMargin: 8
-                    width: Math.min(parent.height - 8, parent.width * 0.52)
+                    anchors.left: parent.left; anchors.leftMargin: 8
+                    width: Math.min(parent.height - 8, parent.width * 0.38)
                     height: width
 
-                    // Rotação do disco inteiro
                     NumberAnimation on rotation {
-                        from: 0; to: 360
-                        duration: 5000
-                        loops: Animation.Infinite
-                        running: mpris.playing
+                        from: 0; to: 360; duration: 5000
+                        loops: Animation.Infinite; running: mpris.playing
                         easing.type: Easing.Linear
                     }
 
-                    // Fundo do disco (preto vinil)
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: width / 2
-                        color: "#111111"
-                    }
+                    Rectangle { anchors.fill:parent; radius:width/2; color:"#111111" }
 
-                    // Ranhuras do vinil — anéis concêntricos
                     Repeater {
                         model: 8
                         Rectangle {
                             anchors.centerIn: parent
-                            property real s: (0.92 - index * 0.06)
-                            width: discItem.width * s; height: width
-                            radius: width / 2
+                            property real s: 0.92 - index * 0.06
+                            width: vinylDisc.width * s; height: width; radius: width/2
                             color: "transparent"
-                            border.color: Qt.rgba(1, 1, 1, 0.04 + index * 0.01)
-                            border.width: 1
+                            border.color: Qt.rgba(1,1,1, 0.04 + index*0.01); border.width: 1
                         }
                     }
 
-                    // Album art circular (centro)
                     Rectangle {
                         anchors.centerIn: parent
-                        width: parent.width * 0.50; height: width
-                        radius: width / 2
-                        clip: true
-                        color: Qt.rgba(0.1, 0.1, 0.1, 1)
-
+                        width: parent.width*0.50; height: width; radius: width/2; clip: true
+                        color: Qt.rgba(0.1,0.1,0.1,1)
                         Image {
-                            anchors.fill: parent
-                            source: mpris.albumArt || ""
+                            anchors.fill: parent; source: mpris.albumArt||""
                             fillMode: Image.PreserveAspectCrop
-                            visible: mpris.albumArt !== ""
-                            smooth: true
+                            visible: mpris.albumArt !== ""; smooth: true
                         }
                         Text {
-                            anchors.centerIn: parent
-                            visible: mpris.albumArt === ""
-                            text: "♫"; color: win.accentCol(); font.pixelSize: 22
+                            anchors.centerIn: parent; visible: mpris.albumArt===""
+                            text:"♫"; color:win.accentCol(); font.pixelSize:22
                         }
                     }
 
-                    // Furo central
                     Rectangle {
-                        anchors.centerIn: parent
-                        width: 10; height: 10; radius: 5
-                        color: "#222222"
-                        border.color: win.accentCol(); border.width: 1
+                        anchors.centerIn: parent; width:10; height:10; radius:5
+                        color:"#222222"; border.color:win.accentCol(); border.width:1
                     }
 
-                    // Visualizer circular — pontos em volta do disco
                     Repeater {
-                        model: 12
+                        model: 24
                         Item {
                             anchors.centerIn: parent
-                            width: discItem.width; height: discItem.height
-                            rotation: index * 30
-                            property real barH: Math.max(2, (win.cavaValues[index] || 0) * discItem.width * 0.14)
-                            Behavior on barH { NumberAnimation { duration: 80; easing.type: Easing.OutCubic } }
+                            width: vinylDisc.width; height: vinylDisc.height
+                            rotation: index * 15
+                            property real barH: Math.max(2, (win.cavaValues[index]||0) * vinylDisc.width * 0.14)
+                            Behavior on barH { NumberAnimation { duration:80; easing.type:Easing.OutCubic } }
                             Rectangle {
-                                x: parent.width / 2 - width / 2
-                                y: 1
-                                width: 3; height: parent.barH
-                                radius: 2
+                                x: parent.width/2 - width/2; y: 1
+                                width: 3; height: parent.barH; radius: 2
                                 color: Qt.rgba(
-                                    win.accentCol().r * 0.5 + 0.5,
-                                    win.accentCol().g * 0.5 + 0.5,
-                                    win.accentCol().b * 0.5 + 0.5,
-                                    0.5 + (parent.barH / (discItem.width * 0.14)) * 0.5
+                                    win.accentCol().r*0.5+0.5,
+                                    win.accentCol().g*0.5+0.5,
+                                    win.accentCol().b*0.5+0.5,
+                                    0.5 + (parent.barH/(vinylDisc.width*0.14))*0.5
                                 )
                             }
                         }
                     }
                 }
 
-                // ── Info (direita) ────────────────────────────────────────
                 Column {
-                    anchors.left: discItem.right
-                    anchors.leftMargin: 12
-                    anchors.right: parent.right
-                    anchors.rightMargin: 8
+                    anchors.left: vinylDisc.right; anchors.leftMargin: 12
+                    anchors.right: parent.right; anchors.rightMargin: 8
                     anchors.verticalCenter: parent.verticalCenter
-                    spacing: 8
+                    spacing: 7
 
                     Text {
-                        width: parent.width
-                        text: mpris.title || "Sem título"
-                        color: win.textCol(false)
-                        font.pixelSize: 13; font.bold: true
+                        width: parent.width; text: mpris.title||"Sem título"
+                        color: win.textCol(false); font.pixelSize:13; font.bold:true
                         elide: Text.ElideRight
                     }
                     Text {
-                        width: parent.width
-                        text: mpris.artist || ""
-                        color: win.accentCol()
-                        font.pixelSize: 10
-                        elide: Text.ElideRight
+                        width: parent.width; text: mpris.artist||""
+                        color: win.accentCol(); font.pixelSize:10; elide: Text.ElideRight
                     }
 
-                    // Barra de progresso
-                    Item { width: parent.width; height: 3
-                        Rectangle { anchors.fill:parent; radius:2; color:win.borderColor() }
+                    Item {
+                        width: parent.width; height: 8
                         Rectangle {
-                            width: parent.width * mpris.progress
-                            height: parent.height; radius: 2
-                            color: win.accentCol()
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width; height:3; radius:2
+                            color: Qt.rgba(win.accentCol().r, win.accentCol().g, win.accentCol().b, 0.20)
+                        }
+                        Rectangle {
+                            id: vinylFill
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width * (mpris.progress||0)
+                            height:3; radius:2; color: win.accentCol()
                             Behavior on width { NumberAnimation { duration:1000; easing.type:Easing.Linear } }
+                        }
+                        Rectangle {
+                            anchors.verticalCenter: parent.verticalCenter
+                            x: vinylFill.width - 4
+                            width:8; height:8; radius:4
+                            color: win.textCol(false)
+                            border.color: win.accentCol(); border.width:1
                         }
                     }
 
-                    // Controles
+                    Row {
+                        width: parent.width; height: 24; spacing: 2
+                        Repeater {
+                            model: 20
+                            Item {
+                                width: (parent.width - 19*2) / 20; height: 24
+                                property real bh: 0.2
+                                SequentialAnimation on bh {
+                                    loops: Animation.Infinite; running: mpris.playing
+                                    NumberAnimation { to: 0.25+(index%5)*0.15; duration:160+(index*41)%200; easing.type:Easing.InOutSine }
+                                    NumberAnimation { to: 0.06+(index%3)*0.07; duration:130+(index*31)%170; easing.type:Easing.InOutSine }
+                                }
+                                NumberAnimation on bh {
+                                    running: !mpris.playing; to:0.12+(index%4)*0.04
+                                    duration:500; easing.type:Easing.OutCubic
+                                }
+                                Rectangle {
+                                    width: parent.width; height: parent.height * parent.bh
+                                    anchors.bottom: parent.bottom; radius: width/2
+                                    color: Qt.rgba(win.accentCol().r, win.accentCol().g, win.accentCol().b, 0.55+(index%3)*0.1)
+                                }
+                            }
+                        }
+                    }
+
                     Row {
                         spacing: 16
-                        Text { text:"⏮"; color:win.accentCol(); font.pixelSize:14; MouseArea{anchors.fill:parent;onClicked:mpris.prev()} }
-                        Text { text:mpris.playing?"⏸":"▶"; color:win.textCol(false); font.pixelSize:18; MouseArea{anchors.fill:parent;onClicked:mpris.playPause()} }
-                        Text { text:"⏭"; color:win.accentCol(); font.pixelSize:14; MouseArea{anchors.fill:parent;onClicked:mpris.next()} }
+                        Text {
+                            text:"⏮"; color:win.accentCol(); font.pixelSize:14
+                            scale: vPrev.pressed?0.75:vPrev.containsMouse?1.2:1.0
+                            Behavior on scale{NumberAnimation{duration:90}}
+                            MouseArea{id:vPrev;anchors.fill:parent;hoverEnabled:true;onClicked:mpris.prev()}
+                        }
+                        Text {
+                            text:mpris.playing?"⏸":"▶"; color:win.textCol(false); font.pixelSize:18
+                            scale: vPP.pressed?0.75:vPP.containsMouse?1.2:1.0
+                            Behavior on scale{NumberAnimation{duration:90}}
+                            MouseArea{id:vPP;anchors.fill:parent;hoverEnabled:true;onClicked:mpris.playPause()}
+                        }
+                        Text {
+                            text:"⏭"; color:win.accentCol(); font.pixelSize:14
+                            scale: vNext.pressed?0.75:vNext.containsMouse?1.2:1.0
+                            Behavior on scale{NumberAnimation{duration:90}}
+                            MouseArea{id:vNext;anchors.fill:parent;hoverEnabled:true;onClicked:mpris.next()}
+                        }
                     }
                 }
             }
