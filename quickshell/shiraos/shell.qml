@@ -6,6 +6,7 @@ import QtQuick
 import ShiraOS
 import "./modules/wallpaper"
 import "./modules/island"
+import "./modules/border"
 
 ShellRoot {
     IpcHandler {
@@ -38,6 +39,7 @@ ShellRoot {
         description: "Wallpaper select down"
         onPressed: AppState.wallpaperDown()
     }
+    LeftBorder {}
     WallpaperPanel {}
     DynamicIsland {}
     IslandExpanded {}
