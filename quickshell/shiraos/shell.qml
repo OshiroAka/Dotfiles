@@ -11,8 +11,7 @@ ShellRoot {
     IpcHandler {
         target: "shiraos"
         function toggleWallpaper() { AppState.toggleWallpaper() }
-        function toggleIsland()    { AppState.toggleIsland()    }
-    }
+        function toggleIsland()    { AppState.toggleIsland()    }    }
 
     GlobalShortcut {
         name: "toggleWallpaper"
@@ -39,7 +38,6 @@ ShellRoot {
         description: "Wallpaper select down"
         onPressed: AppState.wallpaperDown()
     }
-
     WallpaperPanel {}
     DynamicIsland {}
     IslandExpanded {}
