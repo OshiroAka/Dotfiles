@@ -95,8 +95,18 @@ PanelWindow {
     property bool lyricsSynced: false
     property var  lyricsLines: []   // [{ms: int, text: string}]
     property var  _lyricsBuffer: []
+    Timer {
+        id: typeTimer
+        interval: 130; repeat: true; running: false
+        onTriggered: {
+            var full = win.lyricsLines.length > 0 ? (win.lyricsLines[win.lyricsCurrent].text || "").split(" ") : []
+            if (win.lyricsTypePos < full.length) win.lyricsTypePos++
+            else typeTimer.stop()
+        }
+    }
+    property int  lyricsCurrent: 0
     property int  lyricsCurrentWord: 0
-    property int  lyricsCurrent: 0  // índice da linha atual
+    property int  lyricsTypePos: 0  // índice da linha atual
     property int  lyricsWordIdx: 0   // palavra atual dentro da linha
     property var  lyricsWords: []    // palavras da linha atual
     property int  calDay:   (new Date()).getDate()
@@ -578,7 +588,6 @@ PanelWindow {
         }
     }
 
-    property var _lyricsBuffer: []
 
     Process {
         id: lyricsProc
@@ -622,7 +631,6 @@ PanelWindow {
         stdout: SplitParser {
             onRead: function(line) {
                 var posMs = (parseInt(line) || 0) + 200
-                lyricsPosProc.running = false
                 if (win.lyricsSynced && win.lyricsLines.length > 0) {
                     var lines = win.lyricsLines
                     // Calcula palavra atual dentro da linha
@@ -643,6 +651,7 @@ PanelWindow {
                     // Atualiza linha
                     if (idx !== win.lyricsCurrent) {
                         win.lyricsCurrent = idx
+                        win.lyricsTypePos = 0; typeTimer.restart()
                         win.lyricsWords = lines[idx].text.split(" ")
                         win.lyricsWordIdx = 0
                     }
@@ -663,10 +672,31 @@ PanelWindow {
 
     Timer {
         id: lyricsSyncTimer
-        interval: 100; repeat: true; running: win.lyricsMode && win.lyricsSynced && !win.lyricsLoading
+        interval: 80; repeat: true; running: win.lyricsMode && win.lyricsSynced && !win.lyricsLoading
         onTriggered: {
-            if (!lyricsPosProc.running) {
-                lyricsPosProc.running = true
+            var posMs = Math.round(mpris.position * 1000)
+            if (win.lyricsSynced && win.lyricsLines.length > 0) {
+                var lines = win.lyricsLines
+                // Calcula palavra atual
+                if (win.lyricsCurrent < lines.length) {
+                    var lineStart = lines[win.lyricsCurrent].ms
+                    var lineEnd   = win.lyricsCurrent+1 < lines.length ? lines[win.lyricsCurrent+1].ms : lineStart+4000
+                    var words     = (lines[win.lyricsCurrent].text||'').split(' ')
+                    var lineDur   = Math.max(1, lineEnd - lineStart)
+                    var linePos   = posMs - lineStart
+                    var wi        = Math.floor((linePos / lineDur) * words.length)
+                    win.lyricsCurrentWord = Math.max(0, Math.min(wi, words.length-1))
+                }
+                // Acha linha atual
+                var idx = 0
+                for (var i = 0; i < lines.length; i++) {
+                    if (lines[i].ms <= posMs) idx = i
+                    else break
+                }
+                if (idx !== win.lyricsCurrent) {
+                    win.lyricsCurrent = idx
+                    win.lyricsTypePos = 0; typeTimer.restart()
+                }
             }
         }
     }
@@ -966,6 +996,7 @@ PanelWindow {
                 id: lyricsOverlay
                 visible: win.lyricsMode
                 anchors.fill: parent
+                clip: true
                 z: 10
 
                                         Item {
@@ -981,22 +1012,23 @@ PanelWindow {
                                         interactive: false
                                         spacing: 18
                 
-                                        preferredHighlightBegin: height / 2 - 45
-                                        preferredHighlightEnd:   height / 2 + 45
+                                        preferredHighlightBegin: height / 2 - 50
+                                        preferredHighlightEnd:   height / 2 + 50
                                         highlightRangeMode: ListView.StrictlyEnforceRange
                                         currentIndex: win.lyricsCurrent
-                                        highlightMoveDuration: 700
+                                        highlightMoveDuration: 1800
                                         highlightMoveVelocity: -1
                 
                         delegate: Item {
                             id: lyricDelegate
                             width: lyricsView.width
-                            height: isCurrent ? 100 : 48
                             property bool isCurrent: index === win.lyricsCurrent
                             property real dist: Math.abs(index - win.lyricsCurrent)
-                            opacity: dist === 0 ? 1.0 : dist === 1 ? 0.25 : 0.07
-                            Behavior on height  { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
-                            Behavior on opacity { NumberAnimation { duration: 500; easing.type: Easing.InOutQuad } }
+                            property bool isBelow: index > win.lyricsCurrent
+                            opacity: isBelow ? 0.0 : dist === 0 ? 1.0 : dist === 1 ? 0.38 : dist === 2 ? 0.12 : 0.0
+                            height: isCurrent ? 100 : 48
+                            Behavior on height  { NumberAnimation { duration: 800; easing.type: Easing.OutCubic } }
+                            Behavior on opacity { NumberAnimation { duration: 600; easing.type: Easing.InOutQuad } }
 
                             // Linha não-atual
                             Text {
@@ -1025,12 +1057,17 @@ PanelWindow {
                                     wrapMode: Text.WordWrap; renderType: Text.QtRendering
                                     text: modelData.text || ""
                                     font.pixelSize: 34; font.bold: true
-                                    color: win.accentCol(); opacity: 1.0
+                                    color: win.accentCol()
                                     layer.enabled: true
                                     layer.effect: MultiEffect {
                                         autoPaddingEnabled: true
                                         blurEnabled: true
                                         blur: 1.0; blurMax: 128; blurMultiplier: 1.8
+                                    }
+                                    SequentialAnimation on opacity {
+                                        loops: Animation.Infinite; running: isCurrent
+                                        NumberAnimation { to: 0.6; duration: 900; easing.type: Easing.InOutSine }
+                                        NumberAnimation { to: 1.0; duration: 900; easing.type: Easing.InOutSine }
                                     }
                                 }
 
