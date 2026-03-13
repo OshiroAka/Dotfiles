@@ -94,7 +94,6 @@ PanelWindow {
     property bool lyricsLoading: false
     property bool lyricsSynced: false
     property var  lyricsLines: []   // [{ms: int, text: string}]
-    property var  _lyricsBuffer: []
     property int  lyricsCurrent: 0  // índice da linha atual
     property int  lyricsWordIdx: 0   // palavra atual dentro da linha
     property var  lyricsWords: []    // palavras da linha atual
@@ -786,6 +785,127 @@ PanelWindow {
                         SlotD { value: win.tM1; maxVal: 5; bigPx: 28; smPx: 10 }
                         SlotD { value: win.tM2; maxVal: 9; bigPx: 28; smPx: 10 }
                         ColonD { height: 80 }
+                        Item {
+                    visible: !win.lyricsLoading && win.lyricsLines.length > 0
+                    anchors.fill: parent
+                    clip: true
+
+                    ListView {
+                        id: lyricsView
+                        anchors.fill: parent
+                        model: win.lyricsLines
+                        clip: true
+                        interactive: false
+                        spacing: 18
+
+                        preferredHighlightBegin: height / 2 - 45
+                        preferredHighlightEnd:   height / 2 + 45
+                        highlightRangeMode: ListView.StrictlyEnforceRange
+                        currentIndex: win.lyricsCurrent
+                        highlightMoveDuration: 380
+                        highlightMoveVelocity: -1
+
+                        delegate: Item {
+                            id: lyricDelegate
+                            width: lyricsView.width
+                            height: isCurrent ? 90 : 52
+
+                            property bool isCurrent: index === win.lyricsCurrent
+                            property real dist: Math.abs(index - win.lyricsCurrent)
+
+                            Behavior on height { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+
+                            // Linha nao-atual
+                            Text {
+                                visible: !isCurrent
+                                anchors.centerIn: parent
+                                width: parent.width - 48
+                                horizontalAlignment: Text.AlignHCenter
+                                wrapMode: Text.WordWrap
+                                renderType: Text.QtRendering
+                                text: modelData.text || ""
+                                font.pixelSize: dist === 1 ? 15 : 12
+                                color: dist === 1 ? Qt.rgba(1,1,1,0.30) : Qt.rgba(1,1,1,0.12)
+                            }
+
+                            // Linha atual: glow pesado + texto destacado
+                            Item {
+                                visible: isCurrent
+                                anchors.centerIn: parent
+                                width: parent.width - 40
+                                height: parent.height
+
+                                // Glow layer 1 - super espalhado
+                                Text {
+                                    anchors.centerIn: parent
+                                    width: parent.width
+                                    horizontalAlignment: Text.AlignHCenter
+                                    wrapMode: Text.WordWrap
+                                    renderType: Text.QtRendering
+                                    text: modelData.text || ""
+                                    font.pixelSize: 24
+                                    font.bold: true
+                                    color: "white"
+                                    opacity: 0.9
+                                    layer.enabled: true
+                                    layer.effect: MultiEffect {
+                                        blurEnabled: true; blur: 1.0; blurMax: 80; blurMultiplier: 7.0
+                                    }
+                                }
+
+                                // Glow layer 2 - medio
+                                Text {
+                                    anchors.centerIn: parent
+                                    width: parent.width
+                                    horizontalAlignment: Text.AlignHCenter
+                                    wrapMode: Text.WordWrap
+                                    renderType: Text.QtRendering
+                                    text: modelData.text || ""
+                                    font.pixelSize: 24
+                                    font.bold: true
+                                    color: "white"
+                                    opacity: 0.7
+                                    layer.enabled: true
+                                    layer.effect: MultiEffect {
+                                        blurEnabled: true; blur: 0.7; blurMax: 36; blurMultiplier: 3.5
+                                    }
+                                }
+
+                                // Texto principal nitido
+                                Text {
+                                    anchors.centerIn: parent
+                                    width: parent.width
+                                    horizontalAlignment: Text.AlignHCenter
+                                    wrapMode: Text.WordWrap
+                                    renderType: Text.QtRendering
+                                    text: modelData.text || ""
+                                    font.pixelSize: 24
+                                    font.bold: true
+                                    color: "white"
+                                    scale: 1.0
+                                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack; easing.overshoot: 1.3 } }
+                                }
+                            }
+                        }
+                    }
+
+                    // Fade topo
+                    Rectangle {
+                        anchors.top: parent.top; width: parent.width; height: 52; z: 2
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: win.pillColor() }
+                            GradientStop { position: 1.0; color: "transparent" }
+                        }
+                    }
+                    // Fade base
+                    Rectangle {
+                        anchors.bottom: parent.bottom; width: parent.width; height: 52; z: 2
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: "transparent" }
+                            GradientStop { position: 1.0; color: win.pillColor() }
+                        }
+                    }
+                }
                         SlotD { value: win.tS1; maxVal: 5; bigPx: 28; smPx: 10 }
                         SlotD { value: win.tS2; maxVal: 9; bigPx: 28; smPx: 10 }
                     }
@@ -957,129 +1077,6 @@ PanelWindow {
                 anchors.fill: parent
                 z: 10
 
-                                        Item {
-                                    visible: !win.lyricsLoading && win.lyricsLines.length > 0
-                                    anchors.fill: parent
-                                    clip: true
-                
-                                    ListView {
-                                        id: lyricsView
-                                        anchors.fill: parent
-                                        model: win.lyricsLines
-                                        clip: true
-                                        interactive: false
-                                        spacing: 18
-                
-                                        preferredHighlightBegin: height / 2 - 45
-                                        preferredHighlightEnd:   height / 2 + 45
-                                        highlightRangeMode: ListView.StrictlyEnforceRange
-                                        currentIndex: win.lyricsCurrent
-                                        highlightMoveDuration: 380
-                                        highlightMoveVelocity: -1
-                
-                                        delegate: Item {
-                                            id: lyricDelegate
-                                            width: lyricsView.width
-                                            height: isCurrent ? 90 : 52
-                
-                                            property bool isCurrent: index === win.lyricsCurrent
-                                            property real dist: Math.abs(index - win.lyricsCurrent)
-                
-                                            Behavior on height { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-                
-                                            // Linha nao-atual
-                                            Text {
-                                                visible: !isCurrent
-                                                anchors.centerIn: parent
-                                                width: parent.width - 48
-                                                horizontalAlignment: Text.AlignHCenter
-                                                wrapMode: Text.WordWrap
-                                                renderType: Text.QtRendering
-                                                text: modelData.text || ""
-                                                font.pixelSize: dist === 1 ? 15 : 12
-                                                color: dist === 1 ? Qt.rgba(1,1,1,0.30) : Qt.rgba(1,1,1,0.12)
-                                            }
-                
-                                            // Linha atual: glow pesado + texto destacado
-                                            Item {
-                                                visible: isCurrent
-                                                anchors.centerIn: parent
-                                                width: parent.width - 40
-                                                height: parent.height
-                
-                                                // Glow layer 1 - super espalhado
-                                                Text {
-                                                    anchors.centerIn: parent
-                                                    width: parent.width
-                                                    horizontalAlignment: Text.AlignHCenter
-                                                    wrapMode: Text.WordWrap
-                                                    renderType: Text.QtRendering
-                                                    text: modelData.text || ""
-                                                    font.pixelSize: 24
-                                                    font.bold: true
-                                                    color: "white"
-                                                    opacity: 0.9
-                                                    layer.enabled: true
-                                                    layer.effect: MultiEffect {
-                                                        blurEnabled: true; blur: 1.0; blurMax: 80; blurMultiplier: 7.0
-                                                    }
-                                                }
-                
-                                                // Glow layer 2 - medio
-                                                Text {
-                                                    anchors.centerIn: parent
-                                                    width: parent.width
-                                                    horizontalAlignment: Text.AlignHCenter
-                                                    wrapMode: Text.WordWrap
-                                                    renderType: Text.QtRendering
-                                                    text: modelData.text || ""
-                                                    font.pixelSize: 24
-                                                    font.bold: true
-                                                    color: "white"
-                                                    opacity: 0.7
-                                                    layer.enabled: true
-                                                    layer.effect: MultiEffect {
-                                                        blurEnabled: true; blur: 0.7; blurMax: 36; blurMultiplier: 3.5
-                                                    }
-                                                }
-                
-                                                // Texto principal nitido
-                                                Text {
-                                                    anchors.centerIn: parent
-                                                    width: parent.width
-                                                    horizontalAlignment: Text.AlignHCenter
-                                                    wrapMode: Text.WordWrap
-                                                    renderType: Text.QtRendering
-                                                    text: modelData.text || ""
-                                                    font.pixelSize: 24
-                                                    font.bold: true
-                                                    color: "white"
-                                                    scale: 1.0
-                                                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack; easing.overshoot: 1.3 } }
-                                                }
-                                            }
-                                        }
-                                    }
-                
-                                    // Fade topo
-                                    Rectangle {
-                                        anchors.top: parent.top; width: parent.width; height: 52; z: 2
-                                        gradient: Gradient {
-                                            GradientStop { position: 0.0; color: win.pillColor() }
-                                            GradientStop { position: 1.0; color: "transparent" }
-                                        }
-                                    }
-                                    // Fade base
-                                    Rectangle {
-                                        anchors.bottom: parent.bottom; width: parent.width; height: 52; z: 2
-                                        gradient: Gradient {
-                                            GradientStop { position: 0.0; color: "transparent" }
-                                            GradientStop { position: 1.0; color: win.pillColor() }
-                                        }
-                                    }
-                                }
-
-
                 // Loading
                 Text {
                     visible: win.lyricsLoading
@@ -1088,6 +1085,8 @@ PanelWindow {
                     color: Qt.rgba(1,1,1,0.40); font.pixelSize: 13
                     renderType: Text.QtRendering
                 }
+
+                // Karaoke: uma palavra por vez
             }
             clip: true
 
