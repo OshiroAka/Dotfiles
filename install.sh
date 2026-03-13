@@ -154,8 +154,7 @@ if [ -d "$DOTFILES_DIR/quickshell/shiraos" ]; then
         if [[ $REPLY =~ ^[Ss]$ ]]; then
             rm -rf "$CONFIG_DIR"
         else
-            info "Pulando — mantendo config existente"
-        fi
+            info "Pulando — mantendo config existente"        fi
     fi
 
     if [ ! -d "$CONFIG_DIR" ]; then
@@ -197,15 +196,12 @@ case "$1" in
         sleep 0.3
         qs -c shiraos -d &
         echo "ShiraOS iniciado."
-        ;;
-esac
-SCRIPT
-chmod +x "$BIN_DIR/shiraos"
-ok "shiraos"
 
+        ;;
+esac SCRIPT chmod +x "$BIN_DIR/shiraos" ok "shiraos"
 # shiraos-weather — clima via wttr.in
-cat > "$BIN_DIR/shiraos-weather" << 'SCRIPT'
-#!/usr/bin/env python3
+
+=#!/usr/bin/env python3
 import subprocess, json, sys, os
 
 # Localização automática — altere se necessário
@@ -570,6 +566,7 @@ else
     sed -i '/exec-once.*swww-daemon/d' "$HYPR_CONF"
     printf '%s\n' "$HYPR_BLOCK" >> "$HYPR_CONF"
     ok "Configurações do ShiraOS injetadas no hyprland.conf"
+figurações do ShiraOS injetadas no hyprland.conf"
 figurações do ShiraOS injetadas no hyprland.conf"
 figurações do ShiraOS injetadas no hyprland.conf"
 figurações do ShiraOS injetadas no hyprland.conf"
