@@ -429,18 +429,50 @@ chmod +x "$BIN_DIR/shiraos-lyrics"
 ok "shiraos-lyrics"
 
 # ──────────────────────────────────────────────────────
-# 7. Compilar plugin C++ (se build.sh existir)
+# 7. Compilar plugin C++ e instalar corretamente
 # ──────────────────────────────────────────────────────
 step "Compilando plugin C++ (MultiEffect blur)"
+
+QML_SHIRAOS_DIR="/usr/lib/qt6/qml/ShiraOS"
 
 if [ -f "$CONFIG_DIR/build.sh" ]; then
     info "Executando build.sh..."
     cd "$CONFIG_DIR"
-    bash build.sh && ok "Plugin compilado com sucesso" || warn "Build falhou — visual funciona sem o plugin, mas sem blur nativo"
+    if bash build.sh; then
+        ok "Plugin compilado"
+    else
+        warn "Build falhou — ShiraOS funciona mas sem blur nativo"
+        cd "$HOME"
+    fi
     cd "$HOME"
+
+    # Copiar as .so para o diretório correto (o cmake install não faz isso)
+    PLUGIN_BUILD="$CONFIG_DIR/build/plugin"
+    if [ -f "$PLUGIN_BUILD/libShiraOSPlugin.so" ]; then
+        sudo mkdir -p "$QML_SHIRAOS_DIR"
+        sudo cp "$PLUGIN_BUILD/libShiraOSPlugin.so"       "$QML_SHIRAOS_DIR/"
+        sudo cp "$PLUGIN_BUILD/libShiraOSPluginplugin.so" "$QML_SHIRAOS_DIR/"
+        ok ".so copiadas para $QML_SHIRAOS_DIR"
+    else
+        warn "libShiraOSPlugin.so não encontrada em $PLUGIN_BUILD"
+    fi
+
+    # Criar qmldir se não existir ou estiver incompleto
+    if [ ! -f "$QML_SHIRAOS_DIR/qmldir" ] || ! grep -q "plugin ShiraOSPlugin" "$QML_SHIRAOS_DIR/qmldir" 2>/dev/null; then
+        printf 'module ShiraOS\nplugin ShiraOSPlugin\n' | sudo tee "$QML_SHIRAOS_DIR/qmldir" > /dev/null
+        ok "qmldir criado em $QML_SHIRAOS_DIR"
+    else
+        ok "qmldir já correto"
+    fi
+
+    # Verificar resultado final
+    if [ -f "$QML_SHIRAOS_DIR/libShiraOSPlugin.so" ] && [ -f "$QML_SHIRAOS_DIR/qmldir" ]; then
+        ok "Módulo ShiraOS instalado e pronto"
+    else
+        warn "Instalação incompleta — verifique $QML_SHIRAOS_DIR"
+    fi
 else
     warn "build.sh não encontrado — plugin C++ não compilado"
-    info "Isso é normal se você ainda não tem o plugin configurado"
 fi
 
 # ──────────────────────────────────────────────────────
@@ -455,29 +487,60 @@ mkdir -p ~/.cache/shiraos
 ok "Diretórios criados"
 
 # ──────────────────────────────────────────────────────
-# 9. Verificar configuração do Hyprland
+# 9. Configurar Hyprland automaticamente
 # ──────────────────────────────────────────────────────
-step "Verificando Hyprland"
+step "Configurando Hyprland"
 
 HYPR_CONF="$HOME/.config/hypr/hyprland.conf"
 
-if [ -f "$HYPR_CONF" ]; then
-    if ! grep -q "shiraos-island\|quickshell.*blur\|shiraos" "$HYPR_CONF" 2>/dev/null; then
-        warn "Configurações do ShiraOS não encontradas no hyprland.conf"
-        info "Adicione manualmente ao final do seu hyprland.conf:"
-        echo ""
-        echo -e "  ${YELLOW}# ─── ShiraOS ───────────────────────────────────────${NC}"
-        echo -e "  ${YELLOW}layerrule = blur, quickshell:shiraos-island${NC}"
-        echo -e "  ${YELLOW}layerrule = ignorealpha 0.05, quickshell:shiraos-island${NC}"
-        echo -e "  ${YELLOW}layerrule = blur, quickshell:shiraos-expanded${NC}"
-        echo -e "  ${YELLOW}layerrule = ignorealpha 0.05, quickshell:shiraos-expanded${NC}"
-        echo -e "  ${YELLOW}bind = SUPER, Super_L, global, quickshell:toggleIsland${NC}"
-        echo ""
-    else
-        ok "hyprland.conf já configurado"
-    fi
-else
+HYPR_BLOCK='
+# ╔══════════════════════════════════════════════╗
+# ║              ShiraOS — Hyprland              ║
+# ╚══════════════════════════════════════════════╝
+
+# Blur nas camadas da island e wallpaper
+layerrule = blur, quickshell:shiraos-island
+layerrule = ignorealpha 0.05, quickshell:shiraos-island
+layerrule = blur, quickshell:shiraos-expanded
+layerrule = ignorealpha 0.05, quickshell:shiraos-expanded
+layerrule = blur, quickshell:shiraos-wallpaper
+layerrule = ignorealpha 0.05, quickshell:shiraos-wallpaper
+
+# Teclas globais
+bind = SUPER, Super_L,  global, quickshell:toggleIsland
+bind = SUPER, W,        global, quickshell:toggleWallpaper
+
+# Iniciar ShiraOS e swww com o Hyprland
+exec-once = swww-daemon
+exec-once = shiraos
+'
+
+if [ ! -f "$HYPR_CONF" ]; then
     warn "hyprland.conf não encontrado em $HYPR_CONF"
+    info "Crie o arquivo e adicione o bloco abaixo:"
+    echo "$HYPR_BLOCK"
+else
+    if grep -q "ShiraOS — Hyprland" "$HYPR_CONF" 2>/dev/null; then
+        ok "Hyprland já configurado para o ShiraOS"
+    else
+        # Backup antes de mexer
+        cp "$HYPR_CONF" "$HYPR_CONF.bak_shiraos_$(date +%Y%m%d_%H%M%S)"
+        ok "Backup salvo: ${HYPR_CONF}.bak_shiraos_*"
+
+        # Remover exec-once duplicados do ShiraOS se existirem de versão anterior
+        sed -i '/exec-once.*shiraos/d' "$HYPR_CONF"
+        sed -i '/exec-once.*swww-daemon/d' "$HYPR_CONF"
+
+        # Adicionar o bloco completo no final
+        printf '%s\n' "$HYPR_BLOCK" >> "$HYPR_CONF"
+        ok "Configurações do ShiraOS adicionadas ao hyprland.conf"
+
+        info "Blocos adicionados:"
+        info "  layerrule blur (island, expanded, wallpaper)"
+        info "  bind SUPER → toggleIsland"
+        info "  bind SUPER+W → toggleWallpaper"
+        info "  exec-once swww-daemon + shiraos"
+    fi
 fi
 
 # ──────────────────────────────────────────────────────
@@ -485,24 +548,27 @@ fi
 # ──────────────────────────────────────────────────────
 step "Verificando PATH"
 
-if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
-    warn "$BIN_DIR não está no PATH"
-    # Fish
-    FISH_CONF="$HOME/.config/fish/config.fish"
-    if [ -f "$FISH_CONF" ]; then
-        if ! grep -q "local/bin" "$FISH_CONF"; then
-            echo 'fish_add_path $HOME/.local/bin' >> "$FISH_CONF"
-            ok "Adicionado ao config.fish"
-        fi
+FISH_CONF="$HOME/.config/fish/config.fish"
+
+# Fish — usar fish_add_path (persiste entre sessões)
+if [ -f "$FISH_CONF" ]; then
+    if ! grep -q "fish_add_path.*local/bin\|local/bin.*fish_add_path" "$FISH_CONF"; then
+        echo 'fish_add_path $HOME/.local/bin' >> "$FISH_CONF"
+        ok "~/.local/bin adicionado ao config.fish"
+    else
+        ok "config.fish já tem ~/.local/bin"
     fi
-    # Bash
-    if ! grep -q "local/bin" "$HOME/.bashrc" 2>/dev/null; then
-        echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
-        ok "Adicionado ao .bashrc"
-    fi
-else
-    ok "PATH já contém $BIN_DIR"
 fi
+
+# Bash/Zsh — fallback
+if ! grep -q "local/bin" "$HOME/.bashrc" 2>/dev/null; then
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
+    ok "~/.local/bin adicionado ao .bashrc"
+fi
+
+# Exportar para a sessão atual do bash (para o shiraos funcionar logo após o install)
+export PATH="$BIN_DIR:$PATH"
+ok "PATH atualizado para esta sessão"
 
 # ──────────────────────────────────────────────────────
 # 11. Resumo final
@@ -512,13 +578,18 @@ echo -e "${GREEN}${BOLD}╔═════════════════�
 echo -e "${GREEN}${BOLD}║     ShiraOS instalado com sucesso!       ║${NC}"
 echo -e "${GREEN}${BOLD}╚══════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "  Para iniciar: ${CYAN}shiraos${NC}"
-echo -e "  Para parar:   ${CYAN}shiraos stop${NC}"
-echo -e "  Para reiniciar: ${CYAN}shiraos restart${NC}"
-echo -e "  Para debug:   ${CYAN}shiraos debug${NC}"
+echo -e "  ${YELLOW}Se 'shiraos' não funcionar neste terminal, rode:${NC}"
+echo -e "  ${CYAN}source ~/.config/fish/config.fish${NC}  ${NC}(fish)${NC}"
+echo -e "  ${CYAN}source ~/.bashrc${NC}                   ${NC}(bash)${NC}"
 echo ""
-echo -e "  Config em: ${CYAN}$CONFIG_DIR${NC}"
+echo -e "  Para iniciar:    ${CYAN}shiraos${NC}"
+echo -e "  Para parar:      ${CYAN}shiraos stop${NC}"
+echo -e "  Para reiniciar:  ${CYAN}shiraos restart${NC}"
+echo -e "  Para debug:      ${CYAN}shiraos debug${NC}"
+echo ""
+echo -e "  Config em:  ${CYAN}$CONFIG_DIR${NC}"
 echo -e "  Scripts em: ${CYAN}$BIN_DIR${NC}"
+echo -e "  Plugin em:  ${CYAN}/usr/lib/qt6/qml/ShiraOS/${NC}"
 echo ""
-echo -e "  ${YELLOW}⚠ Leia o README.md para configurações adicionais!${NC}"
+echo -e "  ${YELLOW}⚠ Reinicie o Hyprland para aplicar as layerrules e binds!${NC}"
 echo ""
