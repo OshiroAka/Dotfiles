@@ -570,6 +570,7 @@ else
     sed -i '/exec-once.*swww-daemon/d' "$HYPR_CONF"
     printf '%s\n' "$HYPR_BLOCK" >> "$HYPR_CONF"
     ok "Configurações do ShiraOS injetadas no hyprland.conf"
+figurações do ShiraOS injetadas no hyprland.conf"
 figurado para o ShiraOS"
     else
         # Backup antes de mexer
