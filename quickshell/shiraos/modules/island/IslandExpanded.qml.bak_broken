@@ -445,12 +445,7 @@ PanelWindow {
                         Behavior on color { ColorAnimation  { duration:150 } }
                     }}
                 }
-                Item {
-                    anchors.top:dotsRow.bottom; anchors.topMargin:8
-                    anchors.left:parent.left; anchors.right:parent.right
-                    anchors.bottom:parent.bottom; anchors.bottomMargin:8; clip:true
-                    ExpandedContent { catIndex: win.frontCat }
-                }
+            }
 
             CompactContent {
                 visible: win.mode === 1
@@ -1552,6 +1547,4 @@ PanelWindow {
         }
 
     }
-
-}
 }

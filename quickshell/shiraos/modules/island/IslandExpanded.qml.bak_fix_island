@@ -444,12 +444,12 @@ PanelWindow {
                         Behavior on width { NumberAnimation { duration:180; easing.type:Easing.OutExpo } }
                         Behavior on color { ColorAnimation  { duration:150 } }
                     }}
-                }
-                Item {
-                    anchors.top:dotsRow.bottom; anchors.topMargin:8
-                    anchors.left:parent.left; anchors.right:parent.right
-                    anchors.bottom:parent.bottom; anchors.bottomMargin:8; clip:true
-                    ExpandedContent { catIndex: win.frontCat }
+                    Item {
+                        anchors.top:dotsRow.bottom; anchors.topMargin:8
+                        anchors.left:parent.left; anchors.right:parent.right
+                        anchors.bottom:parent.bottom; anchors.bottomMargin:8
+                        ExpandedContent { catIndex: win.frontCat }
+                    }
                 }
 
             CompactContent {
@@ -1552,6 +1552,4 @@ PanelWindow {
         }
 
     }
-
-}
 }
