@@ -494,34 +494,83 @@ step "Configurando Hyprland"
 HYPR_CONF="$HOME/.config/hypr/hyprland.conf"
 
 HYPR_BLOCK='
-# ╔══════════════════════════════════════════════╗
-# ║              ShiraOS — Hyprland              ║
-# ╚══════════════════════════════════════════════╝
+# ╔══════════════════════════════════════════════════════╗
+# ║              ShiraOS — Hyprland                      ║
+# ╚══════════════════════════════════════════════════════╝
 
-# Blur nas camadas da island e wallpaper
-layerrule = blur, quickshell:shiraos-island
-layerrule = ignorealpha 0.05, quickshell:shiraos-island
-layerrule = blur, quickshell:shiraos-expanded
-layerrule = ignorealpha 0.05, quickshell:shiraos-expanded
-layerrule = blur, quickshell:shiraos-wallpaper
-layerrule = ignorealpha 0.05, quickshell:shiraos-wallpaper
+# ── Blur nas camadas da island e wallpaper ──────────────
+layerrule = blur namespace:shiraos-island
+layerrule = ignore_alpha 0.05 namespace:shiraos-island
+layerrule = blur namespace:shiraos-expanded
+layerrule = ignore_alpha 0.05 namespace:shiraos-expanded
+layerrule = blur namespace:shiraos-wallpaper
+layerrule = ignore_alpha 0.05 namespace:shiraos-wallpaper
 
-# Teclas globais
-bind = SUPER, Super_L,  global, quickshell:toggleIsland
-bind = SUPER, W,        global, quickshell:toggleWallpaper
+# ── Transparência de janelas ────────────────────────────
+windowrule {
+    name = spotify-opacity
+    match:class = Spotify
+    opacity = 0.6
+}
+windowrule {
+    name = discord-opacity
+    match:class = discord
+    opacity = 0.8
+}
+windowrule {
+    name = code-oss-opacity
+    match:class = code-oss
+    opacity = 0.8
+}
+windowrule {
+    name = zen-opacity
+    match:class = zen
+    opacity = 0.9
+}
+windowrule {
+    name = telegram-opacity
+    match:class = org.telegram.desktop
+    opacity = 0.8
+}
+windowrule {
+    name = steam-opacity
+    match:class = steam
+    opacity = 0.8
+}
 
-# Iniciar ShiraOS e swww com o Hyprland
+# ── Teclas globais ShiraOS ──────────────────────────────
+bind = SUPER, Super_L, exec, qs -c shiraos ipc call shiraos toggleIsland
+bind = SUPER, W,       exec, qs -c shiraos ipc call shiraos toggleWallpaper
+
+# ── Tamanhos rápidos de janela ──────────────────────────
+bind = SUPER ALT, 1, resizeactive, exact 800 600
+bind = SUPER ALT, 2, resizeactive, exact 1280 720
+bind = SUPER ALT, 3, resizeactive, exact 1920 1080
+bind = SUPER ALT, C, centerwindow
+
+# ── Apps ────────────────────────────────────────────────
+bind = SUPER, F, exec, zen-browser
+
+# ── Toggle blur (3 <-> 5 passes) ───────────────────────
+bind = SUPER, G, exec, hyprctl keyword decoration:blur:passes $(hyprctl getoption decoration:blur:passes | grep int | awk '"'"'{print ($2 == 5 ? 3 : 5)}'"'"')
+
+# ── Autostart ───────────────────────────────────────────
 exec-once = swww-daemon
 exec-once = shiraos
 '
 
 if [ ! -f "$HYPR_CONF" ]; then
     warn "hyprland.conf não encontrado em $HYPR_CONF"
-    info "Crie o arquivo e adicione o bloco abaixo:"
     echo "$HYPR_BLOCK"
 else
-    if grep -q "ShiraOS — Hyprland" "$HYPR_CONF" 2>/dev/null; then
-        ok "Hyprland já configurado para o ShiraOS"
+    cp "$HYPR_CONF" "$HYPR_CONF.bak_shiraos_$(date +%Y%m%d_%H%M%S)"
+    ok "Backup salvo"
+    sed -i '/ShiraOS \xe2\x80\x94 Hyprland/,/exec-once = shiraos$/d' "$HYPR_CONF"
+    sed -i '/exec-once.*shiraos$/d' "$HYPR_CONF"
+    sed -i '/exec-once.*swww-daemon/d' "$HYPR_CONF"
+    printf '%s\n' "$HYPR_BLOCK" >> "$HYPR_CONF"
+    ok "Configurações do ShiraOS injetadas no hyprland.conf"
+figurado para o ShiraOS"
     else
         # Backup antes de mexer
         cp "$HYPR_CONF" "$HYPR_CONF.bak_shiraos_$(date +%Y%m%d_%H%M%S)"
