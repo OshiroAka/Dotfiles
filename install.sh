@@ -417,9 +417,23 @@ try:
     with urllib.request.urlopen(req, timeout=8) as resp:
         data = json.loads(resp.read())
     
-    lrc = data.get("syncedLyrics") or data.get("plainLyrics", "")
-    if lrc:
-        print(lrc)
+    synced = data.get("syncedLyrics", "")
+    plain  = data.get("plainLyrics", "")
+    if synced:
+        print("MODE:SYNCED")
+        import re
+        for line in synced.strip().split("
+"):
+            m = re.match(r"\[(\d+):(\d+\.\d+)\](.*)", line)
+            if m:
+                ms   = int(m.group(1)) * 60000 + int(float(m.group(2)) * 1000)
+                text = m.group(3).strip()
+                print(f"LINE:{ms}|{text}")
+    elif plain:
+        print("MODE:PLAIN")
+        for i, line in enumerate(plain.strip().split("
+")):
+            print(f"LINE:{i * 3000}|{line}")
     else:
         print("ERROR:No lyrics found")
 except Exception as e:
