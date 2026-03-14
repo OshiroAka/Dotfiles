@@ -499,14 +499,12 @@ HYPR_BLOCK='
 # ╚══════════════════════════════════════════════╝
 
 # Blur nas camadas da island e wallpaper
-layerrule = blur on, match:namespace shiraos-island
-layerrule = ignore_alpha 0.05, match:namespace shiraos-island
-layerrule = blur on, match:namespace shiraos-island-expanded
-layerrule = ignore_alpha 0.05, match:namespace shiraos-island-expanded
-layerrule = blur on, match:namespace shiraos-wallpaper
-layerrule = ignore_alpha 0.05, match:namespace shiraos-wallpaper
-layerrule = blur on, match:namespace shiraos-border
-layerrule = ignore_alpha 0.05, match:namespace shiraos-border
+layerrule = blur, quickshell:shiraos-island
+layerrule = ignorealpha 0.05, quickshell:shiraos-island
+layerrule = blur, quickshell:shiraos-expanded
+layerrule = ignorealpha 0.05, quickshell:shiraos-expanded
+layerrule = blur, quickshell:shiraos-wallpaper
+layerrule = ignorealpha 0.05, quickshell:shiraos-wallpaper
 
 # Teclas globais
 bind = SUPER, Super_L,  global, quickshell:toggleIsland
@@ -595,6 +593,3 @@ echo -e "  Plugin em:  ${CYAN}/usr/lib/qt6/qml/ShiraOS/${NC}"
 echo ""
 echo -e "  ${YELLOW}⚠ Reinicie o Hyprland para aplicar as layerrules e binds!${NC}"
 echo ""
-
-layerrule = blur on, match:namespace shiraos-border
-layerrule = ignore_alpha 0.05, match:namespace shiraos-border
