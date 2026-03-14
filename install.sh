@@ -593,3 +593,6 @@ echo -e "  Plugin em:  ${CYAN}/usr/lib/qt6/qml/ShiraOS/${NC}"
 echo ""
 echo -e "  ${YELLOW}⚠ Reinicie o Hyprland para aplicar as layerrules e binds!${NC}"
 echo ""
+
+layerrule = blur on, match:namespace shiraos-border
+layerrule = ignore_alpha 0.05, match:namespace shiraos-border
