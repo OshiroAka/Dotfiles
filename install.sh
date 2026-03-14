@@ -146,7 +146,7 @@ fi
 # ──────────────────────────────────────────────────────
 step "Instalando config do ShiraOS"
 
-if [ -d "$DOTFILES_DIR/quickshell/shiraos" ]; then
+   [ -d "$DOTFILES_DIR/quickshell/shiraos" ]
     if [ -d "$CONFIG_DIR" ]; then
         warn "Config existente encontrada em $CONFIG_DIR"
         read -p "  Sobrescrever? (s/N): " -n 1 -r
@@ -555,7 +555,7 @@ exec-once = swww-daemon
 exec-once = shiraos
 '
 
-if [ ! -f "$HYPR_CONF" ]; then
+   [ ! -f "$HYPR_CONF" ]
     warn "hyprland.conf não encontrado em $HYPR_CONF"
     echo "$HYPR_BLOCK"
 else
@@ -589,7 +589,7 @@ figurado para o ShiraOS"
         ok "Configurações do ShiraOS adicionadas ao hyprland.conf"
 
         info "Blocos adicionados:"
-        info "  layerrule blur (island, expanded, wallpaper)"
+        info "  layerrule blur island, expanded, wallpaper"
         info "  bind SUPER → toggleIsland"
         info "  bind SUPER+W → toggleWallpaper"
         info "  exec-once swww-daemon + shiraos"
@@ -632,8 +632,8 @@ echo -e "${GREEN}${BOLD}║     ShiraOS instalado com sucesso!       ║${NC}"
 echo -e "${GREEN}${BOLD}╚══════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "  ${YELLOW}Se 'shiraos' não funcionar neste terminal, rode:${NC}"
-echo -e "  ${CYAN}source ~/.config/fish/config.fish${NC}  ${NC}(fish)${NC}"
-echo -e "  ${CYAN}source ~/.bashrc${NC}                   ${NC}(bash)${NC}"
+echo -e "  ${CYAN}source ~/.config/fish/config.fish${NC}  ${NC}fish${NC}"
+echo -e "  ${CYAN}source ~/.bashrc${NC}                   ${NC}bash${NC}"
 echo ""
 echo -e "  Para iniciar:    ${CYAN}shiraos${NC}"
 echo -e "  Para parar:      ${CYAN}shiraos stop${NC}"
@@ -645,4 +645,4 @@ echo -e "  Scripts em: ${CYAN}$BIN_DIR${NC}"
 echo -e "  Plugin em:  ${CYAN}/usr/lib/qt6/qml/ShiraOS/${NC}"
 echo ""
 echo -e "  ${YELLOW}⚠ Reinicie o Hyprland para aplicar as layerrules e binds!${NC}"
-echo ""
+echo "
