@@ -61,7 +61,7 @@ PanelWindow {
         NumberAnimation { target: win; property: "pillScale";   to: 1.0;  duration: 420; easing.type: Easing.OutBack; easing.overshoot: 2.2 }
     }
 
-    // ── Slot digit ───────────────────────────────────────────────────────
+    // ── Slot digit ───
     component SlotDigit: Item {
         id: sd
         property int  value:  0
@@ -104,7 +104,7 @@ PanelWindow {
         }
     }
 
-    // ── Pill ─────────────────────────────────────────────────────────────
+    // ── Pill ──────────────---
     Rectangle {
         anchors.centerIn: parent
         width: 260; height: 36; radius: 18
@@ -172,3 +172,4 @@ PanelWindow {
         MouseArea { anchors.fill: parent; onClicked: AppState.toggleIsland() }
     }
 }
+

@@ -7,12 +7,18 @@ import ShiraOS
 import "./modules/wallpaper"
 import "./modules/island"
 import "./modules/border"
+import "./modules"
+import "./modules/lock"
 
 ShellRoot {
     IpcHandler {
         target: "shiraos"
         function toggleWallpaper() { AppState.toggleWallpaper() }
-        function toggleIsland()    { AppState.toggleIsland()    }    }
+        function toggleIsland()    { AppState.toggleIsland()    }
+    function toggleDockSettings() { AppState.dockSettingsOpen = !AppState.dockSettingsOpen }
+        function lockScreen()      { lockSurface.locked = true   }
+        function lockNextTheme()   { lockSurface.nextTheme()     }
+        function lockToggleBlur()  { lockSurface.toggleBlur()    }    }
 
     GlobalShortcut {
         name: "toggleWallpaper"
@@ -39,7 +45,11 @@ ShellRoot {
         description: "Wallpaper select down"
         onPressed: AppState.wallpaperDown()
     }
-    LeftBorder {}
+    LeftBorder { id: leftBorder }
+    SchemePill {}
+    ConfigPill {}
+    SchemePanel {}
+    LockScreen { id: lockSurface }
     WallpaperPanel {}
     DynamicIsland {}
     IslandExpanded {}

@@ -1,3 +1,5 @@
-/usr/lib/qt6/qml/ShiraOS/modules/wallpaper/WallpaperPanel.qml
-/usr/lib/qt6/qml/ShiraOS/modules/island/DynamicIsland.qml
+/usr/lib/qt6/qml/ShiraOS/modules/border/LeftBorder.qml
 /usr/lib/qt6/qml/ShiraOS/modules/osd/Osd.qml
+/usr/lib/qt6/qml/ShiraOS/modules/wallpaper/WallpaperPanel.qml
+/usr/lib/qt6/qml/ShiraOS/modules/island/IslandExpanded.qml
+/usr/lib/qt6/qml/ShiraOS/modules/island/DynamicIsland.qml
