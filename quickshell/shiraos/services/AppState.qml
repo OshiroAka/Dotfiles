@@ -19,8 +19,13 @@ QtObject {
     property string globalFont: "DejaVu Sans"
     property string iconFont:   "FantasqueSansM Nerd Font"
 
+    // ── Wallpaper Style ──────────────────────────────────────
+    property int  wallpaperStyle: 0  // 0=direita topo, 1=centro tela, 2=abaixo island
+    property real islandBottom:   64 // posição Y do fundo da island (atualizado pela island)
+
     // ── Dock Config ───────────────────────────────────────────
     property bool   dockSettingsOpen: false
+    property bool   configOpen:        false
     property int    dockStyle:   0      // 0=bottom 1=left 2=bottom-left 3=bottom-full
     property var    pinnedApps:  []     // [{icon,label,cmd}]
 

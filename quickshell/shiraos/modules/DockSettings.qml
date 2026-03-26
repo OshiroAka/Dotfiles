@@ -85,7 +85,7 @@ PopupWindow {
                                 Behavior on color        { ColorAnimation { duration: 150 } }
                                 Behavior on border.color { ColorAnimation { duration: 150 } }
                                 Item {
-                                    anchors { fill: parent; margins: 9; bottomMargin: 20 }
+                                    anchors { fill: parent; margins: 2; bottomMargin: 20 }
                                     Rectangle {
                                         anchors.fill: parent; radius: 5; color: Qt.rgba(1,1,1,0.05)
                                         Rectangle {

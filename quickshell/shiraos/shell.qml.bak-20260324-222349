@@ -46,6 +46,7 @@ ShellRoot {
     }
     
     SchemePill {}
+    TopBar {}
     //ConfigPill {}
     SchemePanel {}
     LockScreen { id: lockSurface }

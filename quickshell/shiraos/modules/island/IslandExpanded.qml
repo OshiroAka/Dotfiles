@@ -73,6 +73,7 @@ PanelWindow {
 
     property real pillW:  260
     property real pillH:  36
+    onPillHChanged: AppState.islandBottom = 8 + pillH + 12
     property real pillOp: 0.0
 
     property real frontScale:  1.0

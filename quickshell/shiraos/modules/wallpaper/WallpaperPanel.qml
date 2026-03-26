@@ -14,14 +14,23 @@ PanelWindow {
         ? WlrKeyboardFocus.Exclusive
         : WlrKeyboardFocus.None
 
+    // Estilo 0: canto superior direito (padrão)
+    // Estilo 1: centro da tela (left+right+top fixos)
+    // Estilo 2: abaixo da island (segue islandBottom)
     anchors.top:    true
     anchors.right:  true
-    margins.top:    16
-    margins.right:  16
+    anchors.left:   AppState.wallpaperStyle === 1
+
+    margins.top:   AppState.wallpaperStyle === 4
+                   ? AppState.islandBottom + 12
+                   : AppState.wallpaperStyle === 1 ? (screen ? (screen.height - 720) / 2 : 64) : 64
+    margins.right: AppState.wallpaperStyle === 1 ? (screen ? (screen.width - animW) / 2 : 16) : 16
 
     color:         "transparent"
-    implicitWidth:  animW
+    implicitWidth:  AppState.wallpaperStyle === 1 ? Math.min(animW, screen ? screen.width - 80 : 800) : animW
     implicitHeight: 720
+
+    Behavior on margins.top { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
     focusable:      true
 
     Region { id: emptyMask }
@@ -98,13 +107,13 @@ PanelWindow {
         NumberAnimation {
             target: win; property: "animW"
             from: 0; to: 180
-            duration: 500; easing.type: Easing.OutExpo
+            duration: 100; easing.type: Easing.OutExpo
         }
         // Fase 2: expande altura
         NumberAnimation {
             target: win; property: "animH"
-            from: 0; to: 720
-            duration: 800; easing.type: Easing.OutExpo
+            from: 0; to: 800
+            duration: 40; easing.type: Easing.OutExpo
         }
         ScriptAction { script: keyItem.forceActiveFocus() }
     }
@@ -114,7 +123,7 @@ PanelWindow {
         // Fase 1: colapsa altura
         NumberAnimation {
             target: win; property: "animH"
-            to: 0; duration: 2000; easing.type: Easing.InExpo
+            to: 0; duration: 200; easing.type: Easing.InExpo
         }
         // Fase 2: colapsa largura
         NumberAnimation {
