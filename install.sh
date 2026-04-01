@@ -300,111 +300,22 @@ ok "PATH atualizado"
 
 
 # ──────────────────────────────────────────────────────
-# 12. Configurar Kitty
-# ──────────────────────────────────────────────────────
-step "Configurando Kitty"
-
-mkdir -p "$HOME/.config/kitty"
-KITTY_CONF="$HOME/.config/kitty/kitty.conf"
-
-KITTY_BLOCK='background_opacity 0.3
-cursor_trail 10
-cursor_trail_decay 0.3 0.8
-# BEGIN_KITTY_THEME
-# Base2Tone Motel Dark
-include current-theme.conf
-# END_KITTY_THEME'
-
-if grep -q "SHIRASHELL BASIC CONFIG" "$KITTY_CONF" 2>/dev/null; then
-    ok "Kitty já configurado"
-else
-    printf '%s
-# SHIRASHELL BASIC CONFIG
-' "$KITTY_BLOCK" >> "$KITTY_CONF"
-    ok "Kitty configurado"
-fi
-
-
-# ──────────────────────────────────────────────────────
-# 12. Configurar Kitty
-# ──────────────────────────────────────────────────────
-step "Configurando Kitty"
-
-mkdir -p "$HOME/.config/kitty"
-KITTY_CONF="$HOME/.config/kitty/kitty.conf"
-
-KITTY_BLOCK='background_opacity 0.3
-cursor_trail 10
-cursor_trail_decay 0.3 0.8
-# BEGIN_KITTY_THEME
-# Base2Tone Motel Dark
-include current-theme.conf
-# END_KITTY_THEME'
-
-if grep -q "SHIRASHELL BASIC CONFIG" "$KITTY_CONF" 2>/dev/null; then
-    ok "Kitty já configurado"
-else
-    printf '%s
-# SHIRASHELL BASIC CONFIG
-' "$KITTY_BLOCK" >> "$KITTY_CONF"
-    ok "Kitty configurado"
-fi
-
-
-# ──────────────────────────────────────────────────────
-# 12. Configurar Kitty
-# ──────────────────────────────────────────────────────
-step "Configurando Kitty"
-
-mkdir -p "$HOME/.config/kitty"
-KITTY_CONF="$HOME/.config/kitty/kitty.conf"
-
-KITTY_BLOCK='background_opacity 0.3
-cursor_trail 10
-cursor_trail_decay 0.3 0.8
-# BEGIN_KITTY_THEME
-# Base2Tone Motel Dark
-include current-theme.conf
-# END_KITTY_THEME'
-
-if grep -q "SHIRASHELL BASIC CONFIG" "$KITTY_CONF" 2>/dev/null; then
-    ok "Kitty já configurado"
-else
-    printf '%s
-# SHIRASHELL BASIC CONFIG
-' "$KITTY_BLOCK" >> "$KITTY_CONF"
-    ok "Kitty configurado"
-fi
-
-
-# ──────────────────────────────────────────────────────
-# 12. Configurar Kitty
-# ──────────────────────────────────────────────────────
-step "Configurando Kitty"
-
-mkdir -p "$HOME/.config/kitty"
-KITTY_CONF="$HOME/.config/kitty/kitty.conf"
-
-KITTY_BLOCK='background_opacity 0.3
-cursor_trail 10
-cursor_trail_decay 0.3 0.8
-# BEGIN_KITTY_THEME
-# Base2Tone Motel Dark
-include current-theme.conf
-# END_KITTY_THEME'
-
-if grep -q "SHIRASHELL BASIC CONFIG" "$KITTY_CONF" 2>/dev/null; then
-    ok "Kitty já configurado"
-else
-    printf '%s
-# SHIRASHELL BASIC CONFIG
-' "$KITTY_BLOCK" >> "$KITTY_CONF"
-    ok "Kitty configurado"
-fi
-
-# ──────────────────────────────────────────────────────
 # 11. Resumo final
 # ──────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────
+# 12. Configurar Kitty
+# ──────────────────────────────────────────────────────
+step "Configurando Kitty"
+mkdir -p "$HOME/.config/kitty"
+KITTY_CONF="$HOME/.config/kitty/kitty.conf"
+if grep -q "SHIRASHELL BASIC CONFIG" "$KITTY_CONF" 2>/dev/null; then
+    ok "Kitty ja configurado"
+else
+    printf "background_opacity 0.3\ncursor_trail 10\ncursor_trail_decay 0.3 0.8\n# SHIRASHELL BASIC CONFIG\n" >> "$KITTY_CONF"
+    ok "Kitty configurado"
+fi
+
+
 echo ""
 echo -e "${GREEN}${BOLD}╔══════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}${BOLD}║     ShiraOS instalado com sucesso!       ║${NC}"
