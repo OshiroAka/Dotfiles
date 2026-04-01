@@ -58,7 +58,9 @@ PACMAN_DEPS=(
     hyprland
     xdg-desktop-portal-hyprland
     qt6-base
+    qt6-base-private
     qt6-declarative
+    qt6-declarative-private
     qt6-imageformats
     qt6-multimedia
     cmake
@@ -165,10 +167,18 @@ step "Compilando plugin C++ (ShiraOS)"
 if [ -f "$CONFIG_DIR/build.sh" ]; then
     info "Compilando plugin (pode demorar 1-2 min)..."
     cd "$CONFIG_DIR"
-    if timeout 120 bash build.sh; then
+    if timeout 180 bash build.sh; then
         ok "Plugin compilado e instalado"
+        # Verifica se o módulo está acessível
+        if [ -d "/usr/lib/qt6/qml/ShiraOS" ]; then
+            ok "Módulo ShiraOS verificado em /usr/lib/qt6/qml/ShiraOS"
+        else
+            warn "Módulo não encontrado em /usr/lib/qt6/qml/ShiraOS"
+            warn "Tente: cd ~/.config/quickshell/shiraos && sudo bash build.sh"
+        fi
     else
-        warn "Build falhou ou demorou muito — ShiraOS funciona sem o plugin"
+        fail "Build falhou! Rode manualmente: cd ~/.config/quickshell/shiraos && bash build.sh"
+        warn "ShiraOS não iniciará sem o plugin ShiraOS"
     fi
     cd "$HOME"
 else
