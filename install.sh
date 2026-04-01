@@ -217,6 +217,7 @@ esac
 SCRIPT
 chmod +x "$BIN_DIR/shiraos"
 ok "shiraos"
+export PATH="$BIN_DIR:$PATH"
 
 # ──────────────────────────────────────────────────────
 # 8. Criar diretórios necessários
