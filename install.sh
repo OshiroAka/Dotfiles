@@ -163,8 +163,13 @@ fi
 step "Compilando plugin C++ (ShiraOS)"
 
 if [ -f "$CONFIG_DIR/build.sh" ]; then
+    info "Compilando plugin (pode demorar 1-2 min)..."
     cd "$CONFIG_DIR"
-    bash build.sh && ok "Plugin compilado e instalado"
+    if timeout 120 bash build.sh; then
+        ok "Plugin compilado e instalado"
+    else
+        warn "Build falhou ou demorou muito — ShiraOS funciona sem o plugin"
+    fi
     cd "$HOME"
 else
     warn "build.sh não encontrado"
