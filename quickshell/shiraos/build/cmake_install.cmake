@@ -1,4 +1,4 @@
-# Install script for directory: /home/oshiro/.config/quickshell/shiraos
+# Install script for directory: /home/shira/.config/quickshell/shiraos
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -44,17 +44,17 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/oshiro/.config/quickshell/shiraos/build/plugin/cmake_install.cmake")
+  include("/home/shira/.config/quickshell/shiraos/build/plugin/cmake_install.cmake")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/qt6/qml/ShiraOS/modules" TYPE DIRECTORY FILES "/home/oshiro/.config/quickshell/shiraos/modules/" FILES_MATCHING REGEX "/[^/]*\\.qml$")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/qt6/qml/ShiraOS/modules" TYPE DIRECTORY FILES "/home/shira/.config/quickshell/shiraos/modules/" FILES_MATCHING REGEX "/[^/]*\\.qml$")
 endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "/home/oshiro/.config/quickshell/shiraos/build/install_local_manifest.txt"
+  file(WRITE "/home/shira/.config/quickshell/shiraos/build/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()
 if(CMAKE_INSTALL_COMPONENT)
@@ -70,6 +70,6 @@ else()
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "/home/oshiro/.config/quickshell/shiraos/build/${CMAKE_INSTALL_MANIFEST}"
+  file(WRITE "/home/shira/.config/quickshell/shiraos/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

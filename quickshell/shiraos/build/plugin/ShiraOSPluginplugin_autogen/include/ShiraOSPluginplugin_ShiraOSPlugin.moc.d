@@ -1,5 +1,5 @@
-/home/oshiro/.config/quickshell/shiraos/build/plugin/ShiraOSPluginplugin_autogen/include/ShiraOSPluginplugin_ShiraOSPlugin.moc: /home/oshiro/.config/quickshell/shiraos/build/plugin/ShiraOSPluginplugin_ShiraOSPlugin.cpp \
-  /home/oshiro/.config/quickshell/shiraos/build/plugin/ShiraOSPluginplugin_autogen/moc_predefs.h \
+/home/shira/.config/quickshell/shiraos/build/plugin/ShiraOSPluginplugin_autogen/include/ShiraOSPluginplugin_ShiraOSPlugin.moc: /home/shira/.config/quickshell/shiraos/build/plugin/ShiraOSPluginplugin_ShiraOSPlugin.cpp \
+  /home/shira/.config/quickshell/shiraos/build/plugin/ShiraOSPluginplugin_autogen/moc_predefs.h \
   /usr/include/asm-generic/bitsperlong.h \
   /usr/include/asm-generic/errno-base.h \
   /usr/include/asm-generic/errno.h \
@@ -252,6 +252,7 @@
   /usr/include/qt6/QtCore/QUrl \
   /usr/include/qt6/QtCore/q17memory.h \
   /usr/include/qt6/QtCore/q20algorithm.h \
+  /usr/include/qt6/QtCore/q20bit.h \
   /usr/include/qt6/QtCore/q20functional.h \
   /usr/include/qt6/QtCore/q20memory.h \
   /usr/include/qt6/QtCore/q20type_traits.h \

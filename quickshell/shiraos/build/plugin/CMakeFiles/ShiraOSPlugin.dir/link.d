@@ -5,14 +5,14 @@ libShiraOSPlugin.so: \
   CMakeFiles/ShiraOSPlugin.dir/shiraosplugin_qmltyperegistrations.cpp.o \
   CMakeFiles/ShiraOSPlugin.dir/.qt/rcc/qrc_qmake_ShiraOS.cpp.o \
   CMakeFiles/ShiraOSPlugin.dir/plugin.cpp.o \
-  /usr/lib/libQt6Quick.so.6.10.2 \
-  /usr/lib/libQt6OpenGL.so.6.10.2 \
-  /usr/lib/libQt6Gui.so.6.10.2 \
+  /usr/lib/libQt6Quick.so.6.11.0 \
+  /usr/lib/libQt6OpenGL.so.6.11.0 \
+  /usr/lib/libQt6Gui.so.6.11.0 \
   /usr/lib/libGLX.so \
   /usr/lib/libOpenGL.so \
-  /usr/lib/libQt6Qml.so.6.10.2 \
-  /usr/lib/libQt6Network.so.6.10.2 \
-  /usr/lib/libQt6Core.so.6.10.2 \
+  /usr/lib/libQt6Qml.so.6.11.0 \
+  /usr/lib/libQt6Network.so.6.11.0 \
+  /usr/lib/libQt6Core.so.6.11.0 \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/libstdc++.so \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/libm.so \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/libm.so \
@@ -50,21 +50,21 @@ CMakeFiles/ShiraOSPlugin.dir/.qt/rcc/qrc_qmake_ShiraOS.cpp.o:
 
 CMakeFiles/ShiraOSPlugin.dir/plugin.cpp.o:
 
-/usr/lib/libQt6Quick.so.6.10.2:
+/usr/lib/libQt6Quick.so.6.11.0:
 
-/usr/lib/libQt6OpenGL.so.6.10.2:
+/usr/lib/libQt6OpenGL.so.6.11.0:
 
-/usr/lib/libQt6Gui.so.6.10.2:
+/usr/lib/libQt6Gui.so.6.11.0:
 
 /usr/lib/libGLX.so:
 
 /usr/lib/libOpenGL.so:
 
-/usr/lib/libQt6Qml.so.6.10.2:
+/usr/lib/libQt6Qml.so.6.11.0:
 
-/usr/lib/libQt6Network.so.6.10.2:
+/usr/lib/libQt6Network.so.6.11.0:
 
-/usr/lib/libQt6Core.so.6.10.2:
+/usr/lib/libQt6Core.so.6.11.0:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/libstdc++.so:
 

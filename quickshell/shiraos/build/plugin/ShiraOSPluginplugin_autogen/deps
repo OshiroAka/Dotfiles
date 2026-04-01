@@ -1,8 +1,8 @@
 ShiraOSPluginplugin_autogen/timestamp: \
-	/home/oshiro/.config/quickshell/shiraos/build/plugin/ShiraOSPluginplugin_ShiraOSPlugin.cpp \
-	/home/oshiro/.config/quickshell/shiraos/build/plugin/ShiraOSPluginplugin_ShiraOSPlugin_in.cpp \
-	/home/oshiro/.config/quickshell/shiraos/build/plugin/ShiraOSPluginplugin_autogen/moc_predefs.h \
-	/home/oshiro/.config/quickshell/shiraos/plugin/CMakeLists.txt \
+	/home/shira/.config/quickshell/shiraos/build/plugin/ShiraOSPluginplugin_ShiraOSPlugin.cpp \
+	/home/shira/.config/quickshell/shiraos/build/plugin/ShiraOSPluginplugin_ShiraOSPlugin_in.cpp \
+	/home/shira/.config/quickshell/shiraos/build/plugin/ShiraOSPluginplugin_autogen/moc_predefs.h \
+	/home/shira/.config/quickshell/shiraos/plugin/CMakeLists.txt \
 	/usr/include/asm-generic/bitsperlong.h \
 	/usr/include/asm-generic/errno-base.h \
 	/usr/include/asm-generic/errno.h \
@@ -255,6 +255,7 @@ ShiraOSPluginplugin_autogen/timestamp: \
 	/usr/include/qt6/QtCore/QUrl \
 	/usr/include/qt6/QtCore/q17memory.h \
 	/usr/include/qt6/QtCore/q20algorithm.h \
+	/usr/include/qt6/QtCore/q20bit.h \
 	/usr/include/qt6/QtCore/q20functional.h \
 	/usr/include/qt6/QtCore/q20memory.h \
 	/usr/include/qt6/QtCore/q20type_traits.h \
@@ -410,8 +411,7 @@ ShiraOSPluginplugin_autogen/timestamp: \
 	/usr/lib/cmake/Qt6/Qt6ConfigVersion.cmake \
 	/usr/lib/cmake/Qt6/Qt6ConfigVersionImpl.cmake \
 	/usr/lib/cmake/Qt6/Qt6Dependencies.cmake \
-	/usr/lib/cmake/Qt6/Qt6Targets.cmake \
-	/usr/lib/cmake/Qt6/Qt6VersionlessAliasTargets.cmake \
+	/usr/lib/cmake/Qt6/Qt6TargetsPrecheck.cmake \
 	/usr/lib/cmake/Qt6/QtFeature.cmake \
 	/usr/lib/cmake/Qt6/QtFeatureCommon.cmake \
 	/usr/lib/cmake/Qt6/QtInstallPaths.cmake \

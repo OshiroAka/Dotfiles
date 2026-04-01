@@ -1,6 +1,6 @@
-/home/oshiro/.config/quickshell/shiraos/build/plugin/ShiraOSPlugin_autogen/include/plugin.moc: /home/oshiro/.config/quickshell/shiraos/plugin/plugin.cpp \
-  /home/oshiro/.config/quickshell/shiraos/build/plugin/ShiraOSPlugin_autogen/moc_predefs.h \
-  /home/oshiro/.config/quickshell/shiraos/plugin/AppState.hpp \
+/home/shira/.config/quickshell/shiraos/build/plugin/ShiraOSPlugin_autogen/include/plugin.moc: /home/shira/.config/quickshell/shiraos/plugin/plugin.cpp \
+  /home/shira/.config/quickshell/shiraos/build/plugin/ShiraOSPlugin_autogen/moc_predefs.h \
+  /home/shira/.config/quickshell/shiraos/plugin/AppState.hpp \
   /usr/include/alloca.h \
   /usr/include/asm-generic/bitsperlong.h \
   /usr/include/asm-generic/errno-base.h \
@@ -270,6 +270,7 @@
   /usr/include/qt6/QtCore/QUrl \
   /usr/include/qt6/QtCore/q17memory.h \
   /usr/include/qt6/QtCore/q20algorithm.h \
+  /usr/include/qt6/QtCore/q20bit.h \
   /usr/include/qt6/QtCore/q20functional.h \
   /usr/include/qt6/QtCore/q20iterator.h \
   /usr/include/qt6/QtCore/q20memory.h \
@@ -324,6 +325,7 @@
   /usr/include/qt6/QtCore/qhashfunctions.h \
   /usr/include/qt6/QtCore/qiodevicebase.h \
   /usr/include/qt6/QtCore/qiterable.h \
+  /usr/include/qt6/QtCore/qiterable_impl.h \
   /usr/include/qt6/QtCore/qiterator.h \
   /usr/include/qt6/QtCore/qjsondocument.h \
   /usr/include/qt6/QtCore/qjsonobject.h \
@@ -338,6 +340,7 @@
   /usr/include/qt6/QtCore/qmath.h \
   /usr/include/qt6/QtCore/qmetacontainer.h \
   /usr/include/qt6/QtCore/qmetaobject.h \
+  /usr/include/qt6/QtCore/qmetasequence.h \
   /usr/include/qt6/QtCore/qmetatype.h \
   /usr/include/qt6/QtCore/qminmax.h \
   /usr/include/qt6/QtCore/qnamespace.h \

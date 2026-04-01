@@ -4,9 +4,9 @@ libShiraOSPluginplugin.so: \
   CMakeFiles/ShiraOSPluginplugin.dir/ShiraOSPluginplugin_autogen/mocs_compilation.cpp.o \
   CMakeFiles/ShiraOSPluginplugin.dir/ShiraOSPluginplugin_ShiraOSPlugin.cpp.o \
   libShiraOSPlugin.so \
-  /usr/lib/libQt6Qml.so.6.10.2 \
-  /usr/lib/libQt6Network.so.6.10.2 \
-  /usr/lib/libQt6Core.so.6.10.2 \
+  /usr/lib/libQt6Qml.so.6.11.0 \
+  /usr/lib/libQt6Network.so.6.11.0 \
+  /usr/lib/libQt6Core.so.6.11.0 \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/libstdc++.so \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/libm.so \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/libm.so \
@@ -42,11 +42,11 @@ CMakeFiles/ShiraOSPluginplugin.dir/ShiraOSPluginplugin_ShiraOSPlugin.cpp.o:
 
 libShiraOSPlugin.so:
 
-/usr/lib/libQt6Qml.so.6.10.2:
+/usr/lib/libQt6Qml.so.6.11.0:
 
-/usr/lib/libQt6Network.so.6.10.2:
+/usr/lib/libQt6Network.so.6.11.0:
 
-/usr/lib/libQt6Core.so.6.10.2:
+/usr/lib/libQt6Core.so.6.11.0:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/libstdc++.so:
 

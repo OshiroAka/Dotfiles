@@ -1,8 +1,8 @@
 plugin/CMakeFiles/ShiraOSPlugin.dir/ShiraOSPlugin_autogen/mocs_compilation.cpp.o: \
- /home/oshiro/.config/quickshell/shiraos/build/plugin/ShiraOSPlugin_autogen/mocs_compilation.cpp \
+ /home/shira/.config/quickshell/shiraos/build/plugin/ShiraOSPlugin_autogen/mocs_compilation.cpp \
  /usr/include/stdc-predef.h \
- /home/oshiro/.config/quickshell/shiraos/build/plugin/ShiraOSPlugin_autogen/EWIEGA46WW/moc_AppState.cpp \
- /home/oshiro/.config/quickshell/shiraos/build/plugin/ShiraOSPlugin_autogen/EWIEGA46WW/../../../../plugin/AppState.hpp \
+ /home/shira/.config/quickshell/shiraos/build/plugin/ShiraOSPlugin_autogen/EWIEGA46WW/moc_AppState.cpp \
+ /home/shira/.config/quickshell/shiraos/build/plugin/ShiraOSPlugin_autogen/EWIEGA46WW/../../../../plugin/AppState.hpp \
  /usr/include/qt6/QtCore/QObject /usr/include/qt6/QtCore/qobject.h \
  /usr/include/qt6/QtCore/qobjectdefs.h \
  /usr/include/qt6/QtCore/qnamespace.h /usr/include/qt6/QtCore/qglobal.h \
@@ -223,7 +223,8 @@ plugin/CMakeFiles/ShiraOSPlugin.dir/ShiraOSPlugin_autogen/mocs_compilation.cpp.o
  /usr/include/qt6/QtCore/qarraydatapointer.h \
  /usr/include/qt6/QtCore/qarraydataops.h \
  /usr/include/qt6/QtCore/qcontainertools_impl.h \
- /usr/include/qt6/QtCore/qxptype_traits.h /usr/include/c++/15.2.1/cstring \
+ /usr/include/qt6/QtCore/qxptype_traits.h \
+ /usr/include/qt6/QtCore/q23type_traits.h /usr/include/c++/15.2.1/cstring \
  /usr/include/c++/15.2.1/iterator \
  /usr/include/c++/15.2.1/bits/stream_iterator.h \
  /usr/include/c++/15.2.1/bits/streambuf_iterator.h \
@@ -268,7 +269,6 @@ plugin/CMakeFiles/ShiraOSPlugin.dir/ShiraOSPlugin_autogen/mocs_compilation.cpp.o
  /usr/include/qt6/QtCore/qanystringview.h \
  /usr/include/qt6/QtCore/qutf8stringview.h \
  /usr/include/qt6/QtCore/qstringtokenizer.h \
- /usr/include/qt6/QtCore/q23type_traits.h \
  /usr/include/qt6/QtCore/qstringbuilder.h \
  /usr/include/qt6/QtCore/qstringconverter.h \
  /usr/include/qt6/QtCore/qstringconverter_base.h \
@@ -279,7 +279,7 @@ plugin/CMakeFiles/ShiraOSPlugin.dir/ShiraOSPlugin_autogen/mocs_compilation.cpp.o
  /usr/include/qt6/QtCore/qiterator.h \
  /usr/include/qt6/QtCore/qbytearraylist.h \
  /usr/include/qt6/QtCore/qstringlist.h \
- /usr/include/qt6/QtCore/qalgorithms.h \
+ /usr/include/qt6/QtCore/qalgorithms.h /usr/include/qt6/QtCore/q20bit.h \
  /usr/include/qt6/QtCore/qstringmatcher.h \
  /usr/include/qt6/QtCore/qscopedpointer.h \
  /usr/include/qt6/QtCore/qmetatype.h \
@@ -331,15 +331,18 @@ plugin/CMakeFiles/ShiraOSPlugin.dir/ShiraOSPlugin_autogen/mocs_compilation.cpp.o
  /usr/include/qt6/QtCore/qset.h /usr/include/qt6/QtCore/qhash.h \
  /usr/include/qt6/QtCore/qvarlengtharray.h \
  /usr/include/qt6/QtCore/qalloc.h /usr/include/qt6/QtCore/q23utility.h \
- /usr/include/qt6/QtCore/q20utility.h /usr/include/qt6/QtCore/qobject.h \
- /usr/include/qt6/QtQml/qjsvalue.h /usr/include/qt6/QtQml/qqmllist.h \
+ /usr/include/qt6/QtCore/q20utility.h /usr/include/qt6/QtQml/qjsvalue.h \
+ /usr/include/qt6/QtQml/qqmllist.h \
  /usr/include/qt6/QtQml/qqmlparserstatus.h \
  /usr/include/qt6/QtQml/qqmlpropertyvaluesource.h \
  /usr/include/qt6/QtCore/qdatetime.h /usr/include/qt6/QtCore/qcalendar.h \
- /usr/include/qt6/QtCore/qlocale.h /usr/include/qt6/QtCore/qmetaobject.h \
- /usr/include/qt6/QtCore/qpointer.h /usr/include/qt6/QtCore/qurl.h \
- /usr/include/qt6/QtCore/qversionnumber.h /usr/include/qt6/QtCore/qspan.h \
- /usr/include/c++/15.2.1/cassert /usr/include/qt6/QtCore/q20iterator.h \
+ /usr/include/qt6/QtCore/qlocale.h \
+ /usr/include/qt6/QtCore/qmetasequence.h \
+ /usr/include/qt6/QtCore/qiterable_impl.h \
+ /usr/include/qt6/QtCore/qmetaobject.h /usr/include/qt6/QtCore/qpointer.h \
+ /usr/include/qt6/QtCore/qurl.h /usr/include/qt6/QtCore/qversionnumber.h \
+ /usr/include/qt6/QtCore/qspan.h /usr/include/c++/15.2.1/cassert \
+ /usr/include/qt6/QtCore/q20iterator.h \
  /usr/include/qt6/QtCore/qtyperevision.h \
  /usr/include/qt6/QtQml/qqmlregistration.h \
  /usr/include/qt6/QtQmlIntegration/qqmlintegration.h \

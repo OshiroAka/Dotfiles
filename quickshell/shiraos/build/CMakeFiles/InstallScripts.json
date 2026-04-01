@@ -1,8 +1,8 @@
 {
 	"InstallScripts" : 
 	[
-		"/home/oshiro/.config/quickshell/shiraos/build/cmake_install.cmake",
-		"/home/oshiro/.config/quickshell/shiraos/build/plugin/cmake_install.cmake"
+		"/home/shira/.config/quickshell/shiraos/build/cmake_install.cmake",
+		"/home/shira/.config/quickshell/shiraos/build/plugin/cmake_install.cmake"
 	],
 	"Parallel" : false
 }

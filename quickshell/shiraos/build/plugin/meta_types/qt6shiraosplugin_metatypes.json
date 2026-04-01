@@ -24,12 +24,14 @@
                         "lineNumber": 10,
                         "name": "wallpaperOpen",
                         "notify": "wallpaperOpenChanged",
+                        "override": false,
                         "read": "wallpaperOpen",
                         "required": false,
                         "scriptable": true,
                         "stored": true,
                         "type": "bool",
                         "user": false,
+                        "virtual": false,
                         "write": "setWallpaperOpen"
                     },
                     {
@@ -40,12 +42,14 @@
                         "lineNumber": 11,
                         "name": "islandOpen",
                         "notify": "islandOpenChanged",
+                        "override": false,
                         "read": "islandOpen",
                         "required": false,
                         "scriptable": true,
                         "stored": true,
                         "type": "bool",
                         "user": false,
+                        "virtual": false,
                         "write": "setIslandOpen"
                     },
                     {
@@ -56,12 +60,14 @@
                         "lineNumber": 12,
                         "name": "activeWallRow",
                         "notify": "activeWallRowChanged",
+                        "override": false,
                         "read": "activeWallRow",
                         "required": false,
                         "scriptable": true,
                         "stored": true,
                         "type": "int",
                         "user": false,
+                        "virtual": false,
                         "write": "setActiveWallRow"
                     },
                     {
@@ -72,12 +78,14 @@
                         "lineNumber": 13,
                         "name": "staticWallIdx",
                         "notify": "staticWallIdxChanged",
+                        "override": false,
                         "read": "staticWallIdx",
                         "required": false,
                         "scriptable": true,
                         "stored": true,
                         "type": "int",
                         "user": false,
+                        "virtual": false,
                         "write": "setStaticWallIdx"
                     },
                     {
@@ -88,12 +96,14 @@
                         "lineNumber": 14,
                         "name": "liveWallIdx",
                         "notify": "liveWallIdxChanged",
+                        "override": false,
                         "read": "liveWallIdx",
                         "required": false,
                         "scriptable": true,
                         "stored": true,
                         "type": "int",
                         "user": false,
+                        "virtual": false,
                         "write": "setLiveWallIdx"
                     }
                 ],

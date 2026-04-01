@@ -8,8 +8,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/oshiro/.config/quickshell/shiraos/build/plugin/ShiraOSPluginplugin_ShiraOSPlugin.cpp" "plugin/CMakeFiles/ShiraOSPluginplugin.dir/ShiraOSPluginplugin_ShiraOSPlugin.cpp.o" "gcc" "plugin/CMakeFiles/ShiraOSPluginplugin.dir/ShiraOSPluginplugin_ShiraOSPlugin.cpp.o.d"
-  "/home/oshiro/.config/quickshell/shiraos/build/plugin/ShiraOSPluginplugin_autogen/mocs_compilation.cpp" "plugin/CMakeFiles/ShiraOSPluginplugin.dir/ShiraOSPluginplugin_autogen/mocs_compilation.cpp.o" "gcc" "plugin/CMakeFiles/ShiraOSPluginplugin.dir/ShiraOSPluginplugin_autogen/mocs_compilation.cpp.o.d"
+  "/home/shira/.config/quickshell/shiraos/build/plugin/ShiraOSPluginplugin_ShiraOSPlugin.cpp" "plugin/CMakeFiles/ShiraOSPluginplugin.dir/ShiraOSPluginplugin_ShiraOSPlugin.cpp.o" "gcc" "plugin/CMakeFiles/ShiraOSPluginplugin.dir/ShiraOSPluginplugin_ShiraOSPlugin.cpp.o.d"
+  "/home/shira/.config/quickshell/shiraos/build/plugin/ShiraOSPluginplugin_autogen/mocs_compilation.cpp" "plugin/CMakeFiles/ShiraOSPluginplugin.dir/ShiraOSPluginplugin_autogen/mocs_compilation.cpp.o" "gcc" "plugin/CMakeFiles/ShiraOSPluginplugin.dir/ShiraOSPluginplugin_autogen/mocs_compilation.cpp.o.d"
   "" "plugin/libShiraOSPluginplugin.so" "gcc" "plugin/CMakeFiles/ShiraOSPluginplugin.dir/link.d"
   )
 

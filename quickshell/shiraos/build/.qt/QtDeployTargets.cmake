@@ -1,4 +1,4 @@
-set(__QT_DEPLOY_TARGET_ShiraOSPlugin_FILE /home/oshiro/.config/quickshell/shiraos/build/plugin/libShiraOSPlugin.so)
+set(__QT_DEPLOY_TARGET_ShiraOSPlugin_FILE /home/shira/.config/quickshell/shiraos/build/plugin/libShiraOSPlugin.so)
 set(__QT_DEPLOY_TARGET_ShiraOSPlugin_TYPE SHARED_LIBRARY)
-set(__QT_DEPLOY_TARGET_ShiraOSPluginplugin_FILE /home/oshiro/.config/quickshell/shiraos/build/plugin/libShiraOSPluginplugin.so)
+set(__QT_DEPLOY_TARGET_ShiraOSPluginplugin_FILE /home/shira/.config/quickshell/shiraos/build/plugin/libShiraOSPluginplugin.so)
 set(__QT_DEPLOY_TARGET_ShiraOSPluginplugin_TYPE MODULE_LIBRARY)
