@@ -63,6 +63,7 @@ PACMAN_DEPS=(
     qt6-declarative-private
     qt6-imageformats
     qt6-multimedia
+    qt6-tools
     cmake
     ninja
     gcc
@@ -165,20 +166,31 @@ fi
 step "Compilando plugin C++ (ShiraOS)"
 
 if [ -f "$CONFIG_DIR/build.sh" ]; then
-    info "Compilando plugin (pode demorar 1-2 min)..."
-    cd "$CONFIG_DIR"
-    if timeout 180 bash build.sh; then
-        ok "Plugin compilado e instalado"
-        # Verifica se o módulo está acessível
-        if [ -d "/usr/lib/qt6/qml/ShiraOS" ]; then
-            ok "Módulo ShiraOS verificado em /usr/lib/qt6/qml/ShiraOS"
-        else
-            warn "Módulo não encontrado em /usr/lib/qt6/qml/ShiraOS"
-            warn "Tente: cd ~/.config/quickshell/shiraos && sudo bash build.sh"
+    info "Compilando plugin ShiraOS (1-3 min)..."
+
+    # Detecta o diretório QML correto
+    QML_DIR=""
+    for d in         "/usr/lib/qt6/qml"         "/usr/lib/x86_64-linux-gnu/qt6/qml"         "$(qtpaths6 --install-prefix 2>/dev/null)/lib/qt6/qml"         "$(qtpaths --install-prefix 2>/dev/null)/lib/qt6/qml"; do
+        if [ -d "$d" ]; then
+            QML_DIR="$d"
+            break
         fi
+    done
+
+    [ -z "$QML_DIR" ] && QML_DIR="/usr/lib/qt6/qml"
+    info "Instalando módulo QML em: $QML_DIR"
+
+    BUILD_DIR="$CONFIG_DIR/build"
+    rm -rf "$BUILD_DIR"
+    mkdir -p "$BUILD_DIR"
+    cd "$BUILD_DIR"
+
+    if cmake "$CONFIG_DIR"         -DCMAKE_BUILD_TYPE=Release         -DCMAKE_INSTALL_PREFIX=/usr         -DQT6_INSTALL_QML="$QML_DIR"         -G Ninja 2>&1 | tail -5 &&        ninja -j$(nproc) 2>&1 | tail -5 &&        sudo ninja install 2>&1 | tail -5; then
+        ok "Plugin compilado e instalado em $QML_DIR/ShiraOS"
     else
-        fail "Build falhou! Rode manualmente: cd ~/.config/quickshell/shiraos && bash build.sh"
-        warn "ShiraOS não iniciará sem o plugin ShiraOS"
+        fail "Build falhou!"
+        warn "ShiraOS não iniciará sem o plugin. Tente manualmente:"
+        warn "  cd ~/.config/quickshell/shiraos && bash build.sh"
     fi
     cd "$HOME"
 else
