@@ -1,0 +1,11 @@
+
+*.save
+*.bak
+--
+.cache/
+.log
+.local/
+.pki/
+.venv/
+node.modules/
+install.log
