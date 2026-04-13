@@ -45,13 +45,13 @@ ShellRoot {
         onPressed: AppState.wallpaperDown()
     }
     
-    SchemePill {}
+    //SchemePill {}
     //ConfigPill {}
-    SchemePanel {}
-    LockScreen { id: lockSurface }
+    //SchemePanel {}
+    //LockScreen { id: lockSurface }
     WallpaperPanel {}
-    DynamicIsland {}
-    IslandExpanded {}
+    //DynamicIsland {}
+   // IslandExpanded {}
 
     // ── Adaptive Color — idêntico ao WallpaperPanel (gc1/gc2) ────────────
     Process {
