@@ -346,7 +346,7 @@ PanelWindow {
             transformOrigin: Item.Top
             z: 0
             layer.enabled: true
-            layer.effect: MultiEffect { blurEnabled:true; blur:0.4; blurMax:16; blurMultiplier:0.9 }
+            layer.effect: MultiEffect { blurEnabled:trues; blur:0.4; blurMax:16; blurMultiplier:0.9 }
             Rectangle { anchors.fill:parent; radius:height/2; color:win.pillColor(); border.color:win.borderColor(); border.width:1 }
             CompactContent { anchors.fill:parent; anchors.margins:6; catIndex:win.backCat }
         }
