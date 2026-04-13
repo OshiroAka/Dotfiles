@@ -20,25 +20,33 @@ events:
     names:
       - "uname"
     candidate_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
       - "/bin/"
     searched_directories:
+      - "/home/shira/pipes.sh/uname"
+      - "/home/shira/.spicetify/uname"
       - "/home/shira/.local/bin/uname"
       - "/usr/local/sbin/uname"
       - "/usr/local/bin/uname"
     found: "/usr/bin/uname"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -71,31 +79,42 @@ events:
       - "make"
       - "smake"
     candidate_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
     searched_directories:
+      - "/home/shira/pipes.sh/gmake"
+      - "/home/shira/.spicetify/gmake"
       - "/home/shira/.local/bin/gmake"
       - "/usr/local/sbin/gmake"
       - "/usr/local/bin/gmake"
       - "/usr/bin/gmake"
+      - "/var/lib/flatpak/exports/bin/gmake"
       - "/usr/bin/site_perl/gmake"
       - "/usr/bin/vendor_perl/gmake"
       - "/usr/bin/core_perl/gmake"
+      - "/home/shira/pipes.sh/make"
+      - "/home/shira/.spicetify/make"
       - "/home/shira/.local/bin/make"
       - "/usr/local/sbin/make"
       - "/usr/local/bin/make"
     found: "/usr/bin/make"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -126,24 +145,32 @@ events:
       - "icx"
       - "clang"
     candidate_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
     searched_directories:
+      - "/home/shira/pipes.sh/cc"
+      - "/home/shira/.spicetify/cc"
       - "/home/shira/.local/bin/cc"
       - "/usr/local/sbin/cc"
       - "/usr/local/bin/cc"
     found: "/usr/bin/cc"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -175,10 +202,13 @@ events:
     found: "/usr/share/cmake/Modules/CMakeCCompilerId.c.in"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -203,7 +233,7 @@ events:
       Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
       
       The C compiler identification is GNU, found in:
-        /home/shira/.config/quickshell/shiraos/build/CMakeFiles/4.3.0/CompilerIdC/a.out
+        /home/shira/.config/quickshell/shiraos/build/CMakeFiles/4.3.1/CompilerIdC/a.out
       
   -
     kind: "find-v1"
@@ -226,19 +256,25 @@ events:
       - "ar"
     candidate_directories:
       - "/usr/bin/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
     found: "/usr/bin/ar"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -264,19 +300,25 @@ events:
       - "ranlib"
     candidate_directories:
       - "/usr/bin/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
     found: "/usr/bin/ranlib"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -302,19 +344,25 @@ events:
       - "strip"
     candidate_directories:
       - "/usr/bin/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
     found: "/usr/bin/strip"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -340,19 +388,25 @@ events:
       - "ld"
     candidate_directories:
       - "/usr/bin/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
     found: "/usr/bin/ld"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -378,19 +432,25 @@ events:
       - "nm"
     candidate_directories:
       - "/usr/bin/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
     found: "/usr/bin/nm"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -416,19 +476,25 @@ events:
       - "objdump"
     candidate_directories:
       - "/usr/bin/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
     found: "/usr/bin/objdump"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -454,19 +520,25 @@ events:
       - "objcopy"
     candidate_directories:
       - "/usr/bin/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
     found: "/usr/bin/objcopy"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -492,19 +564,25 @@ events:
       - "readelf"
     candidate_directories:
       - "/usr/bin/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
     found: "/usr/bin/readelf"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -530,27 +608,36 @@ events:
       - "dlltool"
     candidate_directories:
       - "/usr/bin/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
     searched_directories:
       - "/usr/bin/dlltool"
+      - "/home/shira/pipes.sh/dlltool"
+      - "/home/shira/.spicetify/dlltool"
       - "/home/shira/.local/bin/dlltool"
       - "/usr/local/sbin/dlltool"
       - "/usr/local/bin/dlltool"
+      - "/var/lib/flatpak/exports/bin/dlltool"
       - "/usr/bin/site_perl/dlltool"
       - "/usr/bin/vendor_perl/dlltool"
       - "/usr/bin/core_perl/dlltool"
     found: false
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -576,19 +663,25 @@ events:
       - "addr2line"
     candidate_directories:
       - "/usr/bin/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
     found: "/usr/bin/addr2line"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -614,27 +707,36 @@ events:
       - "tapi"
     candidate_directories:
       - "/usr/bin/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
     searched_directories:
       - "/usr/bin/tapi"
+      - "/home/shira/pipes.sh/tapi"
+      - "/home/shira/.spicetify/tapi"
       - "/home/shira/.local/bin/tapi"
       - "/usr/local/sbin/tapi"
       - "/usr/local/bin/tapi"
+      - "/var/lib/flatpak/exports/bin/tapi"
       - "/usr/bin/site_perl/tapi"
       - "/usr/bin/vendor_perl/tapi"
       - "/usr/bin/core_perl/tapi"
     found: false
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -663,41 +765,56 @@ events:
       - "gcc-ar"
     candidate_directories:
       - "/usr/bin/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
     searched_directories:
       - "/usr/bin/gcc-ar-15.2"
+      - "/home/shira/pipes.sh/gcc-ar-15.2"
+      - "/home/shira/.spicetify/gcc-ar-15.2"
       - "/home/shira/.local/bin/gcc-ar-15.2"
       - "/usr/local/sbin/gcc-ar-15.2"
       - "/usr/local/bin/gcc-ar-15.2"
+      - "/var/lib/flatpak/exports/bin/gcc-ar-15.2"
       - "/usr/bin/site_perl/gcc-ar-15.2"
       - "/usr/bin/vendor_perl/gcc-ar-15.2"
       - "/usr/bin/core_perl/gcc-ar-15.2"
       - "/usr/bin/gcc-ar-15"
+      - "/home/shira/pipes.sh/gcc-ar-15"
+      - "/home/shira/.spicetify/gcc-ar-15"
       - "/home/shira/.local/bin/gcc-ar-15"
       - "/usr/local/sbin/gcc-ar-15"
       - "/usr/local/bin/gcc-ar-15"
+      - "/var/lib/flatpak/exports/bin/gcc-ar-15"
       - "/usr/bin/site_perl/gcc-ar-15"
       - "/usr/bin/vendor_perl/gcc-ar-15"
       - "/usr/bin/core_perl/gcc-ar-15"
       - "/usr/bin/gcc-ar15"
+      - "/home/shira/pipes.sh/gcc-ar15"
+      - "/home/shira/.spicetify/gcc-ar15"
       - "/home/shira/.local/bin/gcc-ar15"
       - "/usr/local/sbin/gcc-ar15"
       - "/usr/local/bin/gcc-ar15"
+      - "/var/lib/flatpak/exports/bin/gcc-ar15"
       - "/usr/bin/site_perl/gcc-ar15"
       - "/usr/bin/vendor_perl/gcc-ar15"
       - "/usr/bin/core_perl/gcc-ar15"
     found: "/usr/bin/gcc-ar"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -726,41 +843,56 @@ events:
       - "gcc-ranlib"
     candidate_directories:
       - "/usr/bin/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
     searched_directories:
       - "/usr/bin/gcc-ranlib-15.2"
+      - "/home/shira/pipes.sh/gcc-ranlib-15.2"
+      - "/home/shira/.spicetify/gcc-ranlib-15.2"
       - "/home/shira/.local/bin/gcc-ranlib-15.2"
       - "/usr/local/sbin/gcc-ranlib-15.2"
       - "/usr/local/bin/gcc-ranlib-15.2"
+      - "/var/lib/flatpak/exports/bin/gcc-ranlib-15.2"
       - "/usr/bin/site_perl/gcc-ranlib-15.2"
       - "/usr/bin/vendor_perl/gcc-ranlib-15.2"
       - "/usr/bin/core_perl/gcc-ranlib-15.2"
       - "/usr/bin/gcc-ranlib-15"
+      - "/home/shira/pipes.sh/gcc-ranlib-15"
+      - "/home/shira/.spicetify/gcc-ranlib-15"
       - "/home/shira/.local/bin/gcc-ranlib-15"
       - "/usr/local/sbin/gcc-ranlib-15"
       - "/usr/local/bin/gcc-ranlib-15"
+      - "/var/lib/flatpak/exports/bin/gcc-ranlib-15"
       - "/usr/bin/site_perl/gcc-ranlib-15"
       - "/usr/bin/vendor_perl/gcc-ranlib-15"
       - "/usr/bin/core_perl/gcc-ranlib-15"
       - "/usr/bin/gcc-ranlib15"
+      - "/home/shira/pipes.sh/gcc-ranlib15"
+      - "/home/shira/.spicetify/gcc-ranlib15"
       - "/home/shira/.local/bin/gcc-ranlib15"
       - "/usr/local/sbin/gcc-ranlib15"
       - "/usr/local/bin/gcc-ranlib15"
+      - "/var/lib/flatpak/exports/bin/gcc-ranlib15"
       - "/usr/bin/site_perl/gcc-ranlib15"
       - "/usr/bin/vendor_perl/gcc-ranlib15"
       - "/usr/bin/core_perl/gcc-ranlib15"
     found: "/usr/bin/gcc-ranlib"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -798,10 +930,13 @@ events:
     found: "/usr/bin/c++"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -833,10 +968,13 @@ events:
     found: "/usr/share/cmake/Modules/CMakeCXXCompilerId.cpp.in"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -861,7 +999,7 @@ events:
       Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
       
       The CXX compiler identification is GNU, found in:
-        /home/shira/.config/quickshell/shiraos/build/CMakeFiles/4.3.0/CompilerIdCXX/a.out
+        /home/shira/.config/quickshell/shiraos/build/CMakeFiles/4.3.1/CompilerIdCXX/a.out
       
   -
     kind: "find-v1"
@@ -887,41 +1025,56 @@ events:
       - "gcc-ar"
     candidate_directories:
       - "/usr/bin/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
     searched_directories:
       - "/usr/bin/gcc-ar-15.2"
+      - "/home/shira/pipes.sh/gcc-ar-15.2"
+      - "/home/shira/.spicetify/gcc-ar-15.2"
       - "/home/shira/.local/bin/gcc-ar-15.2"
       - "/usr/local/sbin/gcc-ar-15.2"
       - "/usr/local/bin/gcc-ar-15.2"
+      - "/var/lib/flatpak/exports/bin/gcc-ar-15.2"
       - "/usr/bin/site_perl/gcc-ar-15.2"
       - "/usr/bin/vendor_perl/gcc-ar-15.2"
       - "/usr/bin/core_perl/gcc-ar-15.2"
       - "/usr/bin/gcc-ar-15"
+      - "/home/shira/pipes.sh/gcc-ar-15"
+      - "/home/shira/.spicetify/gcc-ar-15"
       - "/home/shira/.local/bin/gcc-ar-15"
       - "/usr/local/sbin/gcc-ar-15"
       - "/usr/local/bin/gcc-ar-15"
+      - "/var/lib/flatpak/exports/bin/gcc-ar-15"
       - "/usr/bin/site_perl/gcc-ar-15"
       - "/usr/bin/vendor_perl/gcc-ar-15"
       - "/usr/bin/core_perl/gcc-ar-15"
       - "/usr/bin/gcc-ar15"
+      - "/home/shira/pipes.sh/gcc-ar15"
+      - "/home/shira/.spicetify/gcc-ar15"
       - "/home/shira/.local/bin/gcc-ar15"
       - "/usr/local/sbin/gcc-ar15"
       - "/usr/local/bin/gcc-ar15"
+      - "/var/lib/flatpak/exports/bin/gcc-ar15"
       - "/usr/bin/site_perl/gcc-ar15"
       - "/usr/bin/vendor_perl/gcc-ar15"
       - "/usr/bin/core_perl/gcc-ar15"
     found: "/usr/bin/gcc-ar"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -950,41 +1103,56 @@ events:
       - "gcc-ranlib"
     candidate_directories:
       - "/usr/bin/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
     searched_directories:
       - "/usr/bin/gcc-ranlib-15.2"
+      - "/home/shira/pipes.sh/gcc-ranlib-15.2"
+      - "/home/shira/.spicetify/gcc-ranlib-15.2"
       - "/home/shira/.local/bin/gcc-ranlib-15.2"
       - "/usr/local/sbin/gcc-ranlib-15.2"
       - "/usr/local/bin/gcc-ranlib-15.2"
+      - "/var/lib/flatpak/exports/bin/gcc-ranlib-15.2"
       - "/usr/bin/site_perl/gcc-ranlib-15.2"
       - "/usr/bin/vendor_perl/gcc-ranlib-15.2"
       - "/usr/bin/core_perl/gcc-ranlib-15.2"
       - "/usr/bin/gcc-ranlib-15"
+      - "/home/shira/pipes.sh/gcc-ranlib-15"
+      - "/home/shira/.spicetify/gcc-ranlib-15"
       - "/home/shira/.local/bin/gcc-ranlib-15"
       - "/usr/local/sbin/gcc-ranlib-15"
       - "/usr/local/bin/gcc-ranlib-15"
+      - "/var/lib/flatpak/exports/bin/gcc-ranlib-15"
       - "/usr/bin/site_perl/gcc-ranlib-15"
       - "/usr/bin/vendor_perl/gcc-ranlib-15"
       - "/usr/bin/core_perl/gcc-ranlib-15"
       - "/usr/bin/gcc-ranlib15"
+      - "/home/shira/pipes.sh/gcc-ranlib15"
+      - "/home/shira/.spicetify/gcc-ranlib15"
       - "/home/shira/.local/bin/gcc-ranlib15"
       - "/usr/local/sbin/gcc-ranlib15"
       - "/usr/local/bin/gcc-ranlib15"
+      - "/var/lib/flatpak/exports/bin/gcc-ranlib15"
       - "/usr/bin/site_perl/gcc-ranlib15"
       - "/usr/bin/vendor_perl/gcc-ranlib15"
       - "/usr/bin/core_perl/gcc-ranlib15"
     found: "/usr/bin/gcc-ranlib"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -998,8 +1166,8 @@ events:
     checks:
       - "Detecting C compiler ABI info"
     directories:
-      source: "/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-5tKOIo"
-      binary: "/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-5tKOIo"
+      source: "/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-ONRSlO"
+      binary: "/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-ONRSlO"
     cmakeVariables:
       CMAKE_CXX_STDLIB_MODULES_JSON: ""
       CMAKE_C_FLAGS: ""
@@ -1009,13 +1177,13 @@ events:
       variable: "CMAKE_C_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-5tKOIo'
+        Change Dir: '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-ONRSlO'
         
-        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_57ee5/fast
-        /usr/bin/make  -f CMakeFiles/cmTC_57ee5.dir/build.make CMakeFiles/cmTC_57ee5.dir/build
-        make[1]: Entering directory '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-5tKOIo'
-        Building C object CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.o
-        /usr/bin/cc   -v -o CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.o -c /usr/share/cmake/Modules/CMakeCCompilerABI.c
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_0ef4b/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_0ef4b.dir/build.make CMakeFiles/cmTC_0ef4b.dir/build
+        make[1]: Entering directory '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-ONRSlO'
+        Building C object CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.o
+        /usr/bin/cc   -v -o CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.o -c /usr/share/cmake/Modules/CMakeCCompilerABI.c
         Using built-in specs.
         COLLECT_GCC=/usr/bin/cc
         Target: x86_64-pc-linux-gnu
@@ -1023,11 +1191,12 @@ events:
         Thread model: posix
         Supported LTO compression algorithms: zlib zstd
         gcc version 15.2.1 20260209 (GCC) 
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_57ee5.dir/'
-         /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/cc1 -quiet -v /usr/share/cmake/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_57ee5.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=x86-64 -version -o /tmp/ccOr1OZn.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_0ef4b.dir/'
+         /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/cc1 -quiet -v /usr/share/cmake/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_0ef4b.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=x86-64 -version -o /tmp/cc3sBERY.s
         GNU C23 (GCC) version 15.2.1 20260209 (x86_64-pc-linux-gnu)
         	compiled by GNU C version 15.2.1 20260209, GMP version 6.3.0, MPFR version 4.2.2, MPC version 1.3.1, isl version isl-0.27-GMP
         
+        warning: MPC header version 1.3.1 differs from library version 1.4.0.
         GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
         ignoring nonexistent directory "/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../x86_64-pc-linux-gnu/include"
         #include "..." search starts here:
@@ -1038,14 +1207,14 @@ events:
          /usr/include
         End of search list.
         Compiler executable checksum: 04cd47456b5b249e30071da0154ed539
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_57ee5.dir/'
-         as -v --64 -o CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.o /tmp/ccOr1OZn.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_0ef4b.dir/'
+         as -v --64 -o CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.o /tmp/cc3sBERY.s
         GNU assembler version 2.46 (x86_64-pc-linux-gnu) using BFD version (GNU Binutils) 2.46
         COMPILER_PATH=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/
         LIBRARY_PATH=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/:/lib/../lib/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.'
-        Linking C executable cmTC_57ee5
-        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_57ee5.dir/link.txt --verbose=1
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.'
+        Linking C executable cmTC_0ef4b
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0ef4b.dir/link.txt --verbose=1
         Using built-in specs.
         COLLECT_GCC=/usr/bin/cc
         COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper
@@ -1056,14 +1225,14 @@ events:
         gcc version 15.2.1 20260209 (GCC) 
         COMPILER_PATH=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/
         LIBRARY_PATH=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/:/lib/../lib/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_57ee5' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_57ee5.'
-         /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/collect2 -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/ccLcbl9R.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_57ee5 /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib -v CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_0ef4b' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_0ef4b.'
+         /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/collect2 -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/ccfAM3ju.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_0ef4b /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib -v CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o
         collect2 version 15.2.1 20260209
-        /usr/bin/ld -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/ccLcbl9R.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_57ee5 /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib -v CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o
+        /usr/bin/ld -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/ccfAM3ju.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_0ef4b /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib -v CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o
         GNU ld (GNU Binutils) 2.46
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_57ee5' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_57ee5.'
-        /usr/bin/cc  -v -Wl,-v CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.o -o cmTC_57ee5
-        make[1]: Leaving directory '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-5tKOIo'
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_0ef4b' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_0ef4b.'
+        /usr/bin/cc  -v -Wl,-v CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.o -o cmTC_0ef4b
+        make[1]: Leaving directory '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-ONRSlO'
         
       exitCode: 0
   -
@@ -1098,13 +1267,13 @@ events:
       Parsed C implicit link information:
         link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
         linker tool regex: [^[ 	]*(->|"|[0-9]+>[ 	-]*Build:[ 	0-9]+ ms[ 	]*)?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)))("|,| |$)]
-        ignore line: [Change Dir: '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-5tKOIo']
+        ignore line: [Change Dir: '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-ONRSlO']
         ignore line: []
-        ignore line: [Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_57ee5/fast]
-        ignore line: [/usr/bin/make  -f CMakeFiles/cmTC_57ee5.dir/build.make CMakeFiles/cmTC_57ee5.dir/build]
-        ignore line: [make[1]: Entering directory '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-5tKOIo']
-        ignore line: [Building C object CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.o]
-        ignore line: [/usr/bin/cc   -v -o CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.o -c /usr/share/cmake/Modules/CMakeCCompilerABI.c]
+        ignore line: [Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_0ef4b/fast]
+        ignore line: [/usr/bin/make  -f CMakeFiles/cmTC_0ef4b.dir/build.make CMakeFiles/cmTC_0ef4b.dir/build]
+        ignore line: [make[1]: Entering directory '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-ONRSlO']
+        ignore line: [Building C object CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.o]
+        ignore line: [/usr/bin/cc   -v -o CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.o -c /usr/share/cmake/Modules/CMakeCCompilerABI.c]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/usr/bin/cc]
         ignore line: [Target: x86_64-pc-linux-gnu]
@@ -1112,11 +1281,12 @@ events:
         ignore line: [Thread model: posix]
         ignore line: [Supported LTO compression algorithms: zlib zstd]
         ignore line: [gcc version 15.2.1 20260209 (GCC) ]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_57ee5.dir/']
-        ignore line: [ /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/cc1 -quiet -v /usr/share/cmake/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_57ee5.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=x86-64 -version -o /tmp/ccOr1OZn.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_0ef4b.dir/']
+        ignore line: [ /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/cc1 -quiet -v /usr/share/cmake/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_0ef4b.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=x86-64 -version -o /tmp/cc3sBERY.s]
         ignore line: [GNU C23 (GCC) version 15.2.1 20260209 (x86_64-pc-linux-gnu)]
         ignore line: [	compiled by GNU C version 15.2.1 20260209  GMP version 6.3.0  MPFR version 4.2.2  MPC version 1.3.1  isl version isl-0.27-GMP]
         ignore line: []
+        ignore line: [warning: MPC header version 1.3.1 differs from library version 1.4.0.]
         ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
         ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../x86_64-pc-linux-gnu/include"]
         ignore line: [#include "..." search starts here:]
@@ -1127,14 +1297,14 @@ events:
         ignore line: [ /usr/include]
         ignore line: [End of search list.]
         ignore line: [Compiler executable checksum: 04cd47456b5b249e30071da0154ed539]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_57ee5.dir/']
-        ignore line: [ as -v --64 -o CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.o /tmp/ccOr1OZn.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_0ef4b.dir/']
+        ignore line: [ as -v --64 -o CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.o /tmp/cc3sBERY.s]
         ignore line: [GNU assembler version 2.46 (x86_64-pc-linux-gnu) using BFD version (GNU Binutils) 2.46]
         ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/]
         ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/:/lib/../lib/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.']
-        ignore line: [Linking C executable cmTC_57ee5]
-        ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_57ee5.dir/link.txt --verbose=1]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.']
+        ignore line: [Linking C executable cmTC_0ef4b]
+        ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0ef4b.dir/link.txt --verbose=1]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/usr/bin/cc]
         ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper]
@@ -1145,13 +1315,13 @@ events:
         ignore line: [gcc version 15.2.1 20260209 (GCC) ]
         ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/]
         ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/:/lib/../lib/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_57ee5' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_57ee5.']
-        link line: [ /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/collect2 -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/ccLcbl9R.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_57ee5 /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib -v CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_0ef4b' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_0ef4b.']
+        link line: [ /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/collect2 -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/ccfAM3ju.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_0ef4b /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib -v CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o]
           arg [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/collect2] ==> ignore
           arg [-plugin] ==> ignore
           arg [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so] ==> ignore
           arg [-plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper] ==> ignore
-          arg [-plugin-opt=-fresolution=/tmp/ccLcbl9R.res] ==> ignore
+          arg [-plugin-opt=-fresolution=/tmp/ccfAM3ju.res] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
           arg [-plugin-opt=-pass-through=-lc] ==> ignore
@@ -1166,7 +1336,7 @@ events:
           arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
           arg [-pie] ==> ignore
           arg [-o] ==> ignore
-          arg [cmTC_57ee5] ==> ignore
+          arg [cmTC_0ef4b] ==> ignore
           arg [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o] ==> obj [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o]
           arg [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o] ==> obj [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o]
           arg [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o] ==> obj [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o]
@@ -1178,7 +1348,7 @@ events:
           arg [-L/lib] ==> dir [/lib]
           arg [-L/usr/lib] ==> dir [/usr/lib]
           arg [-v] ==> ignore
-          arg [CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.o] ==> ignore
+          arg [CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.o] ==> ignore
           arg [-lgcc] ==> lib [gcc]
           arg [--push-state] ==> ignore
           arg [--as-needed] ==> ignore
@@ -1193,7 +1363,7 @@ events:
           arg [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o] ==> obj [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o]
           arg [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o] ==> obj [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o]
         ignore line: [collect2 version 15.2.1 20260209]
-        ignore line: [/usr/bin/ld -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/ccLcbl9R.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_57ee5 /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib -v CMakeFiles/cmTC_57ee5.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o]
+        ignore line: [/usr/bin/ld -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/ccfAM3ju.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_0ef4b /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib -v CMakeFiles/cmTC_0ef4b.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o]
         linker tool for 'C': /usr/bin/ld
         collapse obj [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o] ==> [/usr/lib/Scrt1.o]
         collapse obj [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o] ==> [/usr/lib/crti.o]
@@ -1230,8 +1400,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-Uy3y54"
-      binary: "/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-Uy3y54"
+      source: "/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-6eBJLy"
+      binary: "/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-6eBJLy"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -1242,13 +1412,13 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-Uy3y54'
+        Change Dir: '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-6eBJLy'
         
-        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_b30a5/fast
-        /usr/bin/make  -f CMakeFiles/cmTC_b30a5.dir/build.make CMakeFiles/cmTC_b30a5.dir/build
-        make[1]: Entering directory '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-Uy3y54'
-        Building CXX object CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.o
-        /usr/bin/c++   -v -o CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_be02a/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_be02a.dir/build.make CMakeFiles/cmTC_be02a.dir/build
+        make[1]: Entering directory '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-6eBJLy'
+        Building CXX object CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.o
+        /usr/bin/c++   -v -o CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp
         Using built-in specs.
         COLLECT_GCC=/usr/bin/c++
         Target: x86_64-pc-linux-gnu
@@ -1256,11 +1426,12 @@ events:
         Thread model: posix
         Supported LTO compression algorithms: zlib zstd
         gcc version 15.2.1 20260209 (GCC) 
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_b30a5.dir/'
-         /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/cc1plus -quiet -v -D_GNU_SOURCE /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_b30a5.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -o /tmp/cctfCOQm.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_be02a.dir/'
+         /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/cc1plus -quiet -v -D_GNU_SOURCE /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_be02a.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -o /tmp/cckZ7ORw.s
         GNU C++17 (GCC) version 15.2.1 20260209 (x86_64-pc-linux-gnu)
         	compiled by GNU C version 15.2.1 20260209, GMP version 6.3.0, MPFR version 4.2.2, MPC version 1.3.1, isl version isl-0.27-GMP
         
+        warning: MPC header version 1.3.1 differs from library version 1.4.0.
         GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
         ignoring nonexistent directory "/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../x86_64-pc-linux-gnu/include"
         #include "..." search starts here:
@@ -1274,14 +1445,14 @@ events:
          /usr/include
         End of search list.
         Compiler executable checksum: e33852c7c89951bc2dfbee7c05e182e4
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_b30a5.dir/'
-         as -v --64 -o CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.o /tmp/cctfCOQm.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_be02a.dir/'
+         as -v --64 -o CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.o /tmp/cckZ7ORw.s
         GNU assembler version 2.46 (x86_64-pc-linux-gnu) using BFD version (GNU Binutils) 2.46
         COMPILER_PATH=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/
         LIBRARY_PATH=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/:/lib/../lib/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.'
-        Linking CXX executable cmTC_b30a5
-        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b30a5.dir/link.txt --verbose=1
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.'
+        Linking CXX executable cmTC_be02a
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_be02a.dir/link.txt --verbose=1
         Using built-in specs.
         COLLECT_GCC=/usr/bin/c++
         COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper
@@ -1292,14 +1463,14 @@ events:
         gcc version 15.2.1 20260209 (GCC) 
         COMPILER_PATH=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/
         LIBRARY_PATH=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/:/lib/../lib/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_b30a5' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_b30a5.'
-         /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/collect2 -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/cc7nlFhg.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_b30a5 /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib -v CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_be02a' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_be02a.'
+         /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/collect2 -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/ccxjMOCr.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_be02a /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib -v CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o
         collect2 version 15.2.1 20260209
-        /usr/bin/ld -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/cc7nlFhg.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_b30a5 /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib -v CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o
+        /usr/bin/ld -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/ccxjMOCr.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_be02a /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib -v CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o
         GNU ld (GNU Binutils) 2.46
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_b30a5' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_b30a5.'
-        /usr/bin/c++  -v -Wl,-v CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_b30a5
-        make[1]: Leaving directory '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-Uy3y54'
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_be02a' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_be02a.'
+        /usr/bin/c++  -v -Wl,-v CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_be02a
+        make[1]: Leaving directory '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-6eBJLy'
         
       exitCode: 0
   -
@@ -1340,13 +1511,13 @@ events:
       Parsed CXX implicit link information:
         link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
         linker tool regex: [^[ 	]*(->|"|[0-9]+>[ 	-]*Build:[ 	0-9]+ ms[ 	]*)?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)))("|,| |$)]
-        ignore line: [Change Dir: '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-Uy3y54']
+        ignore line: [Change Dir: '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-6eBJLy']
         ignore line: []
-        ignore line: [Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_b30a5/fast]
-        ignore line: [/usr/bin/make  -f CMakeFiles/cmTC_b30a5.dir/build.make CMakeFiles/cmTC_b30a5.dir/build]
-        ignore line: [make[1]: Entering directory '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-Uy3y54']
-        ignore line: [Building CXX object CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.o]
-        ignore line: [/usr/bin/c++   -v -o CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_be02a/fast]
+        ignore line: [/usr/bin/make  -f CMakeFiles/cmTC_be02a.dir/build.make CMakeFiles/cmTC_be02a.dir/build]
+        ignore line: [make[1]: Entering directory '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-6eBJLy']
+        ignore line: [Building CXX object CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.o]
+        ignore line: [/usr/bin/c++   -v -o CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/usr/bin/c++]
         ignore line: [Target: x86_64-pc-linux-gnu]
@@ -1354,11 +1525,12 @@ events:
         ignore line: [Thread model: posix]
         ignore line: [Supported LTO compression algorithms: zlib zstd]
         ignore line: [gcc version 15.2.1 20260209 (GCC) ]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_b30a5.dir/']
-        ignore line: [ /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/cc1plus -quiet -v -D_GNU_SOURCE /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_b30a5.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -o /tmp/cctfCOQm.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_be02a.dir/']
+        ignore line: [ /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/cc1plus -quiet -v -D_GNU_SOURCE /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_be02a.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -o /tmp/cckZ7ORw.s]
         ignore line: [GNU C++17 (GCC) version 15.2.1 20260209 (x86_64-pc-linux-gnu)]
         ignore line: [	compiled by GNU C version 15.2.1 20260209  GMP version 6.3.0  MPFR version 4.2.2  MPC version 1.3.1  isl version isl-0.27-GMP]
         ignore line: []
+        ignore line: [warning: MPC header version 1.3.1 differs from library version 1.4.0.]
         ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
         ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../x86_64-pc-linux-gnu/include"]
         ignore line: [#include "..." search starts here:]
@@ -1372,14 +1544,14 @@ events:
         ignore line: [ /usr/include]
         ignore line: [End of search list.]
         ignore line: [Compiler executable checksum: e33852c7c89951bc2dfbee7c05e182e4]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_b30a5.dir/']
-        ignore line: [ as -v --64 -o CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.o /tmp/cctfCOQm.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_be02a.dir/']
+        ignore line: [ as -v --64 -o CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.o /tmp/cckZ7ORw.s]
         ignore line: [GNU assembler version 2.46 (x86_64-pc-linux-gnu) using BFD version (GNU Binutils) 2.46]
         ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/]
         ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/:/lib/../lib/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.']
-        ignore line: [Linking CXX executable cmTC_b30a5]
-        ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b30a5.dir/link.txt --verbose=1]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.']
+        ignore line: [Linking CXX executable cmTC_be02a]
+        ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_be02a.dir/link.txt --verbose=1]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/usr/bin/c++]
         ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper]
@@ -1390,13 +1562,13 @@ events:
         ignore line: [gcc version 15.2.1 20260209 (GCC) ]
         ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/]
         ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/:/lib/../lib/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_b30a5' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_b30a5.']
-        link line: [ /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/collect2 -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/cc7nlFhg.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_b30a5 /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib -v CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_be02a' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_be02a.']
+        link line: [ /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/collect2 -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/ccxjMOCr.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_be02a /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib -v CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o]
           arg [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/collect2] ==> ignore
           arg [-plugin] ==> ignore
           arg [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so] ==> ignore
           arg [-plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper] ==> ignore
-          arg [-plugin-opt=-fresolution=/tmp/cc7nlFhg.res] ==> ignore
+          arg [-plugin-opt=-fresolution=/tmp/ccxjMOCr.res] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
           arg [-plugin-opt=-pass-through=-lc] ==> ignore
@@ -1411,7 +1583,7 @@ events:
           arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
           arg [-pie] ==> ignore
           arg [-o] ==> ignore
-          arg [cmTC_b30a5] ==> ignore
+          arg [cmTC_be02a] ==> ignore
           arg [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o] ==> obj [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o]
           arg [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o] ==> obj [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o]
           arg [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o] ==> obj [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o]
@@ -1423,7 +1595,7 @@ events:
           arg [-L/lib] ==> dir [/lib]
           arg [-L/usr/lib] ==> dir [/usr/lib]
           arg [-v] ==> ignore
-          arg [CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+          arg [CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
           arg [-lstdc++] ==> lib [stdc++]
           arg [-lm] ==> lib [m]
           arg [-lgcc_s] ==> lib [gcc_s]
@@ -1434,7 +1606,7 @@ events:
           arg [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o] ==> obj [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o]
           arg [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o] ==> obj [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o]
         ignore line: [collect2 version 15.2.1 20260209]
-        ignore line: [/usr/bin/ld -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/cc7nlFhg.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_b30a5 /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib -v CMakeFiles/cmTC_b30a5.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o]
+        ignore line: [/usr/bin/ld -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/ccxjMOCr.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_be02a /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib -v CMakeFiles/cmTC_be02a.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o]
         linker tool for 'CXX': /usr/bin/ld
         collapse obj [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o] ==> [/usr/lib/Scrt1.o]
         collapse obj [/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o] ==> [/usr/lib/crti.o]
@@ -1478,8 +1650,8 @@ events:
     checks:
       - "Performing Test CMAKE_HAVE_LIBC_PTHREAD"
     directories:
-      source: "/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-VddlyP"
-      binary: "/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-VddlyP"
+      source: "/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-4GVKBV"
+      binary: "/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-4GVKBV"
     cmakeVariables:
       CMAKE_CXX_STDLIB_MODULES_JSON: ""
       CMAKE_C_FLAGS: ""
@@ -1490,18 +1662,18 @@ events:
       variable: "CMAKE_HAVE_LIBC_PTHREAD"
       cached: true
       stdout: |
-        Change Dir: '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-VddlyP'
+        Change Dir: '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-4GVKBV'
         
-        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_12c7f/fast
-        /usr/bin/make  -f CMakeFiles/cmTC_12c7f.dir/build.make CMakeFiles/cmTC_12c7f.dir/build
-        make[1]: Entrando no diretório '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-VddlyP'
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_e6839/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_e6839.dir/build.make CMakeFiles/cmTC_e6839.dir/build
+        make[1]: Entrando no diretório '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-4GVKBV'
         
-        Building C object CMakeFiles/cmTC_12c7f.dir/src.c.o
-        /usr/bin/cc -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_12c7f.dir/src.c.o -c /home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-VddlyP/src.c
-        Linking C executable cmTC_12c7f
-        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_12c7f.dir/link.txt --verbose=1
-        /usr/bin/cc CMakeFiles/cmTC_12c7f.dir/src.c.o -o cmTC_12c7f
-        make[1]: Saindo do diretório '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-VddlyP'
+        Building C object CMakeFiles/cmTC_e6839.dir/src.c.o
+        /usr/bin/cc -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_e6839.dir/src.c.o -c /home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-4GVKBV/src.c
+        Linking C executable cmTC_e6839
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e6839.dir/link.txt --verbose=1
+        /usr/bin/cc CMakeFiles/cmTC_e6839.dir/src.c.o -o cmTC_e6839
+        make[1]: Saindo do diretório '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-4GVKBV'
         
         
       exitCode: 0
@@ -1521,8 +1693,8 @@ events:
     checks:
       - "Performing Test HAVE_STDATOMIC"
     directories:
-      source: "/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-nVn9n3"
-      binary: "/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-nVn9n3"
+      source: "/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-D0ncVG"
+      binary: "/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-D0ncVG"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -1533,18 +1705,18 @@ events:
       variable: "HAVE_STDATOMIC"
       cached: true
       stdout: |
-        Change Dir: '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-nVn9n3'
+        Change Dir: '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-D0ncVG'
         
-        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_cb746/fast
-        /usr/bin/make  -f CMakeFiles/cmTC_cb746.dir/build.make CMakeFiles/cmTC_cb746.dir/build
-        make[1]: Entrando no diretório '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-nVn9n3'
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_e66ea/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_e66ea.dir/build.make CMakeFiles/cmTC_e66ea.dir/build
+        make[1]: Entrando no diretório '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-D0ncVG'
         
-        Building CXX object CMakeFiles/cmTC_cb746.dir/src.cxx.o
-        /usr/bin/c++ -DHAVE_STDATOMIC   -o CMakeFiles/cmTC_cb746.dir/src.cxx.o -c /home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-nVn9n3/src.cxx
-        Linking CXX executable cmTC_cb746
-        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cb746.dir/link.txt --verbose=1
-        /usr/bin/c++ CMakeFiles/cmTC_cb746.dir/src.cxx.o -o cmTC_cb746
-        make[1]: Saindo do diretório '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-nVn9n3'
+        Building CXX object CMakeFiles/cmTC_e66ea.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_STDATOMIC   -o CMakeFiles/cmTC_e66ea.dir/src.cxx.o -c /home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-D0ncVG/src.cxx
+        Linking CXX executable cmTC_e66ea
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e66ea.dir/link.txt --verbose=1
+        /usr/bin/c++ CMakeFiles/cmTC_e66ea.dir/src.cxx.o -o cmTC_e66ea
+        make[1]: Saindo do diretório '/home/shira/.config/quickshell/shiraos/build/CMakeFiles/CMakeScratch/TryCompile-D0ncVG'
         
         
       exitCode: 0
@@ -1620,6 +1792,54 @@ events:
         reason: "no_exist"
       -
         path: "/home/shira/.config/quickshell/shiraos/build/CMakeFiles/pkgRedirects/share/cps/qt6coretools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/Qt6CoreToolsConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/qt6coretools-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/lib/cps/Qt6CoreTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/lib/cps/qt6coretools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/share/cps/Qt6CoreTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/share/cps/qt6coretools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/Qt6CoreToolsConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/qt6coretools-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/lib/cps/Qt6CoreTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/lib/cps/qt6coretools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/share/cps/Qt6CoreTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/share/cps/qt6coretools.cps"
         mode: "cps"
         reason: "no_exist"
       -
@@ -1700,10 +1920,13 @@ events:
       version: "6.11.0"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -1831,10 +2054,13 @@ events:
       version: "6.11.0"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -1923,6 +2149,54 @@ events:
         mode: "cps"
         reason: "no_exist"
       -
+        path: "/home/shira/pipes.sh/Qt6QmlToolsConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/qt6qmltools-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/lib/cps/Qt6QmlTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/lib/cps/qt6qmltools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/share/cps/Qt6QmlTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/share/cps/qt6qmltools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/Qt6QmlToolsConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/qt6qmltools-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/lib/cps/Qt6QmlTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/lib/cps/qt6qmltools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/share/cps/Qt6QmlTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/share/cps/qt6qmltools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
         path: "/home/shira/.local/Qt6QmlToolsConfig.cmake"
         mode: "config"
         reason: "no_exist"
@@ -2000,10 +2274,13 @@ events:
       version: "6.11.0"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -2107,10 +2384,13 @@ events:
       version: "6.11.0"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -2222,10 +2502,13 @@ events:
       version: "6.11.0"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -2310,6 +2593,54 @@ events:
         mode: "cps"
         reason: "no_exist"
       -
+        path: "/home/shira/pipes.sh/Qt6QmlCompilerPlusPrivateToolsConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/qt6qmlcompilerplusprivatetools-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/lib/cps/Qt6QmlCompilerPlusPrivateTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/lib/cps/qt6qmlcompilerplusprivatetools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/share/cps/Qt6QmlCompilerPlusPrivateTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/share/cps/qt6qmlcompilerplusprivatetools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/Qt6QmlCompilerPlusPrivateToolsConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/qt6qmlcompilerplusprivatetools-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/lib/cps/Qt6QmlCompilerPlusPrivateTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/lib/cps/qt6qmlcompilerplusprivatetools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/share/cps/Qt6QmlCompilerPlusPrivateTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/share/cps/qt6qmlcompilerplusprivatetools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
         path: "/home/shira/.local/Qt6QmlCompilerPlusPrivateToolsConfig.cmake"
         mode: "config"
         reason: "no_exist"
@@ -2379,6 +2710,30 @@ events:
         reason: "no_exist"
       -
         path: "/usr/share/cps/qt6qmlcompilerplusprivatetools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/var/lib/flatpak/exports/Qt6QmlCompilerPlusPrivateToolsConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/var/lib/flatpak/exports/qt6qmlcompilerplusprivatetools-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/var/lib/flatpak/exports/lib/cps/Qt6QmlCompilerPlusPrivateTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/var/lib/flatpak/exports/lib/cps/qt6qmlcompilerplusprivatetools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/var/lib/flatpak/exports/share/cps/Qt6QmlCompilerPlusPrivateTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/var/lib/flatpak/exports/share/cps/qt6qmlcompilerplusprivatetools.cps"
         mode: "cps"
         reason: "no_exist"
       -
@@ -2504,10 +2859,13 @@ events:
     found: null
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -2811,10 +3169,13 @@ events:
       version: "6.11.0"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -2903,6 +3264,54 @@ events:
         mode: "cps"
         reason: "no_exist"
       -
+        path: "/home/shira/pipes.sh/Qt6QuickToolsConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/qt6quicktools-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/lib/cps/Qt6QuickTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/lib/cps/qt6quicktools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/share/cps/Qt6QuickTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/share/cps/qt6quicktools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/Qt6QuickToolsConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/qt6quicktools-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/lib/cps/Qt6QuickTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/lib/cps/qt6quicktools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/share/cps/Qt6QuickTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/share/cps/qt6quicktools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
         path: "/home/shira/.local/Qt6QuickToolsConfig.cmake"
         mode: "config"
         reason: "no_exist"
@@ -2980,10 +3389,13 @@ events:
       version: "6.11.0"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -3028,10 +3440,13 @@ events:
     names:
       - "GL/gl.h"
     candidate_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -3051,10 +3466,13 @@ events:
       - "/usr/openwin/share/include/"
       - "/opt/graphics/OpenGL/include/"
     searched_directories:
+      - "/home/shira/pipes.sh/GL/gl.h"
+      - "/home/shira/.spicetify/GL/gl.h"
       - "/home/shira/.local/bin/GL/gl.h"
       - "/usr/local/sbin/GL/gl.h"
       - "/usr/local/bin/GL/gl.h"
       - "/usr/bin/GL/gl.h"
+      - "/var/lib/flatpak/exports/bin/GL/gl.h"
       - "/usr/bin/site_perl/GL/gl.h"
       - "/usr/bin/vendor_perl/GL/gl.h"
       - "/usr/bin/core_perl/GL/gl.h"
@@ -3063,10 +3481,13 @@ events:
     found: "/usr/include/"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -3113,10 +3534,13 @@ events:
     names:
       - "GL/glx.h"
     candidate_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -3133,10 +3557,13 @@ events:
       - "/opt/"
       - "/usr/include/X11/"
     searched_directories:
+      - "/home/shira/pipes.sh/GL/glx.h"
+      - "/home/shira/.spicetify/GL/glx.h"
       - "/home/shira/.local/bin/GL/glx.h"
       - "/usr/local/sbin/GL/glx.h"
       - "/usr/local/bin/GL/glx.h"
       - "/usr/bin/GL/glx.h"
+      - "/var/lib/flatpak/exports/bin/GL/glx.h"
       - "/usr/bin/site_perl/GL/glx.h"
       - "/usr/bin/vendor_perl/GL/glx.h"
       - "/usr/bin/core_perl/GL/glx.h"
@@ -3145,10 +3572,13 @@ events:
     found: "/usr/include/"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -3195,10 +3625,13 @@ events:
     names:
       - "EGL/egl.h"
     candidate_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -3215,10 +3648,13 @@ events:
       - "/opt/"
       - "/usr/include/X11/"
     searched_directories:
+      - "/home/shira/pipes.sh/EGL/egl.h"
+      - "/home/shira/.spicetify/EGL/egl.h"
       - "/home/shira/.local/bin/EGL/egl.h"
       - "/usr/local/sbin/EGL/egl.h"
       - "/usr/local/bin/EGL/egl.h"
       - "/usr/bin/EGL/egl.h"
+      - "/var/lib/flatpak/exports/bin/EGL/egl.h"
       - "/usr/bin/site_perl/EGL/egl.h"
       - "/usr/bin/vendor_perl/EGL/egl.h"
       - "/usr/bin/core_perl/EGL/egl.h"
@@ -3227,10 +3663,13 @@ events:
     found: "/usr/include/"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -3277,10 +3716,13 @@ events:
     names:
       - "GLES2/gl2.h"
     candidate_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -3297,10 +3739,13 @@ events:
       - "/opt/"
       - "/usr/include/X11/"
     searched_directories:
+      - "/home/shira/pipes.sh/GLES2/gl2.h"
+      - "/home/shira/.spicetify/GLES2/gl2.h"
       - "/home/shira/.local/bin/GLES2/gl2.h"
       - "/usr/local/sbin/GLES2/gl2.h"
       - "/usr/local/bin/GLES2/gl2.h"
       - "/usr/bin/GLES2/gl2.h"
+      - "/var/lib/flatpak/exports/bin/GLES2/gl2.h"
       - "/usr/bin/site_perl/GLES2/gl2.h"
       - "/usr/bin/vendor_perl/GLES2/gl2.h"
       - "/usr/bin/core_perl/GLES2/gl2.h"
@@ -3309,10 +3754,13 @@ events:
     found: "/usr/include/"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -3359,10 +3807,13 @@ events:
     names:
       - "GLES3/gl3.h"
     candidate_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -3379,10 +3830,13 @@ events:
       - "/opt/"
       - "/usr/include/X11/"
     searched_directories:
+      - "/home/shira/pipes.sh/GLES3/gl3.h"
+      - "/home/shira/.spicetify/GLES3/gl3.h"
       - "/home/shira/.local/bin/GLES3/gl3.h"
       - "/usr/local/sbin/GLES3/gl3.h"
       - "/usr/local/bin/GLES3/gl3.h"
       - "/usr/bin/GLES3/gl3.h"
+      - "/var/lib/flatpak/exports/bin/GLES3/gl3.h"
       - "/usr/bin/site_perl/GLES3/gl3.h"
       - "/usr/bin/vendor_perl/GLES3/gl3.h"
       - "/usr/bin/core_perl/GLES3/gl3.h"
@@ -3391,10 +3845,13 @@ events:
     found: "/usr/include/"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -3441,10 +3898,13 @@ events:
     names:
       - "GL/xmesa.h"
     candidate_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -3464,10 +3924,13 @@ events:
       - "/usr/openwin/share/include/"
       - "/opt/graphics/OpenGL/include/"
     searched_directories:
+      - "/home/shira/pipes.sh/GL/xmesa.h"
+      - "/home/shira/.spicetify/GL/xmesa.h"
       - "/home/shira/.local/bin/GL/xmesa.h"
       - "/usr/local/sbin/GL/xmesa.h"
       - "/usr/local/bin/GL/xmesa.h"
       - "/usr/bin/GL/xmesa.h"
+      - "/var/lib/flatpak/exports/bin/GL/xmesa.h"
       - "/usr/bin/site_perl/GL/xmesa.h"
       - "/usr/bin/vendor_perl/GL/xmesa.h"
       - "/usr/bin/core_perl/GL/xmesa.h"
@@ -3489,10 +3952,13 @@ events:
     found: false
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -3539,10 +4005,13 @@ events:
     names:
       - "GL/glu.h"
     candidate_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -3559,10 +4028,13 @@ events:
       - "/opt/"
       - "/usr/include/X11/"
     searched_directories:
+      - "/home/shira/pipes.sh/GL/glu.h"
+      - "/home/shira/.spicetify/GL/glu.h"
       - "/home/shira/.local/bin/GL/glu.h"
       - "/usr/local/sbin/GL/glu.h"
       - "/usr/local/bin/GL/glu.h"
       - "/usr/bin/GL/glu.h"
+      - "/var/lib/flatpak/exports/bin/GL/glu.h"
       - "/usr/bin/site_perl/GL/glu.h"
       - "/usr/bin/vendor_perl/GL/glu.h"
       - "/usr/bin/core_perl/GL/glu.h"
@@ -3571,10 +4043,13 @@ events:
     found: "/usr/include/"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -3621,10 +4096,13 @@ events:
     names:
       - "OpenGL"
     candidate_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -3641,10 +4119,13 @@ events:
       - "/opt/"
       - "/usr/lib/X11/"
     searched_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -3653,10 +4134,13 @@ events:
     found: "/usr/lib/libOpenGL.so"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -3703,6 +4187,10 @@ events:
     names:
       - "GLX"
     candidate_directories:
+      - "/home/shira/pipes.sh/libglvnd/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/libglvnd/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/libglvnd/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/libglvnd/"
@@ -3711,6 +4199,8 @@ events:
       - "/usr/local/bin/"
       - "/usr/bin/libglvnd/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/libglvnd/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/libglvnd/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/libglvnd/"
@@ -3742,6 +4232,10 @@ events:
       - "/usr/lib/X11/libglvnd/"
       - "/usr/lib/X11/"
     searched_directories:
+      - "/home/shira/pipes.sh/libglvnd/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/libglvnd/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/libglvnd/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/libglvnd/"
@@ -3750,6 +4244,8 @@ events:
       - "/usr/local/bin/"
       - "/usr/bin/libglvnd/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/libglvnd/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/libglvnd/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/libglvnd/"
@@ -3764,10 +4260,13 @@ events:
     found: "/usr/lib/libGLX.so"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -3814,6 +4313,10 @@ events:
     names:
       - "EGL"
     candidate_directories:
+      - "/home/shira/pipes.sh/libglvnd/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/libglvnd/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/libglvnd/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/libglvnd/"
@@ -3822,6 +4325,8 @@ events:
       - "/usr/local/bin/"
       - "/usr/bin/libglvnd/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/libglvnd/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/libglvnd/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/libglvnd/"
@@ -3853,6 +4358,10 @@ events:
       - "/usr/lib/X11/libglvnd/"
       - "/usr/lib/X11/"
     searched_directories:
+      - "/home/shira/pipes.sh/libglvnd/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/libglvnd/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/libglvnd/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/libglvnd/"
@@ -3861,6 +4370,8 @@ events:
       - "/usr/local/bin/"
       - "/usr/bin/libglvnd/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/libglvnd/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/libglvnd/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/libglvnd/"
@@ -3875,10 +4386,13 @@ events:
     found: "/usr/lib/libEGL.so"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -3925,10 +4439,13 @@ events:
     names:
       - "GLESv2"
     candidate_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -3945,10 +4462,13 @@ events:
       - "/opt/"
       - "/usr/lib/X11/"
     searched_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -3957,10 +4477,13 @@ events:
     found: "/usr/lib/libGLESv2.so"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -4008,10 +4531,13 @@ events:
       - "GLESv3"
       - "GLESv2"
     candidate_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -4028,10 +4554,13 @@ events:
       - "/opt/"
       - "/usr/lib/X11/"
     searched_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -4047,10 +4576,13 @@ events:
       - "/opt/lib/"
       - "/opt/"
       - "/usr/lib/X11/"
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -4059,10 +4591,13 @@ events:
     found: "/usr/lib/libGLESv2.so"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -4110,10 +4645,13 @@ events:
       - "GLU"
       - "MesaGLU"
     candidate_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -4133,10 +4671,13 @@ events:
       - "/usr/openwin/lib/"
       - "/usr/shlib/"
     searched_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -4145,10 +4686,13 @@ events:
     found: "/usr/lib/libGLU.so"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -4193,10 +4737,13 @@ events:
     names:
       - "vulkan/vulkan.h"
     candidate_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -4213,10 +4760,13 @@ events:
       - "/opt/"
       - "/usr/include/X11/"
     searched_directories:
+      - "/home/shira/pipes.sh/vulkan/vulkan.h"
+      - "/home/shira/.spicetify/vulkan/vulkan.h"
       - "/home/shira/.local/bin/vulkan/vulkan.h"
       - "/usr/local/sbin/vulkan/vulkan.h"
       - "/usr/local/bin/vulkan/vulkan.h"
       - "/usr/bin/vulkan/vulkan.h"
+      - "/var/lib/flatpak/exports/bin/vulkan/vulkan.h"
       - "/usr/bin/site_perl/vulkan/vulkan.h"
       - "/usr/bin/vendor_perl/vulkan/vulkan.h"
       - "/usr/bin/core_perl/vulkan/vulkan.h"
@@ -4225,10 +4775,13 @@ events:
     found: "/usr/include/"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -4273,10 +4826,13 @@ events:
     names:
       - "vulkan"
     candidate_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -4293,10 +4849,13 @@ events:
       - "/opt/"
       - "/usr/lib/X11/"
     searched_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -4305,10 +4864,13 @@ events:
     found: "/usr/lib/libvulkan.so"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -4353,10 +4915,13 @@ events:
     names:
       - "glslc"
     candidate_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -4378,16 +4943,21 @@ events:
       - "/opt/sbin/"
       - "/opt/"
     searched_directories:
+      - "/home/shira/pipes.sh/glslc"
+      - "/home/shira/.spicetify/glslc"
       - "/home/shira/.local/bin/glslc"
       - "/usr/local/sbin/glslc"
       - "/usr/local/bin/glslc"
     found: "/usr/bin/glslc"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -4430,10 +5000,13 @@ events:
     names:
       - "glslangValidator"
     candidate_directories:
+      - "/home/shira/pipes.sh/"
+      - "/home/shira/.spicetify/"
       - "/home/shira/.local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/bin/"
       - "/usr/bin/"
+      - "/var/lib/flatpak/exports/bin/"
       - "/usr/bin/site_perl/"
       - "/usr/bin/vendor_perl/"
       - "/usr/bin/core_perl/"
@@ -4455,16 +5028,21 @@ events:
       - "/opt/sbin/"
       - "/opt/"
     searched_directories:
+      - "/home/shira/pipes.sh/glslangValidator"
+      - "/home/shira/.spicetify/glslangValidator"
       - "/home/shira/.local/bin/glslangValidator"
       - "/usr/local/sbin/glslangValidator"
       - "/usr/local/bin/glslangValidator"
     found: "/usr/bin/glslangValidator"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -4558,6 +5136,54 @@ events:
         mode: "cps"
         reason: "no_exist"
       -
+        path: "/home/shira/pipes.sh/Qt6GuiToolsConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/qt6guitools-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/lib/cps/Qt6GuiTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/lib/cps/qt6guitools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/share/cps/Qt6GuiTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/share/cps/qt6guitools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/Qt6GuiToolsConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/qt6guitools-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/lib/cps/Qt6GuiTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/lib/cps/qt6guitools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/share/cps/Qt6GuiTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/share/cps/qt6guitools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
         path: "/home/shira/.local/Qt6GuiToolsConfig.cmake"
         mode: "config"
         reason: "no_exist"
@@ -4635,10 +5261,13 @@ events:
       version: "6.11.0"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -4737,6 +5366,54 @@ events:
         mode: "cps"
         reason: "no_exist"
       -
+        path: "/home/shira/pipes.sh/Qt6DBusToolsConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/qt6dbustools-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/lib/cps/Qt6DBusTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/lib/cps/qt6dbustools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/share/cps/Qt6DBusTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/share/cps/qt6dbustools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/Qt6DBusToolsConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/qt6dbustools-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/lib/cps/Qt6DBusTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/lib/cps/qt6dbustools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/share/cps/Qt6DBusTools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/share/cps/qt6dbustools.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
         path: "/home/shira/.local/Qt6DBusToolsConfig.cmake"
         mode: "config"
         reason: "no_exist"
@@ -4814,10 +5491,13 @@ events:
       version: "6.11.0"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -4942,10 +5622,13 @@ events:
       version: "6.11.0"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -5065,10 +5748,13 @@ events:
       version: "6.11.0"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -5180,10 +5866,13 @@ events:
       version: "6.11.0"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -5300,10 +5989,13 @@ events:
       version: "6.11.0"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -5415,10 +6107,13 @@ events:
       version: "6.11.0"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -5538,10 +6233,13 @@ events:
       version: "6.11.0"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -6077,10 +6775,13 @@ events:
       version: "6.11.0"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
@@ -6170,6 +6871,54 @@ events:
         reason: "no_exist"
       -
         path: "/home/shira/.config/quickshell/shiraos/build/CMakeFiles/pkgRedirects/share/cps/qt6.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/Qt6Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/qt6-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/lib/cps/Qt6.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/lib/cps/qt6.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/share/cps/Qt6.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/pipes.sh/share/cps/qt6.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/Qt6Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/qt6-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/lib/cps/Qt6.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/lib/cps/qt6.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/share/cps/Qt6.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "/home/shira/.spicetify/share/cps/qt6.cps"
         mode: "cps"
         reason: "no_exist"
       -
@@ -6317,11 +7066,107 @@ events:
         mode: "config"
         reason: "no_exist"
       -
+        path: "/usr/lib/cmake/Qt6WaylandEglCompositorHwIntegrationPrivate/Qt6Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandEglCompositorHwIntegrationPrivate/qt6-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositorXdgShellPrivate/Qt6Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositorXdgShellPrivate/qt6-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositorXdgShell/Qt6Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositorXdgShell/qt6-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositorWLShellPrivate/Qt6Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositorWLShellPrivate/qt6-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositorWLShell/Qt6Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositorWLShell/qt6-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositorPrivate/Qt6Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositorPrivate/qt6-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositorPresentationTimePrivate/Qt6Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositorPresentationTimePrivate/qt6-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositorPresentationTime/Qt6Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositorPresentationTime/qt6-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositorIviapplicationPrivate/Qt6Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositorIviapplicationPrivate/qt6-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositorIviapplication/Qt6Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositorIviapplication/qt6-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositor/Qt6Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandCompositor/qt6-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
         path: "/usr/lib/cmake/Qt6WaylandClientPrivate/Qt6Config.cmake"
         mode: "config"
         reason: "no_exist"
       -
         path: "/usr/lib/cmake/Qt6WaylandClientPrivate/qt6-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandClientFeaturesPrivate/Qt6Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/lib/cmake/Qt6WaylandClientFeaturesPrivate/qt6-config.cmake"
         mode: "config"
         reason: "no_exist"
       -
@@ -7578,10 +8423,13 @@ events:
       version: "6.11.0"
     search_context:
       ENV{PATH}:
+        - "/home/shira/pipes.sh"
+        - "/home/shira/.spicetify"
         - "/home/shira/.local/bin"
         - "/usr/local/sbin"
         - "/usr/local/bin"
         - "/usr/bin"
+        - "/var/lib/flatpak/exports/bin"
         - "/usr/bin/site_perl"
         - "/usr/bin/vendor_perl"
         - "/usr/bin/core_perl"
