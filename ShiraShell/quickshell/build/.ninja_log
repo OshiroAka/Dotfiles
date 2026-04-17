@@ -1,7 +1,0 @@
-# ninja log v7
-2	512	1772667183470584877	oshiro_autogen/timestamp	8d13e4ca27cf5212
-2	512	1772667183470584877	oshiro_autogen/mocs_compilation.cpp	8d13e4ca27cf5212
-2	512	1772667183470584877	/home/oshiro/.config/quickshell/build/oshiro_autogen/timestamp	8d13e4ca27cf5212
-2	512	1772667183470584877	/home/oshiro/.config/quickshell/build/oshiro_autogen/mocs_compilation.cpp	8d13e4ca27cf5212
-514	3301	1772667183489584924	CMakeFiles/oshiro.dir/oshiro_autogen/mocs_compilation.cpp.o	3fb6fd4319ac2e06
-514	3713	1772667183490393267	CMakeFiles/oshiro.dir/plugin/Plugin.cpp.o	1d9667beb6e0bea5
