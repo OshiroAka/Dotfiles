@@ -1,7 +1,6 @@
-Teste de script pré pronto
-By - AI - 
+Readme temporario de IA só para testes
 
-# 🌸 ShiraOS
+# 🌸 ShiraShell
 
 > OShiroAKA > Shira
 
@@ -9,7 +8,7 @@ By - AI -
 
 ## ✨ About
 
-ShiraOS is a custom shell/UI project focused on aesthetics, productivity, blur effects, dynamic widgets, animations, and a modern Linux experience built around Hyprland + Quickshell.
+ShiraShell is a wallpaper selector for Wayland, especially Hyprland. It helps users change wallpapers easily without losing their customizations and visual setup.
 
 ## 🖼️ Preview
 
