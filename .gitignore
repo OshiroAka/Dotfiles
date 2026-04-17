@@ -1,28 +1,111 @@
-# Builds
-quickshell/build/
+# =========================
+# Build / Compilação
+# =========================
+build/
+*/build/
 **/build/
+dist/
+out/
+target/
+release/
+debug/
 
-# Binários
-*.so
+# =========================
+# Binários / Objetos
+# =========================
 *.o
+*.so
 *.a
+*.out
+*.bin
+*.exe
+*.dll
+*.class
 
+# =========================
 # CMake
+# =========================
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
 Makefile
+compile_commands.json
 install_manifest.txt
 
-# Qt cache
+# =========================
+# Qt / QML / Quickshell Cache
+# =========================
 .qt/
 .rcc/
+qmlcache/
+*.qmlc
+*.jsc
+*.cache
 
+# =========================
+# Python
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+
+# =========================
+# Node (caso use no futuro)
+# =========================
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# =========================
+# Logs / Temporários
+# =========================
+*.log
+*.tmp
+*.temp
+*.pid
+
+# =========================
 # Backups
+# =========================
 *.bak
 *.bak_*
 *.save
+*.old
+*.orig
+*~
 
-# Temporários
-*.tmp
-*.log
+# =========================
+# Sistema
+# =========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================
+# VSCode / IDEs
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# Secrets / Privado
+# =========================
+.env
+.env.local
+*.key
+*.pem
+*.secret
+
+# =========================
+# Screenshots locais (opcional)
+# =========================
+screenshots/raw/
+
+
+# Só para ficar mais organizado
