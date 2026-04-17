@@ -1,5 +1,3 @@
-Readme temporario de IA só para testes
-
 # 🌸 ShiraShell
 
 > OShiroAKA > Shira
@@ -8,7 +6,7 @@ Readme temporario de IA só para testes
 
 ## ✨ About
 
-ShiraShell is a wallpaper selector for Wayland, especially Hyprland. It helps users change wallpapers easily without losing their customizations and visual setup.
+ShiraShell is a clean wallpaper selector for Wayland, especially Hyprland. It focuses on making wallpaper changes easy while preserving your current customization. Simple on the su
 
 ## 🖼️ Preview
 
@@ -18,13 +16,13 @@ ShiraShell is a wallpaper selector for Wayland, especially Hyprland. It helps us
 
 ## 🚀 Features
 
-* Dynamic topbar / widgets
-* Blur & transparency effects
-* Wallpaper integration
-* Accent color extraction
-* Music / media modules
-* Minimal + futuristic design
-* Fast and customizable workflow
+* Clean wallpaper selector interface
+* Built for Wayland (especially Hyprland)
+* Easy wallpaper switching
+* Keeps existing customization intact
+* Supports features many selectors do not offer
+* Fast and simple workflow
+* Minimal visual experience
 
 ## 🛠️ Stack
 
@@ -74,4 +72,3 @@ Choose your license and add LICENSE file.
 ||   OShiroAKA > Shira        ||
 =================================
 ```
-
