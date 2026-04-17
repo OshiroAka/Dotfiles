@@ -1,9 +1,0 @@
---bare
--I
-/home/shira/.config/quickshell/shiraos/build/plugin
--I
-/home/shira/.config/quickshell/shiraos/build/plugin
--I
-/usr/lib/qt6/qml
---resource
-/home/shira/.config/quickshell/shiraos/build/plugin/.qt/rcc/qmake_ShiraOS.qrc

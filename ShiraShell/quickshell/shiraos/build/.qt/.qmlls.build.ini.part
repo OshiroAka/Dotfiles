@@ -1,3 +1,0 @@
-[<SLASH>home<SLASH>shira<SLASH>.config<SLASH>quickshell<SLASH>shiraos<SLASH>plugin]
-importPaths="/home/shira/.config/quickshell/shiraos/build/plugin:/home/shira/.config/quickshell/shiraos/build:/usr/lib/qt6/qml"
-resourceFiles="/home/shira/.config/quickshell/shiraos/build/plugin/.qt/rcc/qmake_ShiraOS.qrc"

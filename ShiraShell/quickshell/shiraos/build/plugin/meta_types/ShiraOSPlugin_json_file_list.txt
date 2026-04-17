@@ -1,2 +1,0 @@
-/home/shira/.config/quickshell/shiraos/build/plugin/ShiraOSPlugin_autogen/include/../EWIEGA46WW/moc_AppState.cpp.json
-/home/shira/.config/quickshell/shiraos/build/plugin/ShiraOSPlugin_autogen/include/plugin.moc.json
