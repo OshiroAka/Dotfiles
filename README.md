@@ -72,3 +72,12 @@ Choose your license and add LICENSE file.
 ||   OShiroAKA > Shira        ||
 =================================
 ```
+
+
+
+//////// Vou deixar assim depois faço o meu propio e manualmente está faltando detalhes e etc, está tarde então vou deixar isso para depois /////
+
+
+///////I'll leave it like this, I'll make my own manually later; it's missing details, etc, it's late so I'll leave that for later ///////
+
+
