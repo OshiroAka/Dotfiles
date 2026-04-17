@@ -81,3 +81,9 @@ Choose your license and add LICENSE file.
 ///////I'll leave it like this, I'll make my own manually later; it's missing details, etc, it's late so I'll leave that for later ///////
 
 
+
+
+REMINDER: REAME.md was created by AI, not by me, it's just a test!
+
+
+LEMBRETE: REAME.md feito por IA, não foi eu, é só um teste!
