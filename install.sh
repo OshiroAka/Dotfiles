@@ -106,7 +106,7 @@ if ! $DO_UPDATE; then
         # Build
         cmake ninja gcc pkgconf
         # Ferramentas
-        git python imagemagick swww
+        git python imagemagick
         # Hyprland extras
         xdg-desktop-portal-hyprland
     )
@@ -150,13 +150,6 @@ if ! command -v qs &>/dev/null; then
     exit 1
 fi
 ok "Quickshell: $(qs --version 2>/dev/null | head -1 || echo 'ok')"
-
-# Verificar swww
-if ! command -v swww &>/dev/null; then
-    warn "swww não encontrado — instale: sudo pacman -S swww"
-else
-    ok "swww: ok"
-fi
 
 if ! command -v awww &>/dev/null; then
     warn "awww não encontrado — instale: yay -S awww"
@@ -332,7 +325,6 @@ bind = SUPER, W, exec, shiraos wallpaper
 
 # Iniciar ao login
 exec-once = awww-daemon
-exec-once = swww-daemon
 exec-once = shiraos
 HYPR_BLOCK
 
