@@ -190,7 +190,7 @@ fi
 # ── Instalar config do Quickshell ─────────────────────────────
 step "Instalando ShiraOS WallpaperSelector"
 
-SRC_QS="$DOTFILES/ShiraShell/quickshell"
+SRC_QS="$DOTFILES/ShiraShell/shiraos"
 
 if [[ ! -d "$SRC_QS" ]]; then
     fail "Pasta ShiraShell não encontrada nos dotfiles (esperado: $SRC_QS)"
