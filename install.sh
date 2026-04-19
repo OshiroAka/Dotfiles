@@ -253,7 +253,7 @@ CMD="${1:-start}"
 case "$CMD" in
     restart|r)
         pkill -x qs 2>/dev/null; sleep 0.25
-        qs -c shiraos -d &
+        qs --config $HOME/.config/quickshell/shiraos -d &
         echo "ShiraOS reiniciado."
         ;;
     stop|s)
@@ -261,20 +261,20 @@ case "$CMD" in
         ;;
     debug|d)
         pkill -x qs 2>/dev/null; sleep 0.1
-        qs -c shiraos
+        qs --config $HOME/.config/quickshell/shiraos
         ;;
     ipc)
         shift
-        qs -c shiraos ipc call shiraos "$@"
+        qs --config $HOME/.config/quickshell/shiraos ipc call shiraos "$@"
         ;;
     wallpaper|w)
-        qs -c shiraos ipc call shiraos toggleWallpaper
+        qs --config $HOME/.config/quickshell/shiraos ipc call shiraos toggleWallpaper
         ;;
     start|*)
         if pgrep -x qs &>/dev/null; then
             echo "ShiraOS já está rodando. Use 'shiraos restart' para reiniciar."
         else
-            qs -c shiraos -d &
+            qs --config $HOME/.config/quickshell/shiraos -d &
             echo "ShiraOS iniciado."
         fi
         ;;
