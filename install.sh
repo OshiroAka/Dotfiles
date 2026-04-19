@@ -106,7 +106,7 @@ if ! $DO_UPDATE; then
         # Build
         cmake ninja gcc pkgconf
         # Ferramentas
-        git python imagemagick
+        git python imagemagick swww
         # Hyprland extras
         xdg-desktop-portal-hyprland
     )
@@ -152,6 +152,12 @@ fi
 ok "Quickshell: $(qs --version 2>/dev/null | head -1 || echo 'ok')"
 
 # Verificar swww
+if ! command -v swww &>/dev/null; then
+    warn "swww não encontrado — instale: sudo pacman -S swww"
+else
+    ok "swww: ok"
+fi
+
 if ! command -v awww &>/dev/null; then
     warn "awww não encontrado — instale: yay -S awww"
 else
