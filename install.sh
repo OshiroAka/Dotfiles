@@ -213,10 +213,10 @@ fi
 
 if $DO_UPDATE; then
     # Copia apenas os arquivos do projeto, preserva wp_settings.json
-    rsync -a --exclude="wp_settings.json" "$SRC_QS/" "$QS_CFG/"
+    rsync -a --exclude="wp_settings.json" "$SRC_QS/." "$QS_CFG/"
     [[ -f /tmp/wp_settings_backup.json ]] && mv /tmp/wp_settings_backup.json "$SETTINGS_FILE"
 else
-    cp -r "$SRC_QS" "$QS_CFG"
+    cp -r "$SRC_QS/." "$QS_CFG/"
     [[ -f /tmp/wp_settings_backup.json ]] && mv /tmp/wp_settings_backup.json "$SETTINGS_FILE"
 fi
 ok "Config instalada em $QS_CFG"
