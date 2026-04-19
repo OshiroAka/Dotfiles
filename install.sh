@@ -253,7 +253,7 @@ CMD="${1:-start}"
 case "$CMD" in
     restart|r)
         pkill -x qs 2>/dev/null; sleep 0.25
-        qs --config $HOME/.config/quickshell/shiraos -d &
+        qs -c shiraos -d &
         echo "ShiraOS reiniciado."
         ;;
     stop|s)
@@ -261,20 +261,20 @@ case "$CMD" in
         ;;
     debug|d)
         pkill -x qs 2>/dev/null; sleep 0.1
-        qs --config $HOME/.config/quickshell/shiraos
+        qs -c shiraos
         ;;
     ipc)
         shift
-        qs --config $HOME/.config/quickshell/shiraos ipc call shiraos "$@"
+        qs -c shiraos ipc call shiraos "$@"
         ;;
     wallpaper|w)
-        qs --config $HOME/.config/quickshell/shiraos ipc call shiraos toggleWallpaper
+        qs -c shiraos ipc call shiraos toggleWallpaper
         ;;
     start|*)
         if pgrep -x qs &>/dev/null; then
             echo "ShiraOS já está rodando. Use 'shiraos restart' para reiniciar."
         else
-            qs --config $HOME/.config/quickshell/shiraos -d &
+            qs -c shiraos -d &
             echo "ShiraOS iniciado."
         fi
         ;;
@@ -318,7 +318,7 @@ if $DO_HYPR; then
 # ╚══════════════════════════════════════════════════════════╝
 
 # Blur + glass no seletor
-layerrule = blur,          shiraos-wallpaper
+layerrule = blur, shiraos-wallpaper
 layerrule = ignorealpha 0.05, shiraos-wallpaper
 
 # Atalho: SUPER+W abre o seletor
@@ -326,6 +326,7 @@ bind = SUPER, W, exec, shiraos wallpaper
 
 # Iniciar ao login
 exec-once = awww-daemon
+exec-once = swww-daemon
 exec-once = shiraos
 HYPR_BLOCK
 
