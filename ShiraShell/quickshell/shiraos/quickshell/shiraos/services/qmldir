@@ -1,0 +1,3 @@
+module ShiraOS.Services
+singleton AppState 1.0 AppState.qml
+MprisService 1.0 MprisService.qml
