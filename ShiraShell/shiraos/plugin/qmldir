@@ -1,0 +1,3 @@
+module ShiraOS
+plugin ShiraOSPlugin
+classname ShiraOSPlugin
