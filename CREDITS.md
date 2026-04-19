@@ -1,11 +1,10 @@
 # Credits
 
 ---
-
 ## 🌸 Creator
 
 <p align="center">
-  <img src="https://cdn.discordapp.com/attachments/1425273893257744479/1492763380438663258/04122.gif" width="520">
+  <img src="https://camo.githubusercontent.com/7cd71d03a4aad0d4e3c05f7f9581a6662a03e19d74a6f2e1288ca51e1e26ed88/68747470733a2f2f692e70696e696d672e636f6d2f373336782f35382f33342f33302f35383334333038343637323035306434356161373537636163613439373065332e6a7067" width="100%">
 </p>
 
 <p align="center">
