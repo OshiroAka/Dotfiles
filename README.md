@@ -32,14 +32,26 @@ It aims to combine aesthetics and functionality in a clean and enjoyable environ
 
 ---
 
-## 🖼️ Preview
+## 🖼️ Preview 1
+
+<p align="center">
+  <img src="https://github.com/OshiroAka/Dotfiles/blob/main/assets/2026-04-1900-53-10-ezgif.com-video-to-gif-converter.gif?raw=true" width="92%">
+</p>
+
+<p align="center">
+  <i>First preview of ShiraShell</i>
+</p>
+
+---
+
+## 🖼️ Preview 2
 
 <p align="center">
   <img src="https://github.com/OshiroAka/Dotfiles/blob/main/assets/ezgif.com-video-to-gif-converter.gif?raw=true" width="92%">
 </p>
 
 <p align="center">
-  <i>Preview of ShiraShell in action</i>
+  <i>Second preview of ShiraShell</i>
 </p>
 
 ---
