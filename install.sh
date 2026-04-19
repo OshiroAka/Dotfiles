@@ -6,7 +6,7 @@
 # ╚══════════════════════════════════════════════════════════════╝
 # Uso:  bash install.sh
 # Flags:
-#   --no-aur       Pula pacotes AUR (quickshell, swww, etc.)
+#   --no-aur       Pula pacotes AUR (quickshell, awww, etc.)
 #   --no-hyprland  Não modifica hyprland.conf
 #   --no-build     Não compila o plugin C++
 #   --update       Atualiza config sem reinstalar dependências
@@ -106,7 +106,7 @@ if ! $DO_UPDATE; then
         # Build
         cmake ninja gcc pkgconf
         # Ferramentas
-        git python imagemagick swww
+        git python imagemagick
         # Hyprland extras
         xdg-desktop-portal-hyprland
     )
@@ -131,30 +131,14 @@ if ! $DO_UPDATE; then
     if $DO_AUR; then
         step "Instalando dependências AUR"
 
-        AUR_PKGS=(quickshell-git)
+        AUR_PKGS=(quickshell-git awww mpvpaper linux-wallpaperengine)
 
-        # Opcionais — wallpaper engines
-        AUR_OPTIONAL=(mpvpaper linux-wallpaperengine)
-
-        for p in "${AUR_PKGS[@]}"; do
-            if ! pacman -Qi "$p" &>/dev/null; then
-                info "Instalando $p..."
-                "$AUR_HELPER" -S --needed --noconfirm "$p" || { fail "Falha ao instalar $p"; exit 1; }
-            fi
-            ok "$p"
-        done
-
-        for p in "${AUR_OPTIONAL[@]}"; do
-            if ! pacman -Qi "$p" &>/dev/null; then
-                ask "Instalar $p (opcional)? (s/N)"
-                read -r r
-                if [[ "$r" =~ ^[Ss]$ ]]; then
-                    "$AUR_HELPER" -S --needed --noconfirm "$p" && ok "$p" || warn "$p falhou, pulando"
-                else
-                    warn "$p pulado"
-                fi
+        for pkg in "${AUR_PKGS[@]}"; do
+            if pacman -Qi "$pkg" &>/dev/null; then
+                ok "$pkg (já instalado)"
             else
-                ok "$p"
+                info "Instalando $pkg..."
+                "$AUR_HELPER" -S --needed --noconfirm "$pkg" && ok "$pkg" || warn "$pkg falhou — instale manualmente: $AUR_HELPER -S $pkg"
             fi
         done
     fi
@@ -168,19 +152,18 @@ fi
 ok "Quickshell: $(qs --version 2>/dev/null | head -1 || echo 'ok')"
 
 # Verificar swww
-if ! command -v swww &>/dev/null; then
-    warn "swww não encontrado — wallpapers estáticos não funcionarão"
-    info "Instale: sudo pacman -S swww"
+if ! command -v awww &>/dev/null; then
+    warn "awww não encontrado — instale: yay -S awww"
 else
-    ok "swww: $(swww --version 2>/dev/null | head -1 || echo 'ok')"
+    ok "awww: ok"
 fi
 
 # ── Clonar / atualizar dotfiles ───────────────────────────────
 step "Configurando dotfiles ShiraOS"
 
 if [[ -d "$DOTFILES/.git" ]]; then
-    info "Dotfiles já existem — atualizando..."
-    git -C "$DOTFILES" pull --ff-only 2>/dev/null && ok "Dotfiles atualizados" || warn "git pull falhou, usando versão local"
+    info "Atualizando dotfiles..."
+    git -C "$DOTFILES" fetch origin 2>/dev/null && git -C "$DOTFILES" reset --hard origin/main && ok "Dotfiles atualizados" || { warn "git update falhou — reclonando..."; rm -rf "$DOTFILES"; git clone "$REPO_URL" "$DOTFILES" && ok "Dotfiles reclonados"; }
 else
     rm -rf "$DOTFILES"
     git clone "$REPO_URL" "$DOTFILES"
@@ -270,7 +253,7 @@ CMD="${1:-start}"
 case "$CMD" in
     restart|r)
         pkill -x qs 2>/dev/null; sleep 0.25
-        qs --config ~/.config/quickshell/shiraos -d &
+        qs -c shiraos -d &
         echo "ShiraOS reiniciado."
         ;;
     stop|s)
@@ -282,16 +265,16 @@ case "$CMD" in
         ;;
     ipc)
         shift
-        qs --config ~/.config/quickshell/shiraos ipc call shiraos "$@"
+        qs -c shiraos ipc call shiraos "$@"
         ;;
     wallpaper|w)
-        qs --config ~/.config/quickshell/shiraos ipc call shiraos toggleWallpaper
+        qs -c shiraos ipc call shiraos toggleWallpaper
         ;;
     start|*)
         if pgrep -x qs &>/dev/null; then
             echo "ShiraOS já está rodando. Use 'shiraos restart' para reiniciar."
         else
-            qs --config ~/.config/quickshell/shiraos -d &
+            qs -c shiraos -d &
             echo "ShiraOS iniciado."
         fi
         ;;
@@ -342,7 +325,7 @@ layerrule = ignorealpha 0.05, shiraos-wallpaper
 bind = SUPER, W, exec, shiraos wallpaper
 
 # Iniciar ao login
-exec-once = swww-daemon
+exec-once = awww-daemon
 exec-once = shiraos
 HYPR_BLOCK
 
@@ -378,7 +361,7 @@ step "Verificação final"
 CHECKS_OK=true
 
 command -v qs       &>/dev/null && ok "qs (Quickshell)" || { warn "qs não encontrado"; CHECKS_OK=false; }
-command -v swww     &>/dev/null && ok "swww"            || warn "swww não encontrado — instale manualmente"
+command -v awww     &>/dev/null && ok "awww"             || warn "awww não encontrado — yay -S awww"
 command -v shiraos  &>/dev/null && ok "shiraos CLI"     || { warn "shiraos não no PATH (reinicie o terminal)"; }
 [[ -d "$QS_CFG" ]]              && ok "config em $QS_CFG" || { fail "Config não instalada!"; CHECKS_OK=false; }
 

@@ -1,7 +1,0 @@
-module ShiraOS
-linktarget ShiraOSPluginplugin
-optional plugin ShiraOSPluginplugin
-classname ShiraOSPlugin
-typeinfo ShiraOSPlugin.qmltypes
-prefer :/ShiraOS/
-depends QtQuick
