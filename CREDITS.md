@@ -21,7 +21,7 @@ Linux customization • Hyprland • Quickshell • UI Design
 ## 🧪 Early Tester
 
 <p align="center">
-  <img src="https://i.pinimg.com/736x/23/0a/5d/230a5de1a64a7c1a91dba3868854b475.jpg" width="520">
+  <img src="https://i.pinimg.com/736x/23/0a/5d/230a5de1a64a7c1a91dba3868854b475.jpg"
 </p>
 
 <p align="center">
