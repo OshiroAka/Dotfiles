@@ -16,7 +16,7 @@ Built for users who enjoy customization, dynamic interfaces and a unique desktop
 
 ## ✨ About
 
-ShiraShell is a custom shell project designed to improve the Linux desktop experience through modern visuals, practical tools and user-focused design.
+ShiraShell is a project focused on making it easier to change wallpapers and optimizing the customization experience.
 
 It aims to combine aesthetics and functionality in a clean and enjoyable environment.
 
