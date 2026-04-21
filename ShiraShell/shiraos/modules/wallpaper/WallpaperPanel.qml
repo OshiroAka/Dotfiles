@@ -27,9 +27,11 @@ PanelWindow {
     property string panelPosition:  "bottom"
     property string selectorBg:     ""
     property bool   useSelectorBg:  false
-    property string openStyle:      "slide"   // slide | fade | scale
-    property string moveStyle:      "shooter" // shooter | fade | none
+    property string openStyle:      "slide"
+    property string moveStyle:      "shooter"
     property bool   _loaded:        false
+    property bool   useMatugen:     true
+    property string selectorStyle:  "pill"    // pill | cards | skew | spotlight
 
     // ── Geometry ─────────────────────────────────────────────
     property real pillW: isVertical ? panelThick : (screen ? screen.width  : 1920) * panelSpan
@@ -57,15 +59,12 @@ PanelWindow {
     property var selectorBgList: []
     property int staticHl: 0; property int engineHl: 0
     property int liveHl:   0; property int favHl:    0
-
-    // precomputed fav set for O(1) lookup
     property var favSet: ({})
     onFavoritesChanged: {
         var s = {}
         for (var i = 0; i < favorites.length; i++) s[favorites[i].applyPath] = true
         win.favSet = s
     }
-
     property var currentWalls: {
         if (activeCategory === 0) return favorites
         if (activeCategory === 1) return engineWalls
@@ -84,25 +83,21 @@ PanelWindow {
     property color cAc: AppState.accentColor  || Qt.rgba(0.55,0.70,1.00,1.00)
     property color cRm: AppState.accentBorder || Qt.rgba(0.30,0.30,0.60,0.20)
 
-    // ── Open/Close animation ──────────────────────────────────
+    // ── Animations ───────────────────────────────────────────
     property real animProg: 0
     NumberAnimation { id: openAnim;  target: win; property: "animProg"; from: 0; to: 1; duration: 340
         easing.type: win.openStyle === "bounce" ? Easing.OutBack : Easing.OutCubic }
     NumberAnimation { id: closeAnim; target: win; property: "animProg"; from: 1; to: 0; duration: 260
         easing.type: Easing.InCubic }
-
-    // ── Shimmer ───────────────────────────────────────────────
     property real shimmerProg: -0.5
     SequentialAnimation {
         id: shimmerAnim
         NumberAnimation { target: win; property: "shimmerProg"; from: -0.5; to: 1.5; duration: 800; easing.type: Easing.InOutSine }
         ScriptAction { script: win.shimmerProg = -0.5 }
     }
-
-    // ── Shooter ───────────────────────────────────────────────
-    property real shootProg:  0; property bool shootActive: false
-    property real shootFX: 0;   property real shootFY: 0
-    property real shootTX: 0;   property real shootTY: 0
+    property real shootProg: 0; property bool shootActive: false
+    property real shootFX: 0; property real shootFY: 0
+    property real shootTX: 0; property real shootTY: 0
     SequentialAnimation {
         id: shootAnim
         NumberAnimation { target: win; property: "shootProg"; from: 0; to: 1; duration: 600; easing.type: Easing.OutExpo }
@@ -120,11 +115,9 @@ PanelWindow {
     }
 
     // ── Persistence ───────────────────────────────────────────
-    readonly property string _cfgPath: "/home/shira/.config/quickshell/shiraos/wp_settings.json"
-
     Process {
         id: loadProc; running: false
-        command: ["bash","-c","cat /home/shira/.config/quickshell/shiraos/wp_settings.json 2>/dev/null || echo '{}'"]
+        command: ["bash","-c","cat ~/.config/quickshell/shiraos/wp_settings.json 2>/dev/null || echo '{}'"]
         stdout: SplitParser {
             onRead: function(raw) {
                 var d = raw.trim()
@@ -135,32 +128,28 @@ PanelWindow {
                     if (typeof s.panelSpan     !== "undefined") win.panelSpan     = s.panelSpan
                     if (typeof s.thumbRadius   !== "undefined") win.thumbRadius   = s.thumbRadius
                     if (typeof s.pillOpacity   !== "undefined") win.pillOpacity   = s.pillOpacity
-                    if (typeof s.swwwTransition!== "undefined") win.swwwTransition= s.swwwTransition
+                    if (typeof s.swwwTransition !== "undefined") win.swwwTransition = s.swwwTransition
                     if (typeof s.panelPosition !== "undefined") win.panelPosition = s.panelPosition
                     if (typeof s.useSelectorBg !== "undefined") win.useSelectorBg = s.useSelectorBg
                     if (typeof s.selectorBg    !== "undefined") win.selectorBg    = s.selectorBg
                     if (typeof s.openStyle     !== "undefined") win.openStyle     = s.openStyle
                     if (typeof s.moveStyle     !== "undefined") win.moveStyle     = s.moveStyle
+                    if (typeof s.useMatugen    !== "undefined") win.useMatugen    = s.useMatugen
+                    if (typeof s.selectorStyle !== "undefined") win.selectorStyle = s.selectorStyle
                     if (s.favorites && s.favorites.length)      win.favorites     = s.favorites
                 } catch(e) {}
             }
         }
     }
-    Process {
-        id: saveProc; running: false
-    }
+    Process { id: saveProc; running: false }
     function saveSettings() {
         var data = {
-            panelThick:    win.panelThick,
-            panelSpan:     win.panelSpan,
-            thumbRadius:   win.thumbRadius,
-            pillOpacity:   win.pillOpacity,
-            swwwTransition:win.swwwTransition,
-            panelPosition: win.panelPosition,
-            useSelectorBg: win.useSelectorBg,
-            selectorBg:    win.selectorBg,
-            openStyle:     win.openStyle,
-            moveStyle:     win.moveStyle,
+            panelThick:    win.panelThick,    panelSpan:     win.panelSpan,
+            thumbRadius:   win.thumbRadius,   pillOpacity:   win.pillOpacity,
+            swwwTransition:win.swwwTransition, panelPosition: win.panelPosition,
+            useSelectorBg: win.useSelectorBg,  selectorBg:    win.selectorBg,
+            openStyle:     win.openStyle,      moveStyle:     win.moveStyle,
+            useMatugen:    win.useMatugen,     selectorStyle: win.selectorStyle,
             favorites:     win.favorites
         }
         var j = JSON.stringify(data)
@@ -168,6 +157,130 @@ PanelWindow {
             "import sys,os; p=os.path.expanduser('~/.config/quickshell/shiraos/wp_settings.json'); " +
             "os.makedirs(os.path.dirname(p),exist_ok=True); open(p,'w').write(sys.argv[1])", j]
         saveProc.running = false; saveProc.running = true
+    }
+
+    // ── Matugen — gera tema completo a partir da wallpaper ────
+    Process {
+        id: matugenProc; running: false
+        property string wallPath: ""
+        // Usa --json hex para ler cores diretamente do stdout
+        command: ["bash","-c",
+            "WALL=\"" + matugenProc.wallPath + "\"; " +
+            "[ -z \"$WALL\" ] && exit 0; " +
+            "mkdir -p ~/.cache/shiraos; " +
+            "echo \"$WALL\" > ~/.cache/shiraos/current_wallpaper; " +
+            // Extrai cores via matugen --json hex | python3
+            "matugen image \"$WALL\" --source-color-index 0 --json hex 2>/dev/null > /tmp/qs_matugen.json; " +
+            "python3 /tmp/qs_colors_extract.py /tmp/qs_matugen.json; " +
+            // Recarrega Kitty
+            "for s in /tmp/kitty-*; do kitty @ --to unix:$s set-colors --all ~/.config/kitty/current-theme.conf 2>/dev/null || true; done; " +
+            // Recarrega GTK
+            "THEME=$(gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null | tr -d \"'\"); " +
+            "[ -n \"$THEME\" ] && gsettings set org.gnome.desktop.interface gtk-theme '' 2>/dev/null; " +
+            "[ -n \"$THEME\" ] && gsettings set org.gnome.desktop.interface gtk-theme \"$THEME\" 2>/dev/null; " +
+            // Recarrega Mako/Dunst
+            "pgrep -x mako &>/dev/null && makoctl reload 2>/dev/null || true; " +
+            "pgrep -x dunst &>/dev/null && pkill -SIGUSR2 dunst 2>/dev/null || true; " +
+            "echo _DONE"]
+        stdout: SplitParser {
+            onRead: function(data) {
+                var line = data.trim()
+                var hex = ""
+                if (line.startsWith("PRIMARY=")) {
+                    hex = line.replace("PRIMARY=","").trim().replace("#","")
+                    if (hex.length === 6) {
+                        var r=parseInt(hex.substr(0,2),16)/255
+                        var g=parseInt(hex.substr(2,2),16)/255
+                        var b=parseInt(hex.substr(4,2),16)/255
+                        AppState.accentColor  = Qt.rgba(r,g,b,1.0)
+                        AppState.accentPill   = Qt.rgba(r,g,b,0.30)
+                        AppState.accentBorder = Qt.rgba(r,g,b,0.18)
+                        win.cAc = Qt.rgba(r,g,b,1.0)
+                        win.cRm = Qt.rgba(r,g,b,0.18)
+                        win.gc1 = Qt.rgba(r*0.35,g*0.35,b*0.35,0.60)
+                        kittyThemeProc.primary = "#" + hex
+                        kittyThemeProc.bg = "#" + hex  // will be overwritten by BG=
+                    }
+                } else if (line.startsWith("BG=")) {
+                    hex = line.replace("BG=","").trim().replace("#","")
+                    if (hex.length === 6) {
+                        var r2=parseInt(hex.substr(0,2),16)/255
+                        var g2=parseInt(hex.substr(2,2),16)/255
+                        var b2=parseInt(hex.substr(4,2),16)/255
+                        win.gc2 = Qt.rgba(r2,g2,b2,0.95)
+                        AppState.accentDark = Qt.rgba(r2,g2,b2,0.90)
+                        hyprBorderProc.col = hex
+                        hyprBorderProc.running = false; hyprBorderProc.running = true
+                    }
+                } else if (line.startsWith("SURFACE=")) {
+                    kittyThemeProc.surface = "#" + line.replace("SURFACE=","").trim().replace("#","")
+                } else if (line.startsWith("ON_BG=")) {
+                    kittyThemeProc.fgColor = "#" + line.replace("ON_BG=","").trim().replace("#","")
+                } else if (line.startsWith("SECONDARY=")) {
+                    kittyThemeProc.secondary = "#" + line.replace("SECONDARY=","").trim().replace("#","")
+                } else if (line.startsWith("_DONE")) {
+                    // All colors received - generate Kitty theme
+                    kittyThemeProc.running = false; kittyThemeProc.running = true
+                }
+            }
+        }
+    }
+    // Atualiza borda do Hyprland
+    Process {
+        id: hyprBorderProc; running: false
+        property string col: ""
+        command: ["bash","-c","hyprctl keyword general:col.active_border \"rgb("+hyprBorderProc.col+")\" 2>/dev/null || true"]
+    }
+    // Gera tema Kitty diretamente com as cores extraídas
+    Process {
+        id: kittyThemeProc; running: false
+        property string primary:    "#8888ff"
+        property string bg:         "#0e1010"
+        property string surface:    "#1a1a1a"
+        property string fgColor:       "#e0e0e0"
+        property string secondary:  "#aabbcc"
+        command: ["python3", "/tmp/qs_kitty_theme.py",
+            kittyThemeProc.primary, kittyThemeProc.bg,
+            kittyThemeProc.surface, kittyThemeProc.fgColor,
+            kittyThemeProc.secondary]
+    }
+
+    // Fallback com ImageMagick quando matugen não está disponível
+    Process {
+        id: colorProc; running: false
+        property int lc: 0; property string img: ""
+        command: ["bash","-c",
+            "w=\"" + colorProc.img + "\"; " +
+            "[ -z \"$w\" ] && exit 0; " +
+            "convert \"$w\" -resize 50x50! +dither -colors 2 -format \"%[fx:r] %[fx:g] %[fx:b]\\n\" info: 2>/dev/null | head -2"]
+        stdout: SplitParser {
+            onRead: function(data) {
+                var p = data.trim().split(" "); if (p.length < 3) return
+                var r=Math.min(parseFloat(p[0])*0.8,0.45),g=Math.min(parseFloat(p[1])*0.8,0.45),b=Math.min(parseFloat(p[2])*0.8,0.45)
+                if (colorProc.lc===0) {
+                    win.gc1=Qt.rgba(r,g,b,0.55); AppState.accentColor=Qt.rgba(r,g,b,1.0)
+                    AppState.accentPill=Qt.rgba(r,g,b,0.30); AppState.accentBorder=Qt.rgba(r,g,b,0.18)
+                    win.cAc=Qt.rgba(r,g,b,1.0); win.cRm=Qt.rgba(r,g,b,0.18)
+                } else {
+                    win.gc2=Qt.rgba(r,g,b,0.95); AppState.accentDark=Qt.rgba(r,g,b,0.90)
+                }
+                colorProc.lc++
+            }
+        }
+        onRunningChanged: if (running) lc = 0
+    }
+
+    function runTheme(wallPath) {
+        if (!wallPath) return
+        if (win.useMatugen) {
+            matugenProc.wallPath = wallPath
+            matugenProc.running = false
+            matugenProc.running = true
+        } else {
+            colorProc.img = wallPath
+            colorProc.running = false
+            colorProc.running = true
+        }
     }
 
     // ── Processes ─────────────────────────────────────────────
@@ -200,29 +313,11 @@ PanelWindow {
         command: ["bash","-c","find ~/Pictures/Wallpapers/WallpaperSelector -maxdepth 1 -type f 2>/dev/null | sort"]
         stdout: SplitParser { onRead: function(data) { var f=data.trim(); if(f){var a=win.selectorBgList.slice();a.push(f);win.selectorBgList=a} } }
     }
-    Process { id: applyStatic; running: false }
-    Process { id: applyEngine; running: false }
-    Process { id: applyLive;   running: false }
-    Process { id: killEngine;  running: false; command: ["bash","-c","pkill -f linux-wallpaperengine 2>/dev/null; true"] }
-    Process { id: killLive;    running: false; command: ["bash","-c","pkill -f mpvpaper 2>/dev/null; true"] }
-    Process { id: colorProc;   running: false
-        property int lc: 0; property string img: ""
-        command: ["bash","-c",
-            "w=" + '"' + "$(cat /tmp/qs_wall_img 2>/dev/null)" + '"' + "; " +
-            "[ -z $w ] && w=$(swww query 2>/dev/null|grep -o 'image: .*'|sed 's/image: //'|head -1); " +
-            "[ -z $w ] && echo '0.06 0.06 0.12' && echo '0.10 0.08 0.18' && exit; " +
-            "convert $w -resize 50x50! +dither -colors 2 -format '%[fx:r] %[fx:g] %[fx:b]\\n' info: 2>/dev/null | head -2"]
-        stdout: SplitParser {
-            onRead: function(data) {
-                var p=data.trim().split(" "); if(p.length<3) return
-                var r=Math.min(parseFloat(p[0])*0.8,0.45),g=Math.min(parseFloat(p[1])*0.8,0.45),b=Math.min(parseFloat(p[2])*0.8,0.45)
-                if(colorProc.lc===0){win.gc1=Qt.rgba(r,g,b,0.55);AppState.accentColor=Qt.rgba(r,g,b,1.0);AppState.accentPill=Qt.rgba(r,g,b,0.30);AppState.accentBorder=Qt.rgba(r,g,b,0.18)}
-                else{win.gc2=Qt.rgba(r,g,b,0.95);AppState.accentDark=Qt.rgba(r,g,b,0.90)}
-                colorProc.lc++
-            }
-        }
-        onRunningChanged: if(running) lc = 0
-    }
+    Process { id: applyStatic;  running: false }
+    Process { id: applyEngine;  running: false }
+    Process { id: applyLive;    running: false }
+    Process { id: killEngine;   running: false; command: ["bash","-c","pkill -f linux-wallpaperengine 2>/dev/null; true"] }
+    Process { id: killLive;     running: false; command: ["bash","-c","pkill -f mpvpaper 2>/dev/null; true"] }
 
     // ── Logic ─────────────────────────────────────────────────
     function navigate(dir) {
@@ -243,8 +338,7 @@ PanelWindow {
         if (activeCategory === 0) {
             var f0 = win.favorites.slice(); f0.splice(idx,1); win.favorites = f0; return
         }
-        var item = walls[idx]
-        var obj
+        var item = walls[idx]; var obj
         if (activeCategory === 2) {
             var sp = typeof item==="string"?item:(item.path||"")
             obj = {dispPath:sp, applyType:"static", applyPath:sp, previewPath:sp}
@@ -259,25 +353,21 @@ PanelWindow {
         if (!ex) f2.push(obj)
         win.favorites = f2
     }
-    function _setImg(path) {
-        if (path) { applyStatic2.command=["bash","-c","printf '%s' '"+path+"' > /tmp/qs_wall_img"]; applyStatic2.running=false; applyStatic2.running=true }
-    }
-    Process { id: applyStatic2; running: false }
 
     function doApply(item, cat) {
         if (cat === 0) {
             var tp = item.applyType||"static"
             if (tp==="static") {
                 killEngine.running=false;killEngine.running=true;killLive.running=false;killLive.running=true
-                applyStatic.command=["swww","img",item.applyPath,"--transition-type",win.swwwTransition,"--transition-duration","1","--transition-fps","60"]
+                applyStatic.command=["awww","img",item.applyPath,"--transition-type",win.swwwTransition,"--transition-duration","1","--transition-fps","60"]
                 applyStatic.running=false;applyStatic.running=true
-                _setImg(item.applyPath);colorProc.running=false;colorProc.running=true
+                win.runTheme(item.applyPath)
             } else if (tp==="engine") {
                 killLive.running=false;killLive.running=true
-                if(item.previewPath){applyStatic.command=["swww","img",item.previewPath,"--transition-type","fade","--transition-duration","0.4"];applyStatic.running=false;applyStatic.running=true}
+                if(item.previewPath){applyStatic.command=["awww","img",item.previewPath,"--transition-type","fade","--transition-duration","0.4"];applyStatic.running=false;applyStatic.running=true}
                 applyEngine.command=["linux-wallpaperengine","--screen-root","eDP-1","--bg",item.applyPath]
                 applyEngine.running=false;applyEngine.running=true
-                if(item.previewPath){_setImg(item.previewPath);colorProc.running=false;colorProc.running=true}
+                if(item.previewPath) win.runTheme(item.previewPath)
             } else {
                 killEngine.running=false;killEngine.running=true
                 applyLive.command=["mpvpaper","-o","no-audio loop","eDP-1",item.applyPath]
@@ -286,15 +376,15 @@ PanelWindow {
         } else if (cat===2) {
             var sp2=typeof item==="string"?item:(item.path||"")
             killEngine.running=false;killEngine.running=true;killLive.running=false;killLive.running=true
-            applyStatic.command=["swww","img",sp2,"--transition-type",win.swwwTransition,"--transition-duration","1","--transition-fps","60"]
+            applyStatic.command=["awww","img",sp2,"--transition-type",win.swwwTransition,"--transition-duration","1","--transition-fps","60"]
             applyStatic.running=false;applyStatic.running=true
-            _setImg(sp2);colorProc.running=false;colorProc.running=true
+            win.runTheme(sp2)
         } else if (cat===1) {
             killLive.running=false;killLive.running=true
-            if(item.preview){applyStatic.command=["swww","img",item.preview,"--transition-type","fade","--transition-duration","0.4"];applyStatic.running=false;applyStatic.running=true}
+            if(item.preview){applyStatic.command=["awww","img",item.preview,"--transition-type","fade","--transition-duration","0.4"];applyStatic.running=false;applyStatic.running=true}
             applyEngine.command=["linux-wallpaperengine","--screen-root","eDP-1","--bg",item.path]
             applyEngine.running=false;applyEngine.running=true
-            if(item.preview){_setImg(item.preview);colorProc.running=false;colorProc.running=true}
+            if(item.preview) win.runTheme(item.preview)
         } else {
             var lp2=typeof item==="string"?item:(item.path||"")
             killEngine.running=false;killEngine.running=true
@@ -333,7 +423,9 @@ PanelWindow {
                 if(!win._loaded){ win._loaded=true; loadProc.running=true }
                 win.staticWalls=[]; win.engineWalls=[]; win.liveWalls=[]; win.selectorBgList=[]
                 findStatic.running=true; findEngine.running=true; findLive.running=true; findBgList.running=true
-                colorProc.running=false; colorProc.running=true
+                // Lê wallpaper atual do cache para aplicar cores
+                var w = ""
+                win.runTheme(w)
                 win.configOpen=false; win.cfgTab=0
                 openAnim.start()
                 Qt.callLater(function(){ keyItem.forceActiveFocus() })
@@ -355,35 +447,30 @@ PanelWindow {
             Behavior on y      { NumberAnimation { duration:420; easing.type:Easing.OutCubic } }
             Behavior on width  { NumberAnimation { duration:420; easing.type:Easing.OutCubic } }
             Behavior on height { NumberAnimation { duration:420; easing.type:Easing.OutCubic } }
-            opacity: win.openStyle === "fade" ? win.animProg : win.animProg
+            opacity: win.animProg
             transform: [
                 Translate {
-                    x: win.openStyle==="slide" ? (win.panelPosition==="right"?(1-win.animProg)*70:win.panelPosition==="left"?-(1-win.animProg)*70:0) : 0
-                    y: win.openStyle==="slide" ? (win.panelPosition==="bottom"?(1-win.animProg)*70:win.panelPosition==="top"?-(1-win.animProg)*70:0) : 0
+                    x: win.openStyle==="slide"?(win.panelPosition==="right"?(1-win.animProg)*70:win.panelPosition==="left"?-(1-win.animProg)*70:0):0
+                    y: win.openStyle==="slide"?(win.panelPosition==="bottom"?(1-win.animProg)*70:win.panelPosition==="top"?-(1-win.animProg)*70:0):0
                 },
                 Scale {
-                    xScale: (win.openStyle==="scale"||win.openStyle==="bounce") ? (0.82+0.18*win.animProg) : 1.0
-                    yScale: xScale
-                    origin.x: win.pillW/2; origin.y: win.pillH/2
+                    xScale: (win.openStyle==="scale"||win.openStyle==="bounce")?(0.82+0.18*win.animProg):1.0
+                    yScale: xScale; origin.x: win.pillW/2; origin.y: win.pillH/2
                 }
             ]
 
-            // Pill background
             Rectangle {
-                anchors.fill: parent; radius: Math.min(width,height)/2
+                anchors.fill: parent
+                radius: (win.selectorStyle==="cards"||win.selectorStyle==="skew") ? 12 : Math.min(width,height)/2
                 color: "transparent"; antialiasing: true; clip: true
-                Rectangle { anchors.fill: parent; radius: parent.radius
-                    color: Qt.rgba(win.gc1.r,win.gc1.g,win.gc1.b,win.pillOpacity) }
-                Image { anchors.fill: parent
-                    source: (win.useSelectorBg&&win.selectorBg)?"file://"+win.selectorBg:""
-                    fillMode: Image.PreserveAspectCrop; opacity: 0.18; visible: status===Image.Ready }
-                Rectangle { anchors.fill: parent; radius: parent.radius
-                    color: "transparent"; border.color: win.cRm; border.width: 1 }
+                Rectangle { anchors.fill:parent; radius:parent.radius; color:Qt.rgba(win.gc1.r,win.gc1.g,win.gc1.b,win.pillOpacity) }
+                Image { anchors.fill:parent; source:(win.useSelectorBg&&win.selectorBg)?"file://"+win.selectorBg:""
+                    fillMode:Image.PreserveAspectCrop; opacity:0.65; visible:status===Image.Ready }
+                Rectangle { anchors.fill:parent; radius:parent.radius; color:"transparent"; border.color:win.cRm; border.width:1 }
             }
 
-            // Keyboard
             Item {
-                id: keyItem; anchors.fill: parent; focus: true
+                id: keyItem; anchors.fill:parent; focus:true
                 Keys.onEscapePressed: AppState.toggleWallpaper()
                 Keys.onReturnPressed: win.applyCurrentWall()
                 Keys.onEnterPressed:  win.applyCurrentWall()
@@ -406,196 +493,187 @@ PanelWindow {
                 Keys.onPressed: { if(event.key===Qt.Key_Space){ win.toggleFav(); event.accepted=true } }
             }
 
-            // Category dots — horizontal: left, vertical: top
             Column {
-                visible: !win.isVertical
-                anchors.left: parent.left; anchors.leftMargin: 18
-                anchors.verticalCenter: parent.verticalCenter; spacing: 10
-                Repeater { model: win.catNames; delegate: Item { width:30; height:30
-                    property bool act: index===win.activeCategory
-                    Text { visible:index===0; anchors.centerIn:parent; text:"\u2665"; font.pixelSize:act?17:11
-                        color:act?win.cAc:Qt.rgba(1,1,1,0.20); Behavior on color{ColorAnimation{duration:150}} }
-                    Rectangle { visible:index!==0; anchors.centerIn:parent; width:act?20:6; height:6; radius:3
+                visible:!win.isVertical; anchors.left:parent.left; anchors.leftMargin:18
+                anchors.verticalCenter:parent.verticalCenter; spacing:10
+                Repeater { model:win.catNames; delegate:Item { width:30;height:30
+                    property bool act:index===win.activeCategory
+                    Rectangle{
+                        visible:index!==0;anchors.centerIn:parent;width:act?20:6;height:6;radius:3
                         color:act?win.cAc:Qt.rgba(1,1,1,0.20)
                         Behavior on width{NumberAnimation{duration:160;easing.type:Easing.OutCubic}}
-                        Behavior on color{ColorAnimation{duration:160}} }
+                        Behavior on color{ColorAnimation{duration:160}}
+                    }
+                    Rectangle{
+                        visible:index!==0;anchors.centerIn:parent;width:act?20:6;height:6;radius:3
+                        color:act?win.cAc:Qt.rgba(1,1,1,0.20)
+                        Behavior on width{NumberAnimation{duration:160;easing.type:Easing.OutCubic}}
+                        Behavior on color{ColorAnimation{duration:160}}
+                    }
                     MouseArea{anchors.fill:parent;onClicked:{win.activeCategory=index;wallList.scrollToIdx(win.highlightIdx)}}
                 }}
             }
             Row {
-                visible: win.isVertical
-                anchors.top: parent.top; anchors.topMargin: 18
-                anchors.horizontalCenter: parent.horizontalCenter; spacing: 10
-                Repeater { model: win.catNames; delegate: Item { width:30; height:30
-                    property bool act: index===win.activeCategory
-                    Text { visible:index===0; anchors.centerIn:parent; text:"\u2665"; font.pixelSize:act?17:11
-                        color:act?win.cAc:Qt.rgba(1,1,1,0.20); Behavior on color{ColorAnimation{duration:150}} }
-                    Rectangle { visible:index!==0; anchors.centerIn:parent; width:6; height:act?20:6; radius:3
+                visible:win.isVertical; anchors.top:parent.top; anchors.topMargin:18
+                anchors.horizontalCenter:parent.horizontalCenter; spacing:10
+                Repeater { model:win.catNames; delegate:Item { width:30;height:30
+                    property bool act:index===win.activeCategory
+                    Rectangle{
+                        visible:index!==0;anchors.centerIn:parent;width:6;height:act?20:6;radius:3
                         color:act?win.cAc:Qt.rgba(1,1,1,0.20)
                         Behavior on height{NumberAnimation{duration:160;easing.type:Easing.OutCubic}}
-                        Behavior on color{ColorAnimation{duration:160}} }
+                        Behavior on color{ColorAnimation{duration:160}}
+                    }
+                    Rectangle{
+                        visible:index!==0;anchors.centerIn:parent;width:6;height:act?20:6;radius:3
+                        color:act?win.cAc:Qt.rgba(1,1,1,0.20)
+                        Behavior on height{NumberAnimation{duration:160;easing.type:Easing.OutCubic}}
+                        Behavior on color{ColorAnimation{duration:160}}
+                    }
                     MouseArea{anchors.fill:parent;onClicked:{win.activeCategory=index;wallList.scrollToIdx(win.highlightIdx)}}
                 }}
             }
 
-            // Thumbnails
             Item {
-                anchors.fill: parent
-                anchors.leftMargin:   win.isVertical?6:50;  anchors.rightMargin: win.isVertical?6:46
-                anchors.topMargin:    win.isVertical?56:5;  anchors.bottomMargin: 5
-                clip: true
-
+                anchors.fill:parent
+                anchors.leftMargin:win.isVertical?6:50; anchors.rightMargin:win.isVertical?6:46
+                anchors.topMargin:win.isVertical?56:5; anchors.bottomMargin:5
+                clip:true
                 ListView {
-                    id: wallList; anchors.fill: parent
-                    orientation: win.isVertical ? ListView.Vertical : ListView.Horizontal
-                    spacing: 8; clip: true; cacheBuffer: 600
-                    model: win.currentWalls; currentIndex: win.highlightIdx
-
+                    id:wallList; anchors.fill:parent
+                    orientation:win.isVertical?ListView.Vertical:ListView.Horizontal
+                    spacing:8; clip:true; cacheBuffer:600
+                    model:win.currentWalls; currentIndex:win.highlightIdx
                     function scrollToIdx(idx) {
-                        var stride = (win.isVertical?(win.panelThick*0.54):(win.pillH*1.56))+spacing
-                        var dim    = win.isVertical?height:width
-                        var t      = idx*stride - dim/2 + stride/2
-                        var maxC   = win.isVertical?Math.max(0,contentHeight-height):Math.max(0,contentWidth-width)
+                        var stride=(win.isVertical?(win.panelThick*0.54):(win.pillH*1.56))+spacing
+                        var dim=win.isVertical?height:width
+                        var t=idx*stride-dim/2+stride/2
+                        var maxC=win.isVertical?Math.max(0,contentHeight-height):Math.max(0,contentWidth-width)
                         if(win.isVertical){yA.to=Math.max(0,Math.min(t,maxC));yA.restart()}
                         else{xA.to=Math.max(0,Math.min(t,maxC));xA.restart()}
                     }
-                    NumberAnimation on contentX { id: xA; duration:360; easing.type:Easing.OutCubic }
-                    NumberAnimation on contentY { id: yA; duration:360; easing.type:Easing.OutCubic }
-
+                    NumberAnimation on contentX { id:xA; duration:360; easing.type:Easing.OutCubic }
+                    NumberAnimation on contentY { id:yA; duration:360; easing.type:Easing.OutCubic }
                     delegate: Item {
-                        id: card
-                        property bool isHl:  index===win.highlightIdx
-                        property bool isFav: win.isFav(modelData)
-                        property real cw: win.isVertical ? wallList.width-10 : Math.round(wallList.height*1.56)
-                        property real ch: win.isVertical ? Math.round(win.panelThick*0.52) : wallList.height-10
-                        width:  win.isVertical ? wallList.width : cw+10
-                        height: win.isVertical ? ch+10 : wallList.height
-                        scale:   isHl?1.0:0.88; opacity: isHl?1.0:0.50
-                        Behavior on scale   {NumberAnimation{duration:180;easing.type:Easing.OutCubic}}
-                        Behavior on opacity {NumberAnimation{duration:180}}
+                        id:card
+                        property bool isHl:index===win.highlightIdx
+                        property bool isFav:win.isFav(modelData)
+                        property real cw:win.isVertical?wallList.width-10:Math.round(wallList.height*1.56)
+                        property real ch:win.isVertical?Math.round(win.panelThick*0.52):wallList.height-10
+                        width:win.isVertical?wallList.width:cw+10
+                        height:win.isVertical?ch+10:wallList.height
+                        scale:isHl?1.0:0.88; opacity:isHl?1.0:0.50
+                        Behavior on scale{NumberAnimation{duration:180;easing.type:Easing.OutCubic}}
+                        Behavior on opacity{NumberAnimation{duration:180}}
+                        // Card shape container — shape changes with selectorStyle
+                        Item {
+                            id: cardShapeWrap
+                            x: (parent.width-cw)/2; y: (parent.height-ch)/2
+                            width: cw; height: ch
+                            // No per-card transform - skew is applied to pill container
 
-                        Rectangle {
-                            id: cardRect
-                            x:(parent.width-cw)/2; y:(parent.height-ch)/2
-                            width:cw; height:ch; radius:win.thumbRadius
-                            clip:true; antialiasing:true; color:Qt.rgba(0,0,0,0.30)
-
-                            Image {
-                                anchors.fill:parent; fillMode:Image.PreserveAspectCrop
-                                smooth:true; asynchronous:true
-                                source: win.thumbSrc(modelData, win.activeCategory)
-                                opacity: status===Image.Ready?1.0:0
-                                Behavior on opacity{NumberAnimation{duration:200}}
-                            }
-                            // gradient + label
+                            Rectangle {
+                                id:cardRect; anchors.fill: parent
+                                radius: (win.selectorStyle==="cards"||win.selectorStyle==="skew") ? 0 : win.thumbRadius
+                                clip:true; antialiasing:true; color:Qt.rgba(0,0,0,0.30)
+                            Image { anchors.fill:parent; fillMode:Image.PreserveAspectCrop; smooth:true; asynchronous:true
+                                source:win.thumbSrc(modelData,win.activeCategory)
+                                opacity:status===Image.Ready?1.0:0; Behavior on opacity{NumberAnimation{duration:200}} }
                             Rectangle {
                                 anchors.bottom:parent.bottom; anchors.left:parent.left; anchors.right:parent.right
                                 height:30; color:"transparent"
-                                gradient: Gradient { orientation:Gradient.Vertical
+                                gradient:Gradient{ orientation:Gradient.Vertical
                                     GradientStop{position:0;color:"transparent"}
-                                    GradientStop{position:1;color:Qt.rgba(0,0,0,0.80)}
-                                }
-                                Text {
-                                    anchors{bottom:parent.bottom;left:parent.left;right:parent.right;margins:6;bottomMargin:4}
-                                    text:win.thumbLabel(modelData,win.activeCategory)
-                                    font.pixelSize:9; color:Qt.rgba(1,1,1,0.78); elide:Text.ElideRight
-                                }
+                                    GradientStop{position:1;color:Qt.rgba(0,0,0,0.80)} }
+                                Text { anchors{bottom:parent.bottom;left:parent.left;right:parent.right;margins:6;bottomMargin:4}
+                                    text:win.thumbLabel(modelData,win.activeCategory); font.pixelSize:9; color:Qt.rgba(1,1,1,0.78); elide:Text.ElideRight }
                             }
-                            // active border
-                            Rectangle {
-                                anchors.fill:parent; radius:parent.radius; color:"transparent"
+                            Rectangle { anchors.fill:parent; radius:parent.radius; color:"transparent"
                                 border.color:card.isHl?win.cAc:Qt.rgba(1,1,1,0.05); border.width:card.isHl?2:1
-                                Behavior on border.color{ColorAnimation{duration:180}}
-                            }
-                            // shimmer
+                                Behavior on border.color{ColorAnimation{duration:180}} }
                             Rectangle {
                                 anchors.fill:parent; radius:parent.radius; clip:true; color:"transparent"
-                                visible: card.isHl && shimmerAnim.running
+                                visible:card.isHl&&shimmerAnim.running
                                 Rectangle {
                                     width:cardRect.width*0.55; height:cardRect.height*3; rotation:-42
                                     x:win.shimmerProg*cardRect.width*2.2-width*0.5; y:-cardRect.height*0.9
-                                    gradient: Gradient { orientation:Gradient.Horizontal
+                                    gradient:Gradient{ orientation:Gradient.Horizontal
                                         GradientStop{position:0.0;color:"transparent"}
                                         GradientStop{position:0.40;color:Qt.rgba(1,1,1,0.0)}
                                         GradientStop{position:0.50;color:Qt.rgba(1,1,1,0.28)}
                                         GradientStop{position:0.60;color:Qt.rgba(1,1,1,0.0)}
-                                        GradientStop{position:1.0;color:"transparent"}
-                                    }
+                                        GradientStop{position:1.0;color:"transparent"} }
                                 }
                             }
-                            // fav heart
-                            Text {
-                                visible:card.isFav
-                                anchors.top:parent.top; anchors.right:parent.right; anchors.margins:5
-                                text:"\u2665"; font.pixelSize:11; color:win.cAc
-                            }
+                            Text { visible:card.isFav; anchors.top:parent.top; anchors.right:parent.right; anchors.margins:5
+                                text:"\u2665"; font.pixelSize:11; color:win.cAc }
                         }
-                        MouseArea {
-                            anchors.fill:parent
-                            onClicked: {
-                                if(activeCategory===0)      win.favHl=index
-                                else if(activeCategory===1) win.engineHl=index
-                                else if(activeCategory===2) win.staticHl=index
-                                else                        win.liveHl=index
-                                win.applyCurrentWall(); wallList.scrollToIdx(index)
-                            }
-                        }
-                    }
+                            } // end cardRect
 
-                    Text {
-                        visible:wallList.count===0; anchors.centerIn:parent
+                            // Cut-corner overlays for "cards" style
+                            // 4 rotated rectangles mask the corners to create octagon shape
+                            Repeater {
+                                model: win.selectorStyle==="cards" ? 4 : 0
+                                delegate: Rectangle {
+                                    property real cut: 22
+                                    width: cut*1.42; height: cut*1.42
+                                    color: Qt.rgba(win.gc1.r, win.gc1.g, win.gc1.b, win.pillOpacity)
+                                    rotation: 45; antialiasing: true
+                                    x: index===0||index===2 ? (index===0 ? -cut*0.71 : cardShapeWrap.width-cut*0.71) : (index===1 ? cardShapeWrap.width-cut*0.71 : -cut*0.71)
+                                    y: index===0||index===1 ? -cut*0.71 : cardShapeWrap.height-cut*0.71
+                                }
+                            }
+                        } // end cardShapeWrap
+                        MouseArea { anchors.fill:parent; onClicked: {
+                            if(activeCategory===0)      win.favHl=index
+                            else if(activeCategory===1) win.engineHl=index
+                            else if(activeCategory===2) win.staticHl=index
+                            else                        win.liveHl=index
+                            win.applyCurrentWall(); wallList.scrollToIdx(index)
+                        }}
+                    }
+                    Text { visible:wallList.count===0; anchors.centerIn:parent
                         text:win.activeCategory===0?"Nenhum favorito\nSpace para adicionar \u2665":"Nenhum wallpaper encontrado"
                         color:Qt.rgba(1,1,1,0.20); font.pixelSize:11
-                        horizontalAlignment:Text.AlignHCenter; wrapMode:Text.Wrap; width:220
-                    }
+                        horizontalAlignment:Text.AlignHCenter; wrapMode:Text.Wrap; width:220 }
                 }
             }
 
-            // ⚙ button
             Rectangle {
-                id: cfgBtn; z:10; width:32; height:32; radius:16; antialiasing:true
+                id:cfgBtn; z:100; width:32; height:32; radius:16; antialiasing:true
                 color:win.configOpen?Qt.rgba(win.cAc.r,win.cAc.g,win.cAc.b,0.30):Qt.rgba(1,1,1,0.08)
                 border.color:win.configOpen?win.cAc:win.cRm; border.width:1
                 Behavior on color{ColorAnimation{duration:150}}
-                x: { if(win.panelPosition==="right") return -width-8; if(win.panelPosition==="left") return pill.width+8; return pill.width-44 }
-                y: { if(win.panelPosition==="right"||win.panelPosition==="left") return pill.height-height-10
-                     if(win.panelPosition==="top") return pill.height+8; return -height-8 }
+                x:{if(win.panelPosition==="right") return -width-8; if(win.panelPosition==="left") return pill.width+8; return pill.width-44}
+                y:{if(win.panelPosition==="right"||win.panelPosition==="left") return pill.height-height-10; if(win.panelPosition==="top") return pill.height+8; return -height-8}
                 Behavior on x{NumberAnimation{duration:350;easing.type:Easing.OutCubic}}
                 Behavior on y{NumberAnimation{duration:350;easing.type:Easing.OutCubic}}
-                Text { anchors.centerIn:parent; text:"\u2699"; font.pixelSize:14
-                    color:win.configOpen?win.cAc:Qt.rgba(1,1,1,0.5)
-                    rotation:win.configOpen?45:0
-                    Behavior on rotation{NumberAnimation{duration:200;easing.type:Easing.OutBack}} }
+                Text{anchors.centerIn:parent;text:"\u2699";font.pixelSize:14;color:win.configOpen?win.cAc:Qt.rgba(1,1,1,0.5)
+                    rotation:win.configOpen?45:0; Behavior on rotation{NumberAnimation{duration:200;easing.type:Easing.OutBack}}}
                 MouseArea{anchors.fill:parent;onClicked:win.configOpen=!win.configOpen}
             }
 
-            // Config panel
             Rectangle {
-                id: cfgPanel; z:20
-                width: Math.min(490,pill.width-20); height: cfgBody.implicitHeight+56
-                radius:20; antialiasing:true
-                color: Qt.rgba(0.03,0.03,0.09,0.98)
+                id:cfgPanel; z:100
+                width:Math.min(490,pill.width-20); height:cfgBody.implicitHeight+56
+                radius:20; antialiasing:true; color:Qt.rgba(0.03,0.03,0.09,0.98)
                 border.color:Qt.rgba(win.cAc.r,win.cAc.g,win.cAc.b,0.18); border.width:1
-                opacity:win.configOpen?1:0; scale:win.configOpen?1:0.88
-                visible:opacity>0.01
+                opacity:win.configOpen?1:0; scale:win.configOpen?1:0.88; visible:opacity>0.01
                 Behavior on opacity{NumberAnimation{duration:220;easing.type:Easing.OutCubic}}
                 Behavior on scale{NumberAnimation{duration:220;easing.type:Easing.OutCubic}}
-                x: { if(win.panelPosition==="right") return -width-10; if(win.panelPosition==="left") return pill.width+10; return (pill.width-width)/2 }
-                y: { if(win.panelPosition==="top") return pill.height+10
-                     if(win.panelPosition==="right"||win.panelPosition==="left") return pill.height-height
-                     return -height-10 }
-                transformOrigin: { if(win.panelPosition==="top") return Item.Top; if(win.panelPosition==="right") return Item.Right; if(win.panelPosition==="left") return Item.Left; return Item.Bottom }
+                x:{if(win.panelPosition==="right") return -width-10; if(win.panelPosition==="left") return pill.width+10; return (pill.width-width)/2}
+                y:{if(win.panelPosition==="top") return pill.height+10; if(win.panelPosition==="right"||win.panelPosition==="left") return pill.height-height; return -height-10}
+                transformOrigin:{if(win.panelPosition==="top") return Item.Top; if(win.panelPosition==="right") return Item.Right; if(win.panelPosition==="left") return Item.Left; return Item.Bottom}
                 Behavior on x{NumberAnimation{duration:350;easing.type:Easing.OutCubic}}
                 Behavior on y{NumberAnimation{duration:350;easing.type:Easing.OutCubic}}
 
-                // Tab bar
                 Row {
-                    id: tabBar; z:1
+                    id:tabBar; z:1
                     anchors.top:parent.top; anchors.topMargin:14
                     anchors.left:parent.left; anchors.leftMargin:14; spacing:5
                     Repeater {
-                        model:["Posi\u00e7\u00e3o","Anima\u00e7\u00e3o","Apar\u00eancia","Fundo","Tamanhos"]
-                        delegate: Rectangle {
+                        model:["Posi\u00e7\u00e3o","Anima\u00e7\u00e3o","Apar\u00eancia","Fundo","Tamanhos","Tema","Modelo"]
+                        delegate:Rectangle {
                             property bool act:win.cfgTab===index
                             width:tbT.implicitWidth+16; height:26; radius:13
                             color:act?Qt.rgba(win.cAc.r,win.cAc.g,win.cAc.b,0.22):Qt.rgba(1,1,1,0.06)
@@ -606,22 +684,21 @@ PanelWindow {
                         }
                     }
                 }
-                Rectangle { anchors.top:tabBar.bottom;anchors.topMargin:10;anchors.left:parent.left;anchors.right:parent.right;anchors.margins:14;height:1;color:Qt.rgba(1,1,1,0.06) }
+                Rectangle{anchors.top:tabBar.bottom;anchors.topMargin:10;anchors.left:parent.left;anchors.right:parent.right;anchors.margins:14;height:1;color:Qt.rgba(1,1,1,0.06)}
 
                 Column {
-                    id: cfgBody
+                    id:cfgBody
                     anchors.top:tabBar.bottom; anchors.topMargin:18
                     anchors.left:parent.left; anchors.right:parent.right
                     anchors.leftMargin:16; anchors.rightMargin:16; spacing:14
 
-                    // ── Tab 0: Posição ────────────────────────
+                    // Tab 0: Posição
                     Column { visible:win.cfgTab===0; width:parent.width; spacing:12
                         Text{text:"Posi\u00e7\u00e3o do seletor";font.pixelSize:10;color:Qt.rgba(1,1,1,0.45)}
                         Grid { columns:3; spacing:6; width:parent.width
                             Repeater {
-                                model:[{i:"top",l:"\u2b06 Topo"},{i:"left",l:"\u2b05 Esq"},{i:"center",l:"\u29bf Centro"},
-                                       {i:"right",l:"Dir \u27a1"},{i:"bottom",l:"\u2b07 Baixo"},{i:"",l:""}]
-                                delegate: Rectangle {
+                                model:[{i:"top",l:"\u2b06 Topo"},{i:"left",l:"\u2b05 Esq"},{i:"center",l:"\u29bf Centro"},{i:"right",l:"Dir \u27a1"},{i:"bottom",l:"\u2b07 Baixo"},{i:"",l:""}]
+                                delegate:Rectangle {
                                     visible:modelData.i!==""
                                     property bool act:win.panelPosition===modelData.i
                                     width:(cfgBody.width-12)/3; height:34; radius:12
@@ -633,7 +710,7 @@ PanelWindow {
                                 }
                             }
                         }
-                        Text{text:"Transi\u00e7\u00e3o swww";font.pixelSize:10;color:Qt.rgba(1,1,1,0.45)}
+                        Text{text:"Transi\u00e7\u00e3o awww";font.pixelSize:10;color:Qt.rgba(1,1,1,0.45)}
                         Flow{width:parent.width;spacing:5
                             Repeater{model:["grow","fade","wave","wipe","slide","outer","any","random","none"]
                                 delegate:Rectangle{
@@ -650,7 +727,7 @@ PanelWindow {
                         Item{height:4}
                     }
 
-                    // ── Tab 1: Animação ───────────────────────
+                    // Tab 1: Animação
                     Column { visible:win.cfgTab===1; width:parent.width; spacing:14
                         Text{text:"Estilo ao abrir";font.pixelSize:10;color:Qt.rgba(1,1,1,0.45)}
                         Row{spacing:6
@@ -683,7 +760,7 @@ PanelWindow {
                         Item{height:4}
                     }
 
-                    // ── Tab 2: Aparência ──────────────────────
+                    // Tab 2: Aparência
                     Column { visible:win.cfgTab===2; width:parent.width; spacing:14
                         Text{text:"Opacidade do painel";font.pixelSize:10;color:Qt.rgba(1,1,1,0.45)}
                         Row{spacing:10;width:parent.width
@@ -752,7 +829,7 @@ PanelWindow {
                         Item{height:4}
                     }
 
-                    // ── Tab 3: Fundo ──────────────────────────
+                    // Tab 3: Fundo
                     Column { visible:win.cfgTab===3; width:parent.width; spacing:12
                         Row{spacing:12;height:32
                             Text{text:"Imagem de fundo";font.pixelSize:10;color:Qt.rgba(1,1,1,0.55);anchors.verticalCenter:parent.verticalCenter}
@@ -779,7 +856,7 @@ PanelWindow {
                         Item{height:4}
                     }
 
-                    // ── Tab 4: Tamanhos ───────────────────────
+                    // Tab 4: Tamanhos
                     Column { visible:win.cfgTab===4; width:parent.width; spacing:14
                         Text{text:"Largura do seletor";font.pixelSize:10;color:Qt.rgba(1,1,1,0.45)}
                         Row{spacing:10;width:parent.width
@@ -847,15 +924,72 @@ PanelWindow {
                         }
                         Row{spacing:8;height:52
                             Text{text:"Preview:";font.pixelSize:9;color:Qt.rgba(1,1,1,0.28);anchors.verticalCenter:parent.verticalCenter}
-                            Rectangle{width:72;height:46;radius:win.thumbRadius;antialiasing:true
-                                color:Qt.rgba(win.cAc.r,win.cAc.g,win.cAc.b,0.16);border.color:win.cAc;border.width:1}
+                            Rectangle{width:72;height:46;radius:win.thumbRadius;antialiasing:true;color:Qt.rgba(win.cAc.r,win.cAc.g,win.cAc.b,0.16);border.color:win.cAc;border.width:1}
+                        }
+                        Item{height:4}
+                    }
+
+                    // Tab 5: Tema
+                    Column { visible:win.cfgTab===5; width:parent.width; spacing:14
+                        Text{text:"Troca autom\u00e1tica de tema";font.pixelSize:10;color:Qt.rgba(1,1,1,0.45)}
+                        Row{spacing:12;height:36
+                            Text{text:"Matugen (Material You)";font.pixelSize:11;color:Qt.rgba(1,1,1,0.70);anchors.verticalCenter:parent.verticalCenter}
+                            Rectangle{anchors.verticalCenter:parent.verticalCenter;width:44;height:24;radius:12
+                                color:win.useMatugen?Qt.rgba(win.cAc.r,win.cAc.g,win.cAc.b,0.45):Qt.rgba(1,1,1,0.10)
+                                Behavior on color{ColorAnimation{duration:150}}
+                                Rectangle{x:win.useMatugen?parent.width-width-3:3;y:4;width:16;height:16;radius:8;color:"white"
+                                    Behavior on x{NumberAnimation{duration:150;easing.type:Easing.OutCubic}}}
+                                MouseArea{anchors.fill:parent;onClicked:win.useMatugen=!win.useMatugen}
+                            }
+                        }
+                        Text{font.pixelSize:9;color:Qt.rgba(1,1,1,0.30);wrapMode:Text.Wrap;width:parent.width
+                            text:"Ao trocar wallpaper, o matugen gera uma paleta Material You e aplica em:\nKitty  \u2022  GTK  \u2022  Hyprland (bordas)  \u2022  Mako / Dunst"}
+                        Text{text:"Se desativado, usa extrator simples (ImageMagick)";font.pixelSize:9;color:Qt.rgba(1,1,1,0.22);wrapMode:Text.Wrap;width:parent.width}
+                        // Botão de aplicar tema agora
+                        Rectangle {
+                            width:parent.width; height:36; radius:12
+                            color:Qt.rgba(win.cAc.r,win.cAc.g,win.cAc.b,0.15)
+                            border.color:win.cAc; border.width:1
+                            Text{anchors.centerIn:parent;text:"\u21bb  Aplicar tema da wallpaper atual";font.pixelSize:11;color:win.cAc}
+                            MouseArea{anchors.fill:parent;onClicked:{
+                                var w=""
+                                try { w=Qt.resolvedUrl("file://"+String(AppState.staticWallPath||"")).toString().replace("file://","") } catch(e){}
+                                win.runTheme(w)
+                            }}
+                        }
+                        Item{height:4}
+                    }
+
+                    // Tab 6: Modelo do seletor
+                    Column { visible:win.cfgTab===6; width:parent.width; spacing:14
+                        Text{text:"Modelo do seletor";font.pixelSize:10;color:Qt.rgba(1,1,1,0.45)}
+                        Grid { columns:2; spacing:8; width:parent.width
+                            Repeater {
+                                model:[
+                                    {k:"pill",     l:"Pill",      d:"Barra arredondada"},
+                                    {k:"cards",    l:"Cards",     d:"Cartas com bordas cortadas"},
+                                    {k:"skew",     l:"Inclinado", d:"Cartas em paralelogramo"},
+                                    {k:"spotlight",l:"Spotlight", d:"Um grande + pequenos"}
+                                ]
+                                delegate: Rectangle {
+                                    property bool act: win.selectorStyle===modelData.k
+                                    width: (cfgBody.width-8)/2; height: 64; radius: 12
+                                    color: act?Qt.rgba(win.cAc.r,win.cAc.g,win.cAc.b,0.22):Qt.rgba(1,1,1,0.06)
+                                    border.color: act?win.cAc:"transparent"; border.width:1
+                                    Behavior on color{ColorAnimation{duration:150}}
+                                    Column { anchors.centerIn:parent; spacing:4
+                                        Text{anchors.horizontalCenter:parent.horizontalCenter;text:modelData.l;font.pixelSize:12;font.bold:true;color:act?win.cAc:Qt.rgba(1,1,1,0.70)}
+                                        Text{anchors.horizontalCenter:parent.horizontalCenter;text:modelData.d;font.pixelSize:9;color:Qt.rgba(1,1,1,0.40)}
+                                    }
+                                    MouseArea{anchors.fill:parent;onClicked:win.selectorStyle=modelData.k}
+                                }
+                            }
                         }
                         Item{height:4}
                     }
                 }
             }
 
-            // Hints
             Row {
                 visible:!win.isVertical
                 anchors.bottom:parent.bottom; anchors.right:parent.right; anchors.margins:10; spacing:12
@@ -864,12 +998,11 @@ PanelWindow {
             }
         }
 
-        // Shooter particles
         Repeater {
-            model: (win.moveStyle==="shooter" && win.shootActive) ? 16 : 0
-            delegate: Rectangle {
-                property real prog: Math.max(0,Math.min(1,win.shootProg-index*0.050))
-                property real fade: Math.pow(1-prog,2.0)
+            model:(win.moveStyle==="shooter"&&win.shootActive)?16:0
+            delegate:Rectangle {
+                property real prog:Math.max(0,Math.min(1,win.shootProg-index*0.050))
+                property real fade:Math.pow(1-prog,2.0)
                 width:5+5*(1-prog); height:width; radius:width/2
                 color:win.cAc; opacity:fade*0.85
                 x:win.shootFX+(win.shootTX-win.shootFX)*prog-width/2+(index%4-1.5)*10*(1-prog)
@@ -877,4 +1010,4 @@ PanelWindow {
             }
         }
     }
-}
+
