@@ -317,8 +317,8 @@ if $DO_HYPR; then
 # ╚══════════════════════════════════════════════════════════╝
 
 # Blur + glass no seletor
-layerrule = blur, shiraos-wallpaper
-layerrule = ignorealpha 0.05, shiraos-wallpaper
+layerrule = blur shiraos-wallpaper
+layerrule = ignorealpha 0.05 match:namespace shiraos-wallpaper
 
 # Atalho: SUPER+W abre o seletor
 bind = SUPER, W, exec, shiraos wallpaper
