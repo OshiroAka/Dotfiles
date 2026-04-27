@@ -498,12 +498,7 @@ PanelWindow {
                 anchors.verticalCenter:parent.verticalCenter; spacing:10
                 Repeater { model:win.catNames; delegate:Item { width:30;height:30
                     property bool act:index===win.activeCategory
-                    Rectangle{
-                        visible:index!==0;anchors.centerIn:parent;width:act?20:6;height:6;radius:3
-                        color:act?win.cAc:Qt.rgba(1,1,1,0.20)
-                        Behavior on width{NumberAnimation{duration:160;easing.type:Easing.OutCubic}}
-                        Behavior on color{ColorAnimation{duration:160}}
-                    }
+                    Text { visible:index===0; anchors.centerIn:parent; text:"♥"; font.pixelSize:act?17:11; color:act?win.cAc:Qt.rgba(1,1,1,0.22); Behavior on color{ColorAnimation{duration:150}} }
                     Rectangle{
                         visible:index!==0;anchors.centerIn:parent;width:act?20:6;height:6;radius:3
                         color:act?win.cAc:Qt.rgba(1,1,1,0.20)
@@ -518,12 +513,7 @@ PanelWindow {
                 anchors.horizontalCenter:parent.horizontalCenter; spacing:10
                 Repeater { model:win.catNames; delegate:Item { width:30;height:30
                     property bool act:index===win.activeCategory
-                    Rectangle{
-                        visible:index!==0;anchors.centerIn:parent;width:6;height:act?20:6;radius:3
-                        color:act?win.cAc:Qt.rgba(1,1,1,0.20)
-                        Behavior on height{NumberAnimation{duration:160;easing.type:Easing.OutCubic}}
-                        Behavior on color{ColorAnimation{duration:160}}
-                    }
+                    Text { visible:index===0; anchors.centerIn:parent; text:"♥"; font.pixelSize:act?17:11; color:act?win.cAc:Qt.rgba(1,1,1,0.22); Behavior on color{ColorAnimation{duration:150}} }
                     Rectangle{
                         visible:index!==0;anchors.centerIn:parent;width:6;height:act?20:6;radius:3
                         color:act?win.cAc:Qt.rgba(1,1,1,0.20)
@@ -542,7 +532,7 @@ PanelWindow {
                 ListView {
                     id:wallList; anchors.fill:parent
                     orientation:win.isVertical?ListView.Vertical:ListView.Horizontal
-                    spacing:8; clip:true; cacheBuffer:600
+                    spacing:win.selectorStyle==="skew"?-18:8; clip:true; cacheBuffer:600
                     model:win.currentWalls; currentIndex:win.highlightIdx
                     function scrollToIdx(idx) {
                         var stride=(win.isVertical?(win.panelThick*0.54):(win.pillH*1.56))+spacing
@@ -558,7 +548,8 @@ PanelWindow {
                         id:card
                         property bool isHl:index===win.highlightIdx
                         property bool isFav:win.isFav(modelData)
-                        property real cw:win.isVertical?wallList.width-10:Math.round(wallList.height*1.56)
+                        property real spotF: win.selectorStyle==="spotlight"?(index===0?1.35:0.80):1.0
+                        property real cw:win.isVertical?wallList.width-10:Math.round(wallList.height*1.56*spotF)
                         property real ch:win.isVertical?Math.round(win.panelThick*0.52):wallList.height-10
                         width:win.isVertical?wallList.width:cw+10
                         height:win.isVertical?ch+10:wallList.height
@@ -576,6 +567,8 @@ PanelWindow {
                                 id:cardRect; anchors.fill: parent
                                 radius: (win.selectorStyle==="cards"||win.selectorStyle==="skew") ? 0 : win.thumbRadius
                                 clip:true; antialiasing:true; color:Qt.rgba(0,0,0,0.30)
+                            rotation:win.selectorStyle==="skew"?-6:0
+                            Behavior on rotation{NumberAnimation{duration:200}}
                             Image { anchors.fill:parent; fillMode:Image.PreserveAspectCrop; smooth:true; asynchronous:true
                                 source:win.thumbSrc(modelData,win.activeCategory)
                                 opacity:status===Image.Ready?1.0:0; Behavior on opacity{NumberAnimation{duration:200}} }
@@ -645,7 +638,7 @@ PanelWindow {
                 border.color:win.configOpen?win.cAc:win.cRm; border.width:1
                 Behavior on color{ColorAnimation{duration:150}}
                 x:{if(win.panelPosition==="right") return -width-8; if(win.panelPosition==="left") return pill.width+8; return pill.width-44}
-                y:{if(win.panelPosition==="right"||win.panelPosition==="left") return pill.height-height-10; if(win.panelPosition==="top") return pill.height+8; return -height-8}
+                y:{if(win.panelPosition==="right"||win.panelPosition==="left") return pill.height-height-8; if(win.panelPosition==="top") return pill.height+6; return -height-6}
                 Behavior on x{NumberAnimation{duration:350;easing.type:Easing.OutCubic}}
                 Behavior on y{NumberAnimation{duration:350;easing.type:Easing.OutCubic}}
                 Text{anchors.centerIn:parent;text:"\u2699";font.pixelSize:14;color:win.configOpen?win.cAc:Qt.rgba(1,1,1,0.5)
@@ -662,7 +655,7 @@ PanelWindow {
                 Behavior on opacity{NumberAnimation{duration:220;easing.type:Easing.OutCubic}}
                 Behavior on scale{NumberAnimation{duration:220;easing.type:Easing.OutCubic}}
                 x:{if(win.panelPosition==="right") return -width-10; if(win.panelPosition==="left") return pill.width+10; return (pill.width-width)/2}
-                y:{if(win.panelPosition==="top") return pill.height+10; if(win.panelPosition==="right"||win.panelPosition==="left") return pill.height-height; return -height-10}
+                y:{if(win.panelPosition==="top") return pill.height+8; if(win.panelPosition==="right"||win.panelPosition==="left") return Math.max(8,pill.height-height-8); return -height-8}
                 transformOrigin:{if(win.panelPosition==="top") return Item.Top; if(win.panelPosition==="right") return Item.Right; if(win.panelPosition==="left") return Item.Left; return Item.Bottom}
                 Behavior on x{NumberAnimation{duration:350;easing.type:Easing.OutCubic}}
                 Behavior on y{NumberAnimation{duration:350;easing.type:Easing.OutCubic}}
