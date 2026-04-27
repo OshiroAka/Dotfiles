@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+GIF_DIR="$HOME/Dotfiles/ShiraShell/fastfetch-configs/gif_fastfetch"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}"
+LAST_FILE="$CACHE_DIR/shira-fetch-last-gif"
+
+# Reaplica as cores do pywal/pywal16 no terminal atual
+# Isso ajuda quando abre um terminal novo e ele ainda não puxou a paleta.
+if [[ -r "$HOME/.cache/wal/sequences" ]]; then
+  cat "$HOME/.cache/wal/sequences"
+fi
+
+# Ajustes visuais
+IMG_W=30
+IMG_H=16
+IMG_X=0
+IMG_Y=2
+TEXT_PAD=35
+
+mkdir -p "$CACHE_DIR"
+
+mapfile -d '' GIFS < <(find "$GIF_DIR" -maxdepth 1 -type f -iname "*.gif" -print0)
+
+if (( ${#GIFS[@]} == 0 )); then
+  command fastfetch --pipe false
+  exit 0
+fi
+
+LAST_GIF="$(cat "$LAST_FILE" 2>/dev/null || true)"
+CANDIDATES=()
+
+for gif in "${GIFS[@]}"; do
+  if [[ "$gif" != "$LAST_GIF" ]]; then
+    CANDIDATES+=("$gif")
+  fi
+done
+
+if (( ${#CANDIDATES[@]} == 0 )); then
+  CANDIDATES=("${GIFS[@]}")
+fi
+
+GIF="${CANDIDATES[$RANDOM % ${#CANDIDATES[@]}]}"
+printf '%s' "$GIF" > "$LAST_FILE"
+
+clear
+
+if [[ "$TERM" == xterm-kitty* ]] && command -v kitten >/dev/null 2>&1 && [[ -f "$GIF" ]]; then
+  kitten icat \
+    --stdin=no \
+    --transfer-mode=stream \
+    --place "${IMG_W}x${IMG_H}@${IMG_X}x${IMG_Y}" \
+    --scale-up \
+    --align left \
+    "$GIF"
+
+  printf '\033[H'
+
+  command fastfetch --logo none --pipe false | sed "s/^/$(printf '%*s' "$TEXT_PAD")/"
+
+  echo
+else
+  command fastfetch --pipe false
+fi
