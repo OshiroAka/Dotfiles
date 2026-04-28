@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 # ╔══════════════════════════════════════════════════════════════╗
-# ║              ShiraOS — WallpaperSelector                     ║
+# ║              ShiraOS — WallpaperSelector                    ║
 # ║     Seletor de wallpapers para Hyprland / Arch / CachyOS     ║
 # ║            github.com/OshiroAka/Dotfiles                     ║
 # ╚══════════════════════════════════════════════════════════════╝
 # Uso:  bash install.sh
 # Flags:
-#   --no-aur       Pula pacotes AUR (quickshell, awww, etc.)
-#   --no-hyprland  Não modifica hyprland.conf
-#   --no-build     Não compila o plugin C++
-#   --update       Atualiza config sem reinstalar dependências
+#   --yes         Responde sim para as perguntas principais
+#   --no-deps     Pula dependências pacman/AUR
+#   --no-aur      Pula pacotes AUR
+#   --no-hyprland Não modifica hyprland.conf
+#   --no-build    Não compila o plugin C++
+#   --update      Atualiza config sem reinstalar dependências
 
 set -euo pipefail
 IFS=$'\n\t'
@@ -25,6 +27,27 @@ fail()  { echo -e "  ${RED}✘${NC}  $1" >&2; }
 info()  { echo -e "  ${DIM}$1${NC}"; }
 ask()   { echo -e -n "  ${CYAN}?${NC}  $1 "; }
 
+ask_yn() {
+    local prompt="$1"
+    local default="${2:-n}"
+    local reply=""
+
+    if [[ "$YES" == true ]]; then
+        ok "$prompt: sim (--yes)"
+        return 0
+    fi
+
+    if [[ "$default" =~ ^[SsYy]$ ]]; then
+        ask "$prompt (S/n)"
+    else
+        ask "$prompt (s/N)"
+    fi
+
+    read -r reply || true
+    reply="${reply:-$default}"
+    [[ "$reply" =~ ^[SsYy]$ ]]
+}
+
 # ── Paths ─────────────────────────────────────────────────────
 REPO_URL="https://github.com/OshiroAka/Dotfiles.git"
 DOTFILES="$HOME/Dotfiles"
@@ -33,26 +56,36 @@ BIN_DIR="$HOME/.local/bin"
 CACHE_DIR="$HOME/.cache/shiraos"
 WALL_BASE="$HOME/Pictures/Wallpapers"
 SETTINGS_FILE="$QS_CFG/wp_settings.json"
+WALL_DIRS_FILE="$HOME/.config/shiraos/wallpaper-dirs.txt"
 
 # ── Flags ─────────────────────────────────────────────────────
-DO_AUR=true; DO_HYPR=true; DO_BUILD=true; DO_UPDATE=false
+YES=false
+DO_DEPS=true
+DO_AUR=true
+DO_HYPR=true
+DO_BUILD=true
+DO_UPDATE=false
+
 for arg in "$@"; do
     case "$arg" in
+        --yes|-y)       YES=true ;;
+        --no-deps)      DO_DEPS=false ;;
         --no-aur)       DO_AUR=false ;;
         --no-hyprland)  DO_HYPR=false ;;
         --no-build)     DO_BUILD=false ;;
         --update)       DO_UPDATE=true ;;
+        *) warn "Flag desconhecida: $arg" ;;
     esac
 done
 
 # ── Banner ────────────────────────────────────────────────────
-clear
+clear || true
 echo -e "${CYAN}${BOLD}"
 cat << 'EOF'
    _____ _     _              ____  ____
   / ___/| |__ (_)_ __ __ _  / __ \/ ___|
   \__ \ | '_ \| | '__/ _` || |  | \___ \
-  ___/ || | | | | | | (_| || |__| |___) |
+  ___) || | | | | | | (_| || |__| |___) |
  /____/ |_| |_|_|_|  \__,_| \____/|____/
        WallpaperSelector for Hyprland
 EOF
@@ -67,14 +100,39 @@ if ! command -v pacman &>/dev/null; then
 fi
 ok "Arch/CachyOS detectado"
 
-if ! command -v hyprland &>/dev/null && ! pgrep -x Hyprland &>/dev/null; then
-    warn "Hyprland não detectado. O WallpaperSelector requer Hyprland."
-    ask "Continuar mesmo assim? (s/N)"
-    read -r reply
-    [[ "$reply" =~ ^[Ss]$ ]] || exit 0
+if ! command -v Hyprland &>/dev/null && ! command -v hyprland &>/dev/null && ! pgrep -x Hyprland &>/dev/null; then
+    warn "Hyprland não detectado. O WallpaperSelector foi feito para Hyprland."
+    ask_yn "Continuar mesmo assim?" "n" || exit 0
 fi
 
-mkdir -p "$CACHE_DIR" "$BIN_DIR" "$HOME/.config/quickshell"
+mkdir -p "$CACHE_DIR" "$BIN_DIR" "$HOME/.config/quickshell" "$HOME/.config/shiraos"
+
+# ── Perguntas principais ──────────────────────────────────────
+if [[ "$DO_UPDATE" == true ]]; then
+    DO_DEPS=false
+    info "Modo --update: dependências serão puladas."
+fi
+
+if [[ "$DO_DEPS" == true ]]; then
+    ask_yn "Instalar/atualizar dependências do sistema?" "s" || DO_DEPS=false
+fi
+
+if [[ "$DO_AUR" == true && "$DO_DEPS" == true ]]; then
+    ask_yn "Instalar dependências AUR?" "s" || DO_AUR=false
+fi
+
+USE_PYWAL16=false
+if [[ "$DO_AUR" == true && "$DO_DEPS" == true ]]; then
+    ask_yn "Usar pywal16 via AUR no lugar do pywal normal?" "s" && USE_PYWAL16=true || USE_PYWAL16=false
+fi
+
+if [[ "$DO_HYPR" == true ]]; then
+    ask_yn "Adicionar bloco do ShiraOS no hyprland.conf?" "s" || DO_HYPR=false
+fi
+
+if [[ "$DO_BUILD" == true ]]; then
+    ask_yn "Compilar plugin C++ se existir CMakeLists.txt?" "s" || DO_BUILD=false
+fi
 
 # ── AUR helper ────────────────────────────────────────────────
 AUR_HELPER=""
@@ -84,7 +142,7 @@ elif command -v yay &>/dev/null; then
     AUR_HELPER="yay"
 fi
 
-if $DO_AUR && [[ -z "$AUR_HELPER" ]]; then
+if [[ "$DO_AUR" == true && "$DO_DEPS" == true && -z "$AUR_HELPER" ]]; then
     step "Instalando yay (helper AUR)"
     sudo pacman -S --needed --noconfirm base-devel git
     rm -rf /tmp/yay-install
@@ -94,55 +152,103 @@ if $DO_AUR && [[ -z "$AUR_HELPER" ]]; then
     ok "yay instalado"
 fi
 
-$DO_AUR && ok "AUR helper: $AUR_HELPER"
+if [[ "$DO_AUR" == true && "$DO_DEPS" == true ]]; then
+    ok "AUR helper: ${AUR_HELPER:-nenhum}"
+fi
 
-# ── Dependências pacman ───────────────────────────────────────
-if ! $DO_UPDATE; then
-    step "Instalando dependências do sistema (pacman)"
+install_pacman_group() {
+    local -a pkgs=("$@")
+    local -a missing=()
 
-    PKGS=(
-        # Qt6 (Quickshell)
-        qt6-base qt6-declarative qt6-imageformats qt6-multimedia
-        # Build
-        cmake ninja gcc pkgconf
-        # Ferramentas
-        git python imagemagick
-        # Hyprland extras
-        xdg-desktop-portal-hyprland
-    )
-
-    MISSING=()
-    for p in "${PKGS[@]}"; do
-        pacman -Qi "$p" &>/dev/null || MISSING+=("$p")
+    for pkg in "${pkgs[@]}"; do
+        pacman -Qi "$pkg" &>/dev/null || missing+=("$pkg")
     done
 
-    if [[ ${#MISSING[@]} -gt 0 ]]; then
-        info "Instalando: ${MISSING[*]}"
-        sudo pacman -S --needed --noconfirm "${MISSING[@]}" || {
-            warn "Alguns pacotes falharam, tentando individualmente..."
-            for p in "${MISSING[@]}"; do
-                sudo pacman -S --needed --noconfirm "$p" 2>/dev/null && ok "$p" || warn "$p não encontrado, pulando"
-            done
-        }
+    if [[ ${#missing[@]} -eq 0 ]]; then
+        ok "Todos os pacotes pacman do grupo já estão instalados"
+        return 0
     fi
-    ok "Dependências do sistema prontas"
 
-    # ── Dependências AUR ──────────────────────────────────────
-    if $DO_AUR; then
-        step "Instalando dependências AUR"
-
-        AUR_PKGS=(quickshell-git awww mpvpaper linux-wallpaperengine)
-
-        for pkg in "${AUR_PKGS[@]}"; do
-            if pacman -Qi "$pkg" &>/dev/null; then
-                ok "$pkg (já instalado)"
-            else
-                info "Instalando $pkg..."
-                "$AUR_HELPER" -S --needed --noconfirm "$pkg" && ok "$pkg" || warn "$pkg falhou — instale manualmente: $AUR_HELPER -S $pkg"
-            fi
+    info "Instalando: ${missing[*]}"
+    if ! sudo pacman -S --needed --noconfirm "${missing[@]}"; then
+        warn "Instalação em grupo falhou. Tentando individualmente..."
+        for pkg in "${missing[@]}"; do
+            sudo pacman -S --needed --noconfirm "$pkg" 2>/dev/null && ok "$pkg" || warn "$pkg não encontrado, pulando"
         done
     fi
-fi # !DO_UPDATE
+}
+
+install_aur_pkg() {
+    local pkg="$1"
+
+    if [[ -z "$AUR_HELPER" ]]; then
+        warn "Sem AUR helper para instalar $pkg"
+        return 0
+    fi
+
+    if pacman -Qi "$pkg" &>/dev/null; then
+        ok "$pkg já instalado"
+        return 0
+    fi
+
+    info "Instalando AUR: $pkg"
+    "$AUR_HELPER" -S --needed --noconfirm "$pkg" && ok "$pkg" || warn "$pkg falhou — tente manualmente: $AUR_HELPER -S $pkg"
+}
+
+# ── Dependências pacman ───────────────────────────────────────
+if [[ "$DO_DEPS" == true ]]; then
+    step "Instalando dependências do sistema (pacman)"
+
+    # Mantém as dependências antigas e adiciona as atuais usadas pelo ShiraOS.
+    PKGS=(
+        # Base / build
+        base-devel git cmake ninja gcc pkgconf
+
+        # Qt6 / Quickshell
+        qt6-base qt6-declarative qt6-imageformats qt6-multimedia qt6-svg qt6-wayland
+
+        # Python / pywal / scripts
+        python python-requests python-pillow python-pipx curl jq imagemagick
+
+        # Hyprland / Wayland
+        hyprland hyprpaper xdg-desktop-portal xdg-desktop-portal-hyprland
+        grim slurp wl-clipboard
+
+        # Wallpaper / media / áudio
+        mpv playerctl pipewire pipewire-pulse pipewire-alsa wireplumber
+
+        # Extras úteis para o ecossistema ShiraOS
+        cava pavucontrol brightnessctl btop fish kitty
+    )
+
+    if [[ "$USE_PYWAL16" == false ]]; then
+        PKGS+=(python-pywal)
+    fi
+
+    install_pacman_group "${PKGS[@]}"
+    ok "Dependências pacman prontas"
+
+    # ── Dependências AUR ──────────────────────────────────────
+    if [[ "$DO_AUR" == true ]]; then
+        step "Instalando dependências AUR"
+
+        AUR_PKGS=(
+            quickshell-git
+            awww
+            mpvpaper
+            linux-wallpaperengine
+            python-colorthief
+        )
+
+        if [[ "$USE_PYWAL16" == true ]]; then
+            AUR_PKGS+=(python-pywal16)
+        fi
+
+        for pkg in "${AUR_PKGS[@]}"; do
+            install_aur_pkg "$pkg"
+        done
+    fi
+fi
 
 # Verificar Quickshell
 if ! command -v qs &>/dev/null; then
@@ -157,12 +263,21 @@ else
     ok "awww: ok"
 fi
 
+if ! command -v wal &>/dev/null; then
+    warn "wal/pywal não encontrado — instale python-pywal ou python-pywal16"
+else
+    ok "pywal/wal: ok"
+fi
+
 # ── Clonar / atualizar dotfiles ───────────────────────────────
 step "Configurando dotfiles ShiraOS"
 
 if [[ -d "$DOTFILES/.git" ]]; then
     info "Atualizando dotfiles..."
-    git -C "$DOTFILES" fetch origin 2>/dev/null && git -C "$DOTFILES" reset --hard origin/main && ok "Dotfiles atualizados" || { warn "git update falhou — reclonando..."; rm -rf "$DOTFILES"; git clone "$REPO_URL" "$DOTFILES" && ok "Dotfiles reclonados"; }
+    git -C "$DOTFILES" fetch origin 2>/dev/null \
+        && git -C "$DOTFILES" reset --hard origin/main \
+        && ok "Dotfiles atualizados" \
+        || { warn "git update falhou — reclonando..."; rm -rf "$DOTFILES"; git clone "$REPO_URL" "$DOTFILES" && ok "Dotfiles reclonados"; }
 else
     rm -rf "$DOTFILES"
     git clone "$REPO_URL" "$DOTFILES"
@@ -179,12 +294,9 @@ if [[ ! -d "$SRC_QS" ]]; then
     exit 1
 fi
 
-if [[ -d "$QS_CFG" ]] && ! $DO_UPDATE; then
+if [[ -d "$QS_CFG" && "$DO_UPDATE" == false ]]; then
     warn "Já existe uma config em $QS_CFG"
-    ask "Sobrescrever? (s/N)"
-    read -r r
-    if [[ "$r" =~ ^[Ss]$ ]]; then
-        # Preserva settings de usuário se existir
+    if ask_yn "Sobrescrever?" "n"; then
         [[ -f "$SETTINGS_FILE" ]] && cp "$SETTINGS_FILE" /tmp/wp_settings_backup.json && info "Settings preservados"
         rm -rf "$QS_CFG"
     else
@@ -193,27 +305,49 @@ if [[ -d "$QS_CFG" ]] && ! $DO_UPDATE; then
     fi
 fi
 
-if $DO_UPDATE; then
-    # Copia apenas os arquivos do projeto, preserva wp_settings.json
-    rsync -a --exclude="wp_settings.json" "$SRC_QS/." "$QS_CFG/"
-    [[ -f /tmp/wp_settings_backup.json ]] && mv /tmp/wp_settings_backup.json "$SETTINGS_FILE"
+mkdir -p "$QS_CFG"
+
+if command -v rsync &>/dev/null; then
+    if [[ "$DO_UPDATE" == true ]]; then
+        rsync -a --exclude="wp_settings.json" "$SRC_QS/." "$QS_CFG/"
+    else
+        rsync -a "$SRC_QS/." "$QS_CFG/"
+    fi
 else
+    warn "rsync não encontrado; usando cp -r"
     cp -r "$SRC_QS/." "$QS_CFG/"
-    [[ -f /tmp/wp_settings_backup.json ]] && mv /tmp/wp_settings_backup.json "$SETTINGS_FILE"
 fi
+
+[[ -f /tmp/wp_settings_backup.json ]] && mv /tmp/wp_settings_backup.json "$SETTINGS_FILE"
 ok "Config instalada em $QS_CFG"
 
+# ── Config de diretórios do scanner ───────────────────────────
+step "Configurando diretórios de wallpapers"
+mkdir -p \
+    "$WALL_BASE/static" \
+    "$WALL_BASE/live" \
+    "$WALL_BASE/WallpaperSelector" \
+    "$CACHE_DIR" \
+    "$HOME/Downloads"
+
+cat > "$WALL_DIRS_FILE" <<EOF_DIRS
+$HOME/Pictures
+$HOME/Downloads
+$QS_CFG
+EOF_DIRS
+ok "wallpaper-dirs.txt criado em $WALL_DIRS_FILE"
+ok "~/Pictures/Wallpapers/{static,live,WallpaperSelector}"
+
 # ── Compilar plugin C++ ───────────────────────────────────────
-if $DO_BUILD && [[ -f "$QS_CFG/CMakeLists.txt" ]]; then
+if [[ "$DO_BUILD" == true && -f "$QS_CFG/CMakeLists.txt" ]]; then
     step "Compilando plugin C++ (ShiraOS)"
 
-    # Detecta QML_DIR
     QML_DIR=""
     for candidate in \
         "/usr/lib/qt6/qml" \
         "/usr/lib64/qt6/qml" \
-        "$(qt6-paths --install-prefix 2>/dev/null)/lib/qt6/qml" \
-        "$(qtpaths6 --install-prefix 2>/dev/null)/lib/qt6/qml"; do
+        "$(qt6-paths --install-prefix 2>/dev/null || true)/lib/qt6/qml" \
+        "$(qtpaths6 --install-prefix 2>/dev/null || true)/lib/qt6/qml"; do
         [[ -n "$candidate" && -d "$candidate" ]] && { QML_DIR="$candidate"; break; }
     done
     [[ -z "$QML_DIR" ]] && QML_DIR="/usr/lib/qt6/qml"
@@ -237,8 +371,7 @@ if $DO_BUILD && [[ -f "$QS_CFG/CMakeLists.txt" ]]; then
     sudo ninja -C "$BUILD_DIR" install >> "$BUILD_LOG" 2>&1 || { fail "Install falhou! Veja: $BUILD_LOG"; exit 1; }
 
     ok "Plugin ShiraOS compilado → $QML_DIR/ShiraOS"
-
-elif $DO_BUILD; then
+elif [[ "$DO_BUILD" == true ]]; then
     info "CMakeLists.txt não encontrado — plugin C++ não necessário"
 fi
 
@@ -247,11 +380,11 @@ step "Instalando script shiraos"
 
 cat > "$BIN_DIR/shiraos" << 'SCRIPT'
 #!/usr/bin/env bash
-# ShiraOS WallpaperSelector CLI
 CMD="${1:-start}"
 case "$CMD" in
     restart|r)
-        pkill -x qs 2>/dev/null; sleep 0.25
+        pkill -x qs 2>/dev/null || true
+        sleep 0.25
         qs -c shiraos -d &
         echo "ShiraOS reiniciado."
         ;;
@@ -259,7 +392,8 @@ case "$CMD" in
         pkill -x qs 2>/dev/null && echo "ShiraOS parado." || echo "ShiraOS não estava rodando."
         ;;
     debug|d)
-        pkill -x qs 2>/dev/null; sleep 0.1
+        pkill -x qs 2>/dev/null || true
+        sleep 0.1
         qs -c shiraos
         ;;
     ipc)
@@ -282,43 +416,34 @@ SCRIPT
 chmod +x "$BIN_DIR/shiraos"
 ok "shiraos → $BIN_DIR/shiraos"
 
-# ── Diretórios de wallpapers ──────────────────────────────────
-step "Criando estrutura de diretórios"
-mkdir -p \
-    "$WALL_BASE/static" \
-    "$WALL_BASE/live" \
-    "$WALL_BASE/WallpaperSelector" \
-    "$CACHE_DIR"
-ok "~/Pictures/Wallpapers/{static,live,WallpaperSelector}"
-info "Coloque seus wallpapers estáticos em: ~/Pictures/Wallpapers/static/"
-info "Para wallpaper animado (mpvpaper): ~/Pictures/Wallpapers/live/"
-info "Para fundo do seletor: ~/Pictures/Wallpapers/WallpaperSelector/"
-
 # ── Hyprland ─────────────────────────────────────────────────
-if $DO_HYPR; then
+if [[ "$DO_HYPR" == true ]]; then
     step "Configurando Hyprland"
 
     HYPR_CONF="$HOME/.config/hypr/hyprland.conf"
 
     if [[ ! -f "$HYPR_CONF" ]]; then
         warn "hyprland.conf não encontrado em $HYPR_CONF"
-        info "Adicione manualmente o bloco abaixo ao seu hyprland.conf:"
+        info "Adicione manualmente o bloco do ShiraOS ao seu hyprland.conf."
+    elif grep -q "ShiraOS.*WallpaperSelector" "$HYPR_CONF" 2>/dev/null; then
+        ok "Hyprland já configurado"
     else
-        if grep -q "ShiraOS.*WallpaperSelector" "$HYPR_CONF" 2>/dev/null; then
-            ok "Hyprland já configurado"
-        else
-            # Backup
-            cp "$HYPR_CONF" "${HYPR_CONF}.bak_shiraos_$(date +%Y%m%d_%H%M%S)"
+        HYPR_BAK="${HYPR_CONF}.bak_shiraos_$(date +%Y%m%d_%H%M%S)"
+        cp "$HYPR_CONF" "$HYPR_BAK"
 
-            cat >> "$HYPR_CONF" << 'HYPR_BLOCK'
+        cat >> "$HYPR_CONF" << 'HYPR_BLOCK'
 
 # ╔══════════════════════════════════════════════════════════╗
 # ║           ShiraOS — WallpaperSelector                    ║
 # ╚══════════════════════════════════════════════════════════╝
 
-# Blur + glass no seletor
-layerrule = blur shiraos-wallpaper
-layerrule = ignorealpha 0.05 match:namespace shiraos-wallpaper
+# Blur + glass no seletor/settings
+layerrule = blur, shiraos-wallpaper
+layerrule = ignorealpha 0.18, shiraos-wallpaper
+
+# Compatibilidade alternativa, caso sua versão do Hyprland use match:
+layerrule = blur, match:namespace shiraos-wallpaper
+layerrule = ignorealpha 0.18, match:namespace shiraos-wallpaper
 
 # Atalho: SUPER+W abre o seletor
 bind = SUPER, W, exec, shiraos wallpaper
@@ -328,9 +453,8 @@ exec-once = awww-daemon
 exec-once = shiraos
 HYPR_BLOCK
 
-            ok "Configurações adicionadas ao hyprland.conf"
-            info "Backup salvo em ${HYPR_CONF}.bak_shiraos_$(date +%Y%m%d_%H%M%S)"
-        fi
+        ok "Configurações adicionadas ao hyprland.conf"
+        info "Backup salvo em $HYPR_BAK"
     fi
 fi
 
@@ -338,18 +462,16 @@ fi
 step "Verificando PATH"
 export PATH="$BIN_DIR:$PATH"
 
-# fish
 FISH_CFG="$HOME/.config/fish/config.fish"
-if [[ -f "$FISH_CFG" ]] && ! grep -q "local/bin" "$FISH_CFG"; then
+if [[ -f "$FISH_CFG" ]] && ! grep -q "fish_add_path.*local/bin" "$FISH_CFG"; then
     echo 'fish_add_path $HOME/.local/bin' >> "$FISH_CFG"
     ok "fish: ~/.local/bin adicionado"
 fi
 
-# bash / zsh
 for RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
-    if [[ -f "$RC" ]] && ! grep -q 'local/bin' "$RC"; then
+    if [[ -f "$RC" ]] && ! grep -q 'HOME/.local/bin' "$RC"; then
         echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$RC"
-        ok "$(basename $RC): ~/.local/bin adicionado"
+        ok "$(basename "$RC"): ~/.local/bin adicionado"
     fi
 done
 ok "PATH pronto"
@@ -359,35 +481,40 @@ step "Verificação final"
 
 CHECKS_OK=true
 
-command -v qs       &>/dev/null && ok "qs (Quickshell)" || { warn "qs não encontrado"; CHECKS_OK=false; }
-command -v awww     &>/dev/null && ok "awww"             || warn "awww não encontrado — yay -S awww"
-command -v shiraos  &>/dev/null && ok "shiraos CLI"     || { warn "shiraos não no PATH (reinicie o terminal)"; }
-[[ -d "$QS_CFG" ]]              && ok "config em $QS_CFG" || { fail "Config não instalada!"; CHECKS_OK=false; }
+command -v qs          &>/dev/null && ok "qs (Quickshell)" || { warn "qs não encontrado"; CHECKS_OK=false; }
+command -v awww        &>/dev/null && ok "awww"             || warn "awww não encontrado — yay -S awww"
+command -v wal         &>/dev/null && ok "wal/pywal"        || warn "wal não encontrado — python-pywal/python-pywal16"
+command -v mpvpaper    &>/dev/null && ok "mpvpaper"         || warn "mpvpaper não encontrado"
+command -v playerctl   &>/dev/null && ok "playerctl"        || warn "playerctl não encontrado"
+command -v shiraos     &>/dev/null && ok "shiraos CLI"      || warn "shiraos não no PATH; reinicie o terminal"
+[[ -d "$QS_CFG" ]]                 && ok "config em $QS_CFG" || { fail "Config não instalada!"; CHECKS_OK=false; }
 
 if [[ -f "$QS_CFG/CMakeLists.txt" ]]; then
     ls /usr/lib/qt6/qml/ShiraOS/qmldir &>/dev/null \
         && ok "Plugin ShiraOS carregado" \
-        || { warn "Plugin ShiraOS não encontrado — tente: shiraos debug"; CHECKS_OK=false; }
+        || warn "Plugin ShiraOS não encontrado — se necessário rode com build ativado"
 fi
 
 # ── Resumo ────────────────────────────────────────────────────
 echo ""
-if $CHECKS_OK; then
+if [[ "$CHECKS_OK" == true ]]; then
     echo -e "${GREEN}${BOLD}╔══════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}${BOLD}║   ShiraOS WallpaperSelector pronto!              ║${NC}"
+    echo -e "${GREEN}${BOLD}║   ShiraOS WallpaperSelector pronto!             ║${NC}"
     echo -e "${GREEN}${BOLD}╚══════════════════════════════════════════════════╝${NC}"
 else
     echo -e "${YELLOW}${BOLD}╔══════════════════════════════════════════════════╗${NC}"
     echo -e "${YELLOW}${BOLD}║   Instalado com avisos — veja acima             ║${NC}"
     echo -e "${YELLOW}${BOLD}╚══════════════════════════════════════════════════╝${NC}"
 fi
+
 echo ""
-echo -e "  Iniciar:     ${CYAN}shiraos${NC}"
-echo -e "  Reiniciar:   ${CYAN}shiraos restart${NC}"
-echo -e "  Debug:       ${CYAN}shiraos debug${NC}"
-echo -e "  Abrir painel:${CYAN}SUPER + W${NC}  (ou  shiraos wallpaper)"
+echo -e "  Iniciar:       ${CYAN}shiraos${NC}"
+echo -e "  Reiniciar:     ${CYAN}shiraos restart${NC}"
+echo -e "  Debug:         ${CYAN}shiraos debug${NC}"
+echo -e "  Abrir painel:  ${CYAN}SUPER + W${NC}  ou  ${CYAN}shiraos wallpaper${NC}"
 echo ""
-echo -e "  ${DIM}Coloque wallpapers em ~/Pictures/Wallpapers/static/${NC}"
+echo -e "  ${DIM}Wallpapers estáticos: ~/Pictures/Wallpapers/static/${NC}"
+echo -e "  ${DIM}Wallpapers live:     ~/Pictures/Wallpapers/live/${NC}"
 echo ""
-echo -e "  ${YELLOW}⚠  Reinicie o Hyprland para ativar blur e o atalho SUPER+W${NC}"
+echo -e "  ${YELLOW}⚠ Reinicie o Hyprland ou rode hyprctl reload para ativar blur/atalho.${NC}"
 echo ""

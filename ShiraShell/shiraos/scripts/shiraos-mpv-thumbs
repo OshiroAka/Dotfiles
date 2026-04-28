@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v ffmpeg >/dev/null 2>&1; then
+  echo "AVISO: ffmpeg não encontrado. Instale com: sudo pacman -S ffmpeg"
+  exit 0
+fi
+
+mkdir -p "$HOME/.cache"
+
+find "$HOME/Pictures/Wallpapers/live" -maxdepth 1 -type f \
+  \( -iname '*.mp4' -o -iname '*.webm' -o -iname '*.mkv' -o -iname '*.mov' \) \
+  2>/dev/null | while IFS= read -r f; do
+    base="$(basename "$f")"
+    name="${base%.*}"
+    out="$HOME/.cache/qs_mpv_thumb_${name}.jpg"
+
+    if [ -s "$out" ]; then
+      continue
+    fi
+
+    ffmpeg -hide_banner -loglevel error -y \
+      -ss 2 -i "$f" \
+      -frames:v 1 \
+      -vf "scale=960:-2:force_original_aspect_ratio=decrease" \
+      "$out" >/dev/null 2>&1 || true
+  done

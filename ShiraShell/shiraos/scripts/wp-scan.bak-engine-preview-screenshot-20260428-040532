@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+printf 'BEGIN\n'
+
+find "$HOME/Pictures/Wallpapers/static" -maxdepth 1 -type f \
+  \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.gif' \) \
+  2>/dev/null | sort | while IFS= read -r f; do
+  printf 'STATIC|%s\n' "$f"
+done
+
+find "$HOME/Pictures/Wallpapers/live" -maxdepth 1 -type f \
+  \( -iname '*.mp4' -o -iname '*.webm' -o -iname '*.mkv' -o -iname '*.mov' -o -iname '*.gif' \) \
+  2>/dev/null | sort | while IFS= read -r f; do
+  printf 'LIVE|%s\n' "$f"
+done
+
+find "$HOME/Pictures/Wallpapers/WallpaperSelector" -maxdepth 1 -type f \
+  \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.gif' \) \
+  2>/dev/null | sort | while IFS= read -r f; do
+  printf 'BG|%s\n' "$f"
+done
+
+for BASE in \
+  "$HOME/.steam/steam/steamapps/workshop/content/431960" \
+  "$HOME/.local/share/Steam/steamapps/workshop/content/431960"
+do
+  [ -d "$BASE" ] || continue
+
+  for d in "$BASE"/*/; do
+    [ -d "$d" ] || continue
+    id="$(basename "$d")"
+    prev=""
+
+    if [ -f "$d/project.json" ]; then
+      prev="$(python3 - "$d" <<'PY' 2>/dev/null || true
+import json, os, sys
+
+root = sys.argv[1]
+project = os.path.join(root, "project.json")
+
+try:
+    data = json.load(open(project, "r", encoding="utf-8", errors="ignore"))
+except Exception:
+    sys.exit(0)
+
+candidates = []
+for key in ("preview", "thumbnail", "cover", "image"):
+    value = data.get(key)
+    if isinstance(value, str) and value.strip():
+        candidates.append(value)
+
+for value in candidates:
+    path = value
+    if not os.path.isabs(path):
+        path = os.path.join(root, path)
+    if os.path.exists(path):
+        print(path)
+        break
+PY
+)"
+    fi
+
+    if [ -z "$prev" ]; then
+      prev="$(find "$d" -maxdepth 4 -type f \
+        \( -iname 'preview.*' -o -iname 'thumbnail.*' -o -iname 'thumb.*' -o -iname 'cover.*' -o -iname 'icon.*' \) \
+        \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.gif' \) \
+        2>/dev/null | sort | head -1 || true)"
+    fi
+
+    if [ -z "$prev" ]; then
+      prev="$(find "$d" -maxdepth 4 -type f \
+        \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.gif' \) \
+        2>/dev/null | sort | head -1 || true)"
+    fi
+
+    printf 'ENGINE|%s|%s\n' "$id" "$prev"
+  done
+done
+
+printf 'END\n'

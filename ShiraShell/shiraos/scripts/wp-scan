@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BASE="$HOME/.config/quickshell/shiraos"
+GEN="$BASE/scripts/wp-build-preview-cache"
+
+# Gera thumbs sem travar o scan se faltar ffmpeg.
+[ -x "$GEN" ] && "$GEN" >/dev/null 2>&1 || true
+
+printf 'BEGIN\n'
+
+find "$HOME/Pictures/Wallpapers/static" -maxdepth 1 -type f \
+  \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.gif' \) \
+  2>/dev/null | sort | while IFS= read -r f; do
+  printf 'STATIC|%s\n' "$f"
+done
+
+for ROOT in \
+  "$HOME/.steam/steam/steamapps/workshop/content/431960" \
+  "$HOME/.local/share/Steam/steamapps/workshop/content/431960"
+do
+  [ -d "$ROOT" ] || continue
+
+  for d in "$ROOT"/*/; do
+    [ -d "$d" ] || continue
+    id="$(basename "$d")"
+    prev=""
+
+    # 1) Prefer GIF preview, so animated thumbs work.
+    prev="$(find "$d" -maxdepth 5 -type f \
+      \( -iname 'preview*.gif' -o -iname 'thumbnail*.gif' -o -iname 'thumb*.gif' -o -iname 'cover*.gif' -o -iname '*.gif' \) \
+      2>/dev/null | sort | head -1 || true)"
+
+    # 2) Prefer generated clean cache from source files.
+    if [ -z "$prev" ]; then
+      for ext in jpg png jpeg webp; do
+        p="$HOME/.cache/shiraos/engine-previews/${id}.${ext}"
+        if [ -s "$p" ]; then
+          prev="$p"
+          break
+        fi
+      done
+    fi
+
+    # 3) project.json preview.
+    if [ -z "$prev" ] && [ -f "$d/project.json" ]; then
+      prev="$(python3 - "$d" <<'PY' 2>/dev/null || true
+import json, os, sys
+root = sys.argv[1]
+try:
+    data = json.load(open(os.path.join(root, "project.json"), "r", encoding="utf-8", errors="ignore"))
+except Exception:
+    sys.exit(0)
+
+keys = ("preview", "thumbnail", "cover", "image")
+for key in keys:
+    val = data.get(key)
+    if isinstance(val, str) and val.strip():
+        path = val if os.path.isabs(val) else os.path.join(root, val)
+        if os.path.exists(path):
+            print(path)
+            break
+PY
+)"
+    fi
+
+    # 4) Fallback: common still preview files.
+    if [ -z "$prev" ]; then
+      prev="$(find "$d" -maxdepth 5 -type f \
+        \( -iname 'preview.*' -o -iname 'thumbnail.*' -o -iname 'thumb.*' -o -iname 'cover.*' -o -iname 'icon.*' \) \
+        \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.gif' \) \
+        2>/dev/null | sort | head -1 || true)"
+    fi
+
+    printf 'ENGINE|%s|%s\n' "$id" "$prev"
+  done
+done
+
+find "$HOME/Pictures/Wallpapers/live" -maxdepth 1 -type f \
+  \( -iname '*.mp4' -o -iname '*.webm' -o -iname '*.mkv' -o -iname '*.mov' -o -iname '*.gif' \) \
+  2>/dev/null | sort | while IFS= read -r f; do
+  printf 'LIVE|%s\n' "$f"
+done
+
+find "$HOME/Pictures/Wallpapers/WallpaperSelector" -maxdepth 1 -type f \
+  \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.gif' \) \
+  2>/dev/null | sort | while IFS= read -r f; do
+  printf 'BG|%s\n' "$f"
+done
+
+printf 'END\n'

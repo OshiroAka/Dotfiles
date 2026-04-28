@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+KEY="${1:-}"
+[ -z "$KEY" ] && exit 0
+
+CACHE_DIR="$HOME/.cache/shiraos/engine-shots"
+mkdir -p "$CACHE_DIR"
+
+OUT="$CACHE_DIR/${KEY}.png"
+TMP="$OUT.tmp.png"
+
+# Se já existe, não sobrescreve.
+[ -s "$OUT" ] && exit 0
+
+# Tempo para:
+# 1) o seletor sumir
+# 2) o linux-wallpaperengine desenhar o primeiro frame
+sleep 2.8
+
+command -v grim >/dev/null 2>&1 || exit 0
+
+for _ in 1 2 3; do
+  rm -f "$TMP"
+  if grim "$TMP" >/dev/null 2>&1 && [ -s "$TMP" ]; then
+    mv -f "$TMP" "$OUT"
+    exit 0
+  fi
+  sleep 0.8
+done
+
+rm -f "$TMP" 2>/dev/null || true
+exit 0

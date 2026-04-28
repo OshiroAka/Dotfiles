@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ENGINE_CACHE="$HOME/.cache/shiraos/engine-previews"
+MPV_CACHE_LEGACY="$HOME/.cache"
+mkdir -p "$ENGINE_CACHE" "$MPV_CACHE_LEGACY"
+
+have_ffmpeg=0
+command -v ffmpeg >/dev/null 2>&1 && have_ffmpeg=1
+
+make_video_thumb() {
+  local input="$1"
+  local output="$2"
+
+  [ "$have_ffmpeg" = "1" ] || return 1
+  [ -s "$output" ] && return 0
+
+  mkdir -p "$(dirname "$output")"
+
+  ffmpeg -hide_banner -loglevel error -y \
+    -ss 2 -i "$input" \
+    -frames:v 1 \
+    -vf "scale=960:-1:force_original_aspect_ratio=decrease" \
+    "$output" >/dev/null 2>&1 || return 1
+}
+
+# MPV/live wallpaper thumbs.
+find "$HOME/Pictures/Wallpapers/live" -maxdepth 1 -type f \
+  \( -iname '*.mp4' -o -iname '*.webm' -o -iname '*.mkv' -o -iname '*.mov' \) \
+  2>/dev/null | while IFS= read -r f; do
+    base="${f##*/}"
+    name="${base%.*}"
+    out="$MPV_CACHE_LEGACY/qs_mpv_thumb_${name}.jpg"
+    make_video_thumb "$f" "$out" || true
+done
+
+# Wallpaper Engine clean source-based previews.
+for ROOT in \
+  "$HOME/.steam/steam/steamapps/workshop/content/431960" \
+  "$HOME/.local/share/Steam/steamapps/workshop/content/431960"
+do
+  [ -d "$ROOT" ] || continue
+
+  for d in "$ROOT"/*/; do
+    [ -d "$d" ] || continue
+    id="$(basename "$d")"
+
+    # 1) Prefer animated GIF thumb/preview if package has one.
+    gif="$(find "$d" -maxdepth 5 -type f \
+      \( -iname 'preview*.gif' -o -iname 'thumbnail*.gif' -o -iname 'thumb*.gif' -o -iname 'cover*.gif' -o -iname '*.gif' \) \
+      2>/dev/null | sort | head -1 || true)"
+
+    if [ -n "$gif" ]; then
+      # Use original gif directly, no conversion.
+      continue
+    fi
+
+    # 2) If wallpaper source contains a video, create a clean frame from it.
+    out="$ENGINE_CACHE/${id}.jpg"
+    [ -s "$out" ] && continue
+
+    video="$(find "$d" -maxdepth 5 -type f \
+      \( -iname '*.mp4' -o -iname '*.webm' -o -iname '*.mkv' -o -iname '*.mov' \) \
+      2>/dev/null | sort | head -1 || true)"
+
+    if [ -n "$video" ]; then
+      make_video_thumb "$video" "$out" || true
+      [ -s "$out" ] && continue
+    fi
+
+    # 3) Fallback: copy/convert an image asset into cache if possible.
+    img="$(find "$d" -maxdepth 5 -type f \
+      \( -iname 'preview*.png' -o -iname 'preview*.jpg' -o -iname 'preview*.jpeg' -o -iname 'preview*.webp' \
+      -o -iname 'thumbnail*.png' -o -iname 'thumbnail*.jpg' -o -iname 'thumbnail*.jpeg' -o -iname 'thumbnail*.webp' \
+      -o -iname 'cover*.png' -o -iname 'cover*.jpg' -o -iname 'cover*.jpeg' -o -iname 'cover*.webp' \) \
+      2>/dev/null | sort | head -1 || true)"
+
+    if [ -n "$img" ]; then
+      case "${img,,}" in
+        *.jpg|*.jpeg) cp -f "$img" "$out" 2>/dev/null || true ;;
+        *.png) cp -f "$img" "$ENGINE_CACHE/${id}.png" 2>/dev/null || true ;;
+        *.webp)
+          if [ "$have_ffmpeg" = "1" ]; then
+            ffmpeg -hide_banner -loglevel error -y -i "$img" "$out" >/dev/null 2>&1 || true
+          fi
+        ;;
+      esac
+    fi
+  done
+done

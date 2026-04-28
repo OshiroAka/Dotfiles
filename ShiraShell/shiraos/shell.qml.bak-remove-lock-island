@@ -5,13 +5,19 @@ import Quickshell.Hyprland._GlobalShortcuts
 import QtQuick
 import ShiraOS
 import "./modules/wallpaper"
+import "./modules/island"
+import "./modules"
+import "./modules/lock"
 
 ShellRoot {
     IpcHandler {
         target: "shiraos"
         function toggleWallpaper() { AppState.toggleWallpaper() }
-        function toggleDockSettings() { AppState.dockSettingsOpen = !AppState.dockSettingsOpen }
-    }
+        function toggleIsland()    { AppState.toggleIsland()    }
+    function toggleDockSettings() { AppState.dockSettingsOpen = !AppState.dockSettingsOpen }
+        function lockScreen()      { lockSurface.locked = true   }
+        function lockNextTheme()   { lockSurface.nextTheme()     }
+        function lockToggleBlur()  { lockSurface.toggleBlur()    }    }
 
     GlobalShortcut {
         name: "toggleWallpaper"
