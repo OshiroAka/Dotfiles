@@ -439,6 +439,75 @@ if $DO_BUILD; then
     fi
 fi
 
+
+# ── Compilar / instalar módulo QML ShiraOS ─────────────────────
+step "Instalando módulo QML ShiraOS"
+
+QML_DIR=""
+for candidate in \
+    "/usr/lib/qt6/qml" \
+    "/usr/lib64/qt6/qml" \
+    "$(qtpaths6 --query QT_INSTALL_QML 2>/dev/null || true)" \
+    "$(qt6-paths --install-prefix 2>/dev/null || true)/lib/qt6/qml"
+do
+    [[ -n "$candidate" && -d "$candidate" ]] && {
+        QML_DIR="$candidate"
+        break
+    }
+done
+
+[[ -z "$QML_DIR" ]] && QML_DIR="/usr/lib/qt6/qml"
+
+if grep -q "import ShiraOS" "$QS_CFG/shell.qml" 2>/dev/null; then
+    if [[ -f "$QML_DIR/ShiraOS/qmldir" ]]; then
+        ok "Módulo ShiraOS já instalado em $QML_DIR/ShiraOS"
+    elif [[ -f "$SRC_QS/CMakeLists.txt" ]]; then
+        info "Compilando módulo de: $SRC_QS"
+        info "Instalando em: $QML_DIR"
+
+        BUILD_DIR="$SRC_QS/build"
+        BUILD_LOG="$CACHE_DIR/build-shiraos-module.log"
+
+        rm -rf "$BUILD_DIR"
+        mkdir -p "$BUILD_DIR" "$CACHE_DIR"
+
+        cmake -S "$SRC_QS" -B "$BUILD_DIR" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/usr \
+            -DQT6_INSTALL_QML="$QML_DIR" \
+            -G Ninja > "$BUILD_LOG" 2>&1 || {
+                fail "cmake falhou. Veja: $BUILD_LOG"
+                tail -40 "$BUILD_LOG"
+                exit 1
+            }
+
+        ninja -C "$BUILD_DIR" -j"$(nproc)" >> "$BUILD_LOG" 2>&1 || {
+            fail "Build falhou. Veja: $BUILD_LOG"
+            tail -40 "$BUILD_LOG"
+            exit 1
+        }
+
+        sudo ninja -C "$BUILD_DIR" install >> "$BUILD_LOG" 2>&1 || {
+            fail "Install do módulo falhou. Veja: $BUILD_LOG"
+            tail -40 "$BUILD_LOG"
+            exit 1
+        }
+
+        if [[ -f "$QML_DIR/ShiraOS/qmldir" ]]; then
+            ok "Módulo ShiraOS instalado em $QML_DIR/ShiraOS"
+        else
+            fail "Build terminou, mas $QML_DIR/ShiraOS/qmldir não apareceu."
+            exit 1
+        fi
+    else
+        fail "shell.qml usa import ShiraOS, mas $SRC_QS/CMakeLists.txt não existe."
+        exit 1
+    fi
+else
+    info "shell.qml não usa import ShiraOS — módulo não necessário"
+fi
+
+
 # ── Script shiraos ────────────────────────────────────────────
 step "Instalando script shiraos"
 
