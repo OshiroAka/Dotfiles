@@ -444,11 +444,15 @@ step "Instalando script shiraos"
 
 cat > "$BIN_DIR/shiraos" << 'SCRIPT'
 #!/usr/bin/env bash
-CMD="${1:-start}"
+# ShiraOS WallpaperSelector CLI
+
 CFG="$HOME/.config/quickshell/shiraos"
+CMD="${1:-start}"
 
 if [[ ! -f "$CFG/shell.qml" ]]; then
     echo "Config não encontrada em: $CFG/shell.qml"
+    echo
+    echo "Configs disponíveis:"
     find "$HOME/.config/quickshell" -maxdepth 4 -name shell.qml 2>/dev/null || true
     exit 1
 fi
