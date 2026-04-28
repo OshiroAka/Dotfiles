@@ -287,32 +287,12 @@ fi
 # ── Instalar config do Quickshell ─────────────────────────────
 step "Instalando ShiraOS WallpaperSelector"
 
-# Detecta a pasta real do ShiraOS dentro do repo.
-# Suporta layouts antigos e novos:
-#   ShiraShell/shiraos
-#   ShiraShell/quickshell/shiraos
-#   ShiraShell/quickshell
-SRC_QS=""
+SRC_QS="$DOTFILES/ShiraShell/shiraos"
 
-for candidate in \
-    "$DOTFILES/ShiraShell/shiraos" \
-    "$DOTFILES/ShiraShell/quickshell/shiraos" \
-    "$DOTFILES/ShiraShell/quickshell"
-do
-    if [[ -f "$candidate/shell.qml" ]]; then
-        SRC_QS="$candidate"
-        break
-    fi
-done
-
-if [[ -z "$SRC_QS" ]]; then
-    fail "Não achei shell.qml do ShiraOS dentro dos dotfiles."
-    info "Procurando shell.qml:"
-    find "$DOTFILES" -maxdepth 7 -name shell.qml 2>/dev/null || true
+if [[ ! -d "$SRC_QS" ]]; then
+    fail "Pasta ShiraShell não encontrada nos dotfiles (esperado: $SRC_QS)"
     exit 1
 fi
-
-ok "Fonte ShiraOS detectada: $SRC_QS"
 
 if [[ -d "$QS_CFG" && "$DO_UPDATE" == false ]]; then
     warn "Já existe uma config em $QS_CFG"
@@ -358,85 +338,41 @@ EOF_DIRS
 ok "wallpaper-dirs.txt criado em $WALL_DIRS_FILE"
 ok "~/Pictures/Wallpapers/{static,live,WallpaperSelector}"
 
-# ── Compilar / instalar módulo QML ShiraOS ─────────────────────
-# Necessário quando shell.qml tem: import ShiraOS
-if $DO_BUILD; then
-    step "Verificando módulo QML ShiraOS"
+# ── Compilar plugin C++ ───────────────────────────────────────
+if [[ "$DO_BUILD" == true && -f "$QS_CFG/CMakeLists.txt" ]]; then
+    step "Compilando plugin C++ (ShiraOS)"
 
-    PLUGIN_SRC=""
-
+    QML_DIR=""
     for candidate in \
-        "$QS_CFG" \
-        "$SRC_QS" \
-        "$DOTFILES/ShiraShell/shiraos" \
-        "$DOTFILES/ShiraShell/quickshell" \
-        "$DOTFILES/ShiraShell/quickshell/shiraos"
-    do
-        if [[ -f "$candidate/CMakeLists.txt" ]]; then
-            PLUGIN_SRC="$candidate"
-            break
-        fi
+        "/usr/lib/qt6/qml" \
+        "/usr/lib64/qt6/qml" \
+        "$(qt6-paths --install-prefix 2>/dev/null || true)/lib/qt6/qml" \
+        "$(qtpaths6 --install-prefix 2>/dev/null || true)/lib/qt6/qml"; do
+        [[ -n "$candidate" && -d "$candidate" ]] && { QML_DIR="$candidate"; break; }
     done
+    [[ -z "$QML_DIR" ]] && QML_DIR="/usr/lib/qt6/qml"
+    info "Módulo QML → $QML_DIR"
 
-    if [[ -n "$PLUGIN_SRC" ]]; then
-        info "CMakeLists.txt encontrado em: $PLUGIN_SRC"
+    BUILD_DIR="$QS_CFG/build"
+    BUILD_LOG="$CACHE_DIR/build.log"
+    rm -rf "$BUILD_DIR"; mkdir -p "$BUILD_DIR"
 
-        QML_DIR=""
-        for candidate in \
-            "/usr/lib/qt6/qml" \
-            "/usr/lib64/qt6/qml" \
-            "$(qt6-paths --install-prefix 2>/dev/null || true)/lib/qt6/qml" \
-            "$(qtpaths6 --install-prefix 2>/dev/null || true)/lib/qt6/qml"
-        do
-            [[ -n "$candidate" && -d "$candidate" ]] && { QML_DIR="$candidate"; break; }
-        done
+    info "Configurando cmake..."
+    cmake -S "$QS_CFG" -B "$BUILD_DIR" \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DQT6_INSTALL_QML="$QML_DIR" \
+        -G Ninja > "$BUILD_LOG" 2>&1 || { fail "cmake falhou! Veja: $BUILD_LOG"; tail -20 "$BUILD_LOG"; exit 1; }
 
-        [[ -z "$QML_DIR" ]] && QML_DIR="/usr/lib/qt6/qml"
+    info "Compilando ($(nproc) threads)..."
+    ninja -C "$BUILD_DIR" -j"$(nproc)" >> "$BUILD_LOG" 2>&1 || { fail "Build falhou! Veja: $BUILD_LOG"; tail -20 "$BUILD_LOG"; exit 1; }
 
-        info "Instalando módulo QML em: $QML_DIR"
+    info "Instalando módulo..."
+    sudo ninja -C "$BUILD_DIR" install >> "$BUILD_LOG" 2>&1 || { fail "Install falhou! Veja: $BUILD_LOG"; exit 1; }
 
-        BUILD_DIR="$PLUGIN_SRC/build"
-        BUILD_LOG="$CACHE_DIR/build.log"
-        rm -rf "$BUILD_DIR"
-        mkdir -p "$BUILD_DIR"
-
-        cmake -S "$PLUGIN_SRC" -B "$BUILD_DIR" \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=/usr \
-            -DQT6_INSTALL_QML="$QML_DIR" \
-            -G Ninja > "$BUILD_LOG" 2>&1 || {
-                fail "cmake falhou! Veja: $BUILD_LOG"
-                tail -30 "$BUILD_LOG"
-                exit 1
-            }
-
-        ninja -C "$BUILD_DIR" -j"$(nproc)" >> "$BUILD_LOG" 2>&1 || {
-            fail "Build falhou! Veja: $BUILD_LOG"
-            tail -30 "$BUILD_LOG"
-            exit 1
-        }
-
-        sudo ninja -C "$BUILD_DIR" install >> "$BUILD_LOG" 2>&1 || {
-            fail "Install do módulo ShiraOS falhou! Veja: $BUILD_LOG"
-            tail -30 "$BUILD_LOG"
-            exit 1
-        }
-
-        if [[ -f "$QML_DIR/ShiraOS/qmldir" ]]; then
-            ok "Módulo ShiraOS instalado: $QML_DIR/ShiraOS"
-        else
-            warn "Build terminou, mas não achei $QML_DIR/ShiraOS/qmldir"
-            warn "Se o qs reclamar de 'module ShiraOS is not installed', veja: $BUILD_LOG"
-        fi
-
-    elif grep -q "import ShiraOS" "$QS_CFG/shell.qml" 2>/dev/null; then
-        fail "shell.qml usa 'import ShiraOS', mas não achei CMakeLists.txt para compilar o módulo."
-        info "Procure manualmente com:"
-        info "  find ~/Dotfiles ~/.config/quickshell -maxdepth 7 -name CMakeLists.txt"
-        exit 1
-    else
-        info "CMakeLists.txt não encontrado e shell.qml não importa ShiraOS — build não necessário"
-    fi
+    ok "Plugin ShiraOS compilado → $QML_DIR/ShiraOS"
+elif [[ "$DO_BUILD" == true ]]; then
+    info "CMakeLists.txt não encontrado — plugin C++ não necessário"
 fi
 
 # ── Script shiraos ────────────────────────────────────────────
@@ -444,24 +380,12 @@ step "Instalando script shiraos"
 
 cat > "$BIN_DIR/shiraos" << 'SCRIPT'
 #!/usr/bin/env bash
-# ShiraOS WallpaperSelector CLI
-
-CFG="$HOME/.config/quickshell/shiraos"
 CMD="${1:-start}"
-
-if [[ ! -f "$CFG/shell.qml" ]]; then
-    echo "Config não encontrada em: $CFG/shell.qml"
-    echo
-    echo "Configs disponíveis:"
-    find "$HOME/.config/quickshell" -maxdepth 4 -name shell.qml 2>/dev/null || true
-    exit 1
-fi
-
 case "$CMD" in
     restart|r)
         pkill -x qs 2>/dev/null || true
         sleep 0.25
-        qs -c "$CFG" -d &
+        qs -c shiraos -d &
         echo "ShiraOS reiniciado."
         ;;
     stop|s)
@@ -470,20 +394,20 @@ case "$CMD" in
     debug|d)
         pkill -x qs 2>/dev/null || true
         sleep 0.1
-        qs -c "$CFG"
+        qs -c shiraos
         ;;
     ipc)
         shift
-        qs -c "$CFG" ipc call shiraos "$@"
+        qs -c shiraos ipc call shiraos "$@"
         ;;
     wallpaper|w)
-        qs -c "$CFG" ipc call shiraos toggleWallpaper
+        qs -c shiraos ipc call shiraos toggleWallpaper
         ;;
     start|*)
         if pgrep -x qs &>/dev/null; then
             echo "ShiraOS já está rodando. Use 'shiraos restart' para reiniciar."
         else
-            qs -c "$CFG" -d &
+            qs -c shiraos -d &
             echo "ShiraOS iniciado."
         fi
         ;;
