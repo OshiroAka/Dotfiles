@@ -361,6 +361,110 @@ EOF_DIRS
 ok "wallpaper-dirs.txt criado em $WALL_DIRS_FILE"
 ok "~/Pictures/Wallpapers/{static,live,WallpaperSelector}"
 
+
+# ── Fix robusto do qmldir/plugin ShiraOS ─────────────────────
+# Resolve casos onde o qmldir aponta para "ShiraOSPluginplugin",
+# mas o .so real é "libShiraOSPlugin.so".
+check_shiraos_qmldir_plugin() {
+    local qml_dir="${1:-}"
+    local dest=""
+    local plugin=""
+
+    if [[ -z "$qml_dir" ]]; then
+        qml_dir="$(qtpaths6 --query QT_INSTALL_QML 2>/dev/null || true)"
+        [[ -z "$qml_dir" ]] && qml_dir="/usr/lib/qt6/qml"
+    fi
+
+    dest="$qml_dir/ShiraOS"
+
+    [[ -f "$dest/qmldir" ]] || return 1
+
+    plugin="$(awk '$1=="plugin"{print $2; exit}' "$dest/qmldir" 2>/dev/null || true)"
+    [[ -n "$plugin" ]] || return 1
+
+    [[ -f "$dest/lib${plugin}.so" ]] || return 1
+    return 0
+}
+
+fix_shiraos_qmldir_plugin_name() {
+    local qml_dir="${1:-}"
+    local build_dir="${2:-}"
+    local dest=""
+    local plugin_file=""
+    local plugin_base=""
+    local tmp_qmldir=""
+
+    if [[ -z "$qml_dir" ]]; then
+        qml_dir="$(qtpaths6 --query QT_INSTALL_QML 2>/dev/null || true)"
+        [[ -z "$qml_dir" ]] && qml_dir="/usr/lib/qt6/qml"
+    fi
+
+    dest="$qml_dir/ShiraOS"
+    sudo install -d "$dest"
+
+    # 1) Procura primeiro um .so já instalado.
+    plugin_file="$(find "$dest" -maxdepth 2 -type f \( -name 'libShiraOS*.so' -o -name '*ShiraOS*.so' -o -name 'lib*.so' \) 2>/dev/null | head -n 1 || true)"
+
+    # 2) Se não achou no destino, procura em possíveis diretórios de build.
+    if [[ -z "$plugin_file" ]]; then
+        for maybe_build in             "$build_dir"             "${QS_CFG:-}/build"             "${SRC_QS:-}/build"             "${DOTFILES:-$HOME/Dotfiles}/ShiraShell/shiraos/build"             "${DOTFILES:-$HOME/Dotfiles}/ShiraShell/quickshell/build"             "$HOME/Dotfiles/ShiraShell/shiraos/build"             "$HOME/Dotfiles/ShiraShell/quickshell/build"
+        do
+            [[ -n "$maybe_build" && -d "$maybe_build" ]] || continue
+
+            plugin_file="$(find "$maybe_build" -type f \( -name 'libShiraOS*.so' -o -name '*ShiraOS*.so' -o -name 'lib*plugin*.so' \) 2>/dev/null | head -n 1 || true)"
+            [[ -n "$plugin_file" ]] && break
+        done
+    fi
+
+    if [[ -z "$plugin_file" ]]; then
+        fail "Não achei o arquivo .so do plugin ShiraOS para corrigir o qmldir."
+        info "Procure manualmente com:"
+        info "  find ~/Dotfiles ~/.config/quickshell -name '*ShiraOS*.so' -o -name 'lib*plugin*.so'"
+        return 1
+    fi
+
+    # 3) Garante que o .so está dentro do diretório de módulo QML.
+    if [[ "$plugin_file" != "$dest/"* ]]; then
+        sudo cp -f "$plugin_file" "$dest/"
+        sudo chmod 755 "$dest/$(basename "$plugin_file")"
+        plugin_file="$dest/$(basename "$plugin_file")"
+    fi
+
+    plugin_base="$(basename "$plugin_file")"
+    plugin_base="${plugin_base#lib}"
+    plugin_base="${plugin_base%.so}"
+
+    # 4) Recria qmldir usando o nome REAL do .so.
+    # Ex:
+    #   libShiraOSPlugin.so -> plugin ShiraOSPlugin
+    # Isso evita o erro:
+    #   module "ShiraOS" plugin "ShiraOSPluginplugin" not found
+    tmp_qmldir="$(mktemp)"
+    cat > "$tmp_qmldir" <<EOF_QMLDIR
+module ShiraOS
+plugin $plugin_base
+EOF_QMLDIR
+
+    sudo cp "$tmp_qmldir" "$dest/qmldir"
+    rm -f "$tmp_qmldir"
+
+    sudo chmod 644 "$dest/qmldir"
+    sudo chmod 755 "$dest" 2>/dev/null || true
+
+    if check_shiraos_qmldir_plugin "$qml_dir"; then
+        ok "qmldir corrigido: plugin $plugin_base"
+        info "Módulo: $dest"
+        return 0
+    fi
+
+    fail "qmldir foi escrito, mas o plugin ainda não validou."
+    info "Conteúdo de $dest:"
+    ls -la "$dest" 2>/dev/null || true
+    info "qmldir:"
+    cat "$dest/qmldir" 2>/dev/null || true
+    return 1
+}
+
 # ── Compilar / instalar módulo QML ShiraOS ─────────────────────
 # Necessário quando shell.qml tem: import ShiraOS
 #
@@ -430,13 +534,9 @@ install_qml_module_manually() {
     rm -rf "$stage"
     mkdir -p "$stage"
 
-    # 1) Tenta reaproveitar qmldir gerado pelo Qt/CMake.
-    qmldir_file="$(find "$build_dir" -type f -name qmldir -path '*ShiraOS*' 2>/dev/null | head -n 1 || true)"
-    if [[ -n "$qmldir_file" ]]; then
-        cp "$qmldir_file" "$stage/qmldir"
-    fi
-
-    # 2) Acha o .so do plugin. O nome pode variar:
+    # 1) Acha o .so do plugin. O nome pode variar:
+    #    Não reaproveitamos qmldir gerado pelo CMake porque ele pode
+    #    apontar para ShiraOSPluginplugin em vez do .so real.
     #    libShiraOSPlugin.so, libShiraOSPluginplugin.so, etc.
     plugin_file="$(find "$build_dir" -type f \( -name '*ShiraOS*.so' -o -name 'lib*plugin*.so' \) 2>/dev/null | head -n 1 || true)"
 
@@ -454,13 +554,11 @@ install_qml_module_manually() {
     plugin_base="${plugin_base#lib}"
     plugin_base="${plugin_base%.so}"
 
-    # 3) Se CMake não gerou qmldir, cria um qmldir mínimo correto.
-    if [[ ! -f "$stage/qmldir" ]]; then
-        cat > "$stage/qmldir" <<EOF_QMLDIR
+    # 3) Sempre cria qmldir usando o nome REAL do .so encontrado.
+    cat > "$stage/qmldir" <<EOF_QMLDIR
 module ShiraOS
 plugin $plugin_base
 EOF_QMLDIR
-    fi
 
     # 4) Copia qmltypes/metainfo se existirem.
     find "$build_dir" -type f \( -name '*.qmltypes' -o -name 'plugins.qmltypes' -o -name '*.qmltypes.json' \) -exec cp -f {} "$stage/" \; 2>/dev/null || true
@@ -517,18 +615,23 @@ build_and_install_shiraos_module() {
     # O install do CMake pode funcionar em alguns layouts, então tentamos.
     # Mas não confiamos somente nele.
     sudo ninja -C "$build_dir" install >> "$build_log" 2>&1 || {
+    fix_shiraos_qmldir_plugin_name "$qml_dir" "$build_dir" || true
         warn "ninja install falhou ou não instalou tudo. Vou tentar instalação manual."
     }
 
-    if [[ -f "$qml_dir/ShiraOS/qmldir" ]]; then
+    fix_shiraos_qmldir_plugin_name "$qml_dir" "$build_dir" || true
+
+    if check_shiraos_qmldir_plugin "$qml_dir"; then
         ok "Módulo ShiraOS instalado via CMake: $qml_dir/ShiraOS"
         return 0
     fi
 
-    warn "qmldir não apareceu após ninja install; instalando manualmente..."
+    warn "qmldir não apareceu ou plugin inválido após ninja install; instalando manualmente..."
     install_qml_module_manually "$plugin_src" "$build_dir" "$qml_dir" "$build_log" || return 1
 
-    if [[ -f "$qml_dir/ShiraOS/qmldir" ]]; then
+    fix_shiraos_qmldir_plugin_name "$qml_dir" "$build_dir" || true
+
+    if check_shiraos_qmldir_plugin "$qml_dir"; then
         ok "Módulo ShiraOS instalado manualmente: $qml_dir/ShiraOS"
         return 0
     fi
