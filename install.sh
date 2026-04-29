@@ -801,6 +801,83 @@ fi
 echo ""
 if [[ "$CHECKS_OK" == true ]]; then
     echo -e "${GREEN}${BOLD}╔══════════════════════════════════════════════════╗${NC}"
+
+# ── Caelestia pywal scheme slot ─────────────────────────────
+# Prepara o slot do Caelestia para o usuário conseguir escrever nele.
+# Isso evita pedir sudo toda hora quando o auto scheme/pywal atualizar o tema.
+step "Preparando slot Caelestia para pywal"
+
+install_caelestia_pywal_helper_if_found() {
+    local helper_name="shiraos-caelestia-pywal-scheme"
+    local dest="${BIN_DIR:-$HOME/.local/bin}/$helper_name"
+    local dotfiles="${DOTFILES:-$HOME/Dotfiles}"
+    local src=""
+
+    mkdir -p "${BIN_DIR:-$HOME/.local/bin}"
+
+    # Se já existe, só garante permissão.
+    if [[ -f "$dest" ]]; then
+        chmod 755 "$dest" 2>/dev/null || true
+        return 0
+    fi
+
+    # Tenta achar o helper em locais comuns do repo.
+    for src in \
+        "$dotfiles/$helper_name" \
+        "$dotfiles/.local/bin/$helper_name" \
+        "$dotfiles/bin/$helper_name" \
+        "$dotfiles/scripts/$helper_name" \
+        "$dotfiles/ShiraShell/$helper_name" \
+        "$dotfiles/ShiraShell/bin/$helper_name" \
+        "$dotfiles/ShiraShell/scripts/$helper_name" \
+        "$dotfiles/ShiraShell/shiraos/scripts/$helper_name" \
+        "$dotfiles/ShiraShell/quickshell/scripts/$helper_name" \
+        "${QS_CFG:-$HOME/.config/quickshell/shiraos}/scripts/$helper_name"
+    do
+        if [[ -f "$src" ]]; then
+            install -m 755 "$src" "$dest"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+prepare_caelestia_pywal_slot() {
+    local helper="${BIN_DIR:-$HOME/.local/bin}/shiraos-caelestia-pywal-scheme"
+    local status_output=""
+
+    install_caelestia_pywal_helper_if_found || true
+
+    if [[ ! -x "$helper" ]]; then
+        warn "Helper não encontrado: $helper"
+        warn "Pulando Caelestia pywal slot. Se você usa Caelestia, adicione esse helper ao repo."
+        return 0
+    fi
+
+    info "Rodando prepare/apply do Caelestia pywal scheme..."
+    "$helper" --prepare --apply --allow-sudo --force --no-terminal --attempts 3 || {
+        warn "Falha ao preparar/aplicar o scheme do Caelestia."
+        warn "Você pode rodar manualmente:"
+        warn "  $helper --prepare --apply --allow-sudo --force --no-terminal --attempts 3"
+        return 0
+    }
+
+    status_output="$("$helper" --status 2>/dev/null || true)"
+    if [[ -n "$status_output" ]]; then
+        echo "$status_output" | sed 's/^/  /'
+    fi
+
+    if echo "$status_output" | grep -q "Writable slot: True"; then
+        ok "Caelestia pywal slot preparado: Writable slot: True"
+    else
+        warn "Não consegui confirmar 'Writable slot: True'. Confira com:"
+        warn "  $helper --status"
+    fi
+}
+
+prepare_caelestia_pywal_slot
+
     echo -e "${GREEN}${BOLD}║   ShiraOS WallpaperSelector pronto!             ║${NC}"
     echo -e "${GREEN}${BOLD}╚══════════════════════════════════════════════════╝${NC}"
 else
