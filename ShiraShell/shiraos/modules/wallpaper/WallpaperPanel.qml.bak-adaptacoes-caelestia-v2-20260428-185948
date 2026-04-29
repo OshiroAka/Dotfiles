@@ -144,10 +144,6 @@ property real skewHeight: 0.62
     property var engineWalls: []
     property var liveWalls: []
     property var favorites: []
-    property var hiddenWalls: ({ static: [], live: [], engine: [] })
-    property var firstSeenWalls: ({})
-    property int exclusionTab: 0
-    readonly property var exclusionNames: ["Static", "MPV", "Engine"]
     property var selectorBgList: []
     property var favSet: ({})
 
@@ -163,7 +159,7 @@ property real skewHeight: 0.62
        return liveWalls
    }
    property var currentWalls: {
-       return filterHidden(sourceWalls || [], activeCategory)
+       return sourceWalls || []
    }
 
 property int highlightIdx: {
@@ -175,100 +171,7 @@ property int highlightIdx: {
 
     onFavoritesChanged: rebuildFavSet()
 
-    
-    function hiddenTypeOfCat(cat) {
-        if (cat === 1) return "engine"
-        if (cat === 3) return "live"
-        return "static"
-    }
-
-    function pathOfAny(item, cat) {
-        if (cat === 1) return item.path || ""
-        if (cat === 0) return item.applyPath || ""
-        return typeof item === "string" ? item : (item.path || "")
-    }
-
-    function isHiddenWall(item, cat) {
-        var type = hiddenTypeOfCat(cat)
-        var p = pathOfAny(item, cat)
-        var list = hiddenWalls[type] || []
-        return list.indexOf(p) >= 0
-    }
-
-    function filterHidden(list, cat) {
-        var out = []
-        for (var i = 0; i < list.length; i++) {
-            if (!isHiddenWall(list[i], cat))
-                out.push(list[i])
-        }
-        return out
-    }
-
-    function toggleHiddenWall(type, path) {
-        if (!path) return
-
-        var h = {
-            static: (hiddenWalls.static || []).slice(),
-            live: (hiddenWalls.live || []).slice(),
-            engine: (hiddenWalls.engine || []).slice()
-        }
-
-        var arr = h[type] || []
-        var idx = arr.indexOf(path)
-
-        if (idx >= 0)
-            arr.splice(idx, 1)
-        else
-            arr.push(path)
-
-        h[type] = arr
-        hiddenWalls = h
-        scheduleSave()
-            clampHighlights()
-        scheduleSave()
-    }
-
-    function dedupeWalls(list, cat) {
-        var out = []
-        var seen = {}
-
-        for (var i = 0; i < list.length; i++) {
-            var p = pathOfAny(list[i], cat)
-            if (!p || seen[p])
-                continue
-
-            seen[p] = true
-            out.push(list[i])
-        }
-
-        return out
-    }
-
-    function sortByFirstSeen(list, cat) {
-        var arr = dedupeWalls(list, cat)
-        arr.sort(function(a, b) {
-            var pa = pathOfAny(a, cat)
-            var pb = pathOfAny(b, cat)
-            var ta = firstSeenWalls[pa] || 0
-            var tb = firstSeenWalls[pb] || 0
-            return tb - ta
-        })
-        return arr
-    }
-
-    function markFirstSeen(path) {
-        if (!path) return
-        if (firstSeenWalls[path]) return
-
-        var s = {}
-        for (var k in firstSeenWalls)
-            s[k] = firstSeenWalls[k]
-
-        s[path] = Date.now()
-        firstSeenWalls = s
-    }
-
-function rebuildFavSet() {
+    function rebuildFavSet() {
         var s = {}
         for (var i = 0; i < favorites.length; i++)
             s[favorites[i].applyPath] = true
@@ -503,13 +406,6 @@ function rebuildFavSet() {
                             win[keys[i]] = s[keys[i]]
                     if (s.favorites && s.favorites.length)
                         win.favorites = s.favorites
-
-                    if (s.hiddenWalls)
-                        win.hiddenWalls = s.hiddenWalls
-
-                    if (s.firstSeenWalls)
-                        win.firstSeenWalls = s.firstSeenWalls
-
                     rebuildFavSet()
                 } catch(e) {
                     console.log("wp settings parse error", e)
@@ -570,9 +466,7 @@ function rebuildFavSet() {
             varalSwing: varalSwing,
             varalSwingAngle: varalSwingAngle,
             varalDrop: varalDrop,
-            favorites: favorites,
-            hiddenWalls: hiddenWalls,
-            firstSeenWalls: firstSeenWalls
+            favorites: favorites
         }
         saveProc.command = [
             "python3", "-c",
@@ -591,19 +485,20 @@ function rebuildFavSet() {
 
     Timer {
         id: caelestiaPywalTimer
-        interval: 1200
+        interval: 900
         repeat: false
-        onTriggered: applyCaelestiaPywalScheme(true)
+        onTriggered: applyCaelestiaPywalScheme()
     }
 
-    function applyCaelestiaPywalScheme(forceApply) {
+    function applyCaelestiaPywalScheme() {
         if (!caelestiaPywalEnabled)
             return
-        console.log("SHIRA_CAELESTIA_PYWAL_APPLY force=" + forceApply)
+
+        console.log("SHIRA_CAELSTIA_PYWAL_APPLY")
         Quickshell.execDetached([
             "bash",
             "-lc",
-            "$HOME/.local/bin/shiraos-caelestia-pywal-scheme --apply --force --no-terminal --attempts 3 --no-terminal" + forceArg + " >> /tmp/shiraos-caelestia-pywal.log 2>&1"
+            "$HOME/.local/bin/shiraos-caelestia-pywal-scheme --apply >> /tmp/shiraos-caelestia-pywal.log 2>&1"
         ])
     }
 
@@ -637,25 +532,13 @@ function rebuildFavSet() {
                         return
                     // SHIRA_STATIC_RAM_CACHE_V34_END
 
-                    var spath = p.slice(1).join("|")
-                    markFirstSeen(spath)
-                    var a = staticWalls.slice()
-                    a.push(spath)
-                    staticWalls = sortByFirstSeen(a, 2)
+                    var a = staticWalls.slice(); a.push(p.slice(1).join("|")); staticWalls = a
                 } else if (kind === "LIVE") {
-                    var lpath = p.slice(1).join("|")
-                    markFirstSeen(lpath)
-                    var b = liveWalls.slice()
-                    b.push(lpath)
-                    liveWalls = sortByFirstSeen(b, 3)
+                    var b = liveWalls.slice(); b.push(p.slice(1).join("|")); liveWalls = b
                 } else if (kind === "BG") {
                     var c = selectorBgList.slice(); c.push(p.slice(1).join("|")); selectorBgList = c
                 } else if (kind === "ENGINE") {
-                    var obj = { path: p[1] || "", preview: p.slice(2).join("|") || "" }
-                    markFirstSeen(obj.path)
-                    var e = engineWalls.slice()
-                    e.push(obj)
-                    engineWalls = sortByFirstSeen(e, 1)
+                    var e = engineWalls.slice(); e.push({ path: p[1] || "", preview: p.slice(2).join("|") || "" }); engineWalls = e
                 }
             }
         }
@@ -1757,9 +1640,7 @@ Item {
                             CatButton { label: "Modelo"; tab: 3 }
                             CatButton { label: "Presets"; tab: 6 }
                             CatButton { label: "Tema"; tab: 4 }
-                            CatButton { label: "Adaptações"; tab: 8 }
                             CatButton { label: "Engine"; tab: 7 }
-                            CatButton { label: "Exclusão"; tab: 9 }
                             CatButton { label: "Visualização"; tab: -1 }
                             Item { height: 8 }
                             MiniButton { label: "Recarregar lista"
@@ -1768,93 +1649,6 @@ Item {
                                 onPress: saveSettingsNow() }
                             Item { height: 8 }
                             Text { text: "savedata: ~/.config/quickshell/shiraos/wp_settings.json"; width: parent.width; wrapMode: Text.WordWrap; font.pixelSize: 9; color: Qt.rgba(1, 1, 1, 0.24) }
-
-Column {
-    visible: cfgTab === 9
-    width: parent.width
-    spacing: 14
-
-    Text { text: "Exclusão"; font.pixelSize: 18; font.bold: true; color: cAc }
-
-    Flickable {
-        width: parent.width
-        height: 560
-        clip: true
-        contentHeight: exclusionColumn.implicitHeight + 20
-
-        Column {
-            id: exclusionColumn
-            width: parent.width
-            spacing: 8
-
-            Row {
-                spacing: 8
-
-                Repeater {
-                    model: exclusionNames
-                    delegate: Rectangle {
-                        width: 110
-                        height: 36
-                        radius: 14
-                        color: exclusionTab === index ? Qt.rgba(cAc.r,cAc.g,cAc.b,0.18) : Qt.rgba(1,1,1,0.05)
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: modelData
-                            color: exclusionTab === index ? cAc : "white"
-                            font.pixelSize: 11
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: exclusionTab = index
-                        }
-                    }
-                }
-            }
-
-            Repeater {
-                model: exclusionTab === 0 ? staticWalls : exclusionTab === 1 ? liveWalls : engineWalls
-
-                delegate: Rectangle {
-                    width: parent.width - 24
-                    height: 56
-                    radius: 16
-                    color: Qt.rgba(1,1,1,0.05)
-
-                    property string pth: exclusionTab === 2 ? modelData.path : modelData
-                    property string typ: exclusionTab === 0 ? "static" : exclusionTab === 1 ? "live" : "engine"
-
-                    Text {
-                        anchors.left: parent.left
-                        anchors.leftMargin: 14
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: parent.width - 110
-                        text: pth.replace(/.*\//,"")
-                        elide: Text.ElideRight
-                        color: "white"
-                        font.pixelSize: 10
-                    }
-
-                    Text {
-                        anchors.right: parent.right
-                        anchors.rightMargin: 14
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: (hiddenWalls[typ] || []).indexOf(pth) >= 0 ? "OCULTO" : "VISÍVEL"
-                        color: cAc
-                        font.pixelSize: 9
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: toggleHiddenWall(typ, pth)
-                    }
-                }
-            }
-        }
-    }
-}
-
                         }
                     }
 
@@ -1865,157 +1659,11 @@ Column {
                         clip: true
                         opacity: 0.55 + settingsTabAnim * 0.45
                         scale: 0.975 + settingsTabAnim * 0.025
-                        contentHeight: cfgTab === 9 ? shiraExclusionPageV3.implicitHeight + 64 : settingsContent.implicitHeight + 64
+                        contentHeight: settingsContent.implicitHeight + 64
                         Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
                         Behavior on scale { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
 
-                                
-Column {
-    id: shiraExclusionPageV3
-    visible: cfgTab === 9
-    opacity: cfgTab === 9 ? 1 : 0
-    y: 0
-    x: 0
-    width: settingsFlick.width
-    spacing: 14
-
-    Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-
-    Text {
-        text: "Exclusão"
-        font.pixelSize: 20
-        font.bold: true
-        color: cAc
-    }
-
-    Text {
-        text: "Clique em um wallpaper para ocultar ou mostrar no seletor. O arquivo não será apagado."
-        width: parent.width - 42
-        wrapMode: Text.WordWrap
-        font.pixelSize: 10
-        color: Qt.rgba(1,1,1,0.42)
-    }
-
-    Row {
-        spacing: 8
-
-        Repeater {
-            model: exclusionNames
-
-            Rectangle {
-                width: 116
-                height: 36
-                radius: 14
-                color: exclusionTab === index ? Qt.rgba(cAc.r,cAc.g,cAc.b,0.20) : Qt.rgba(1,1,1,0.055)
-                border.width: 1
-                border.color: exclusionTab === index ? cAc : Qt.rgba(1,1,1,0.08)
-
-                Text {
-                    anchors.centerIn: parent
-                    text: modelData
-                    color: exclusionTab === index ? cAc : Qt.rgba(1,1,1,0.62)
-                    font.pixelSize: 11
-                    font.bold: exclusionTab === index
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: exclusionTab = index
-                }
-            }
-        }
-    }
-
-    Column {
-        width: parent.width
-        spacing: 10
-
-        Repeater {
-            model: exclusionTab === 0 ? staticWalls : exclusionTab === 1 ? liveWalls : engineWalls
-
-            Rectangle {
-                width: parent.width - 42
-                height: 92
-                radius: 20
-
-                property int exCat: exclusionTab === 0 ? 2 : exclusionTab === 1 ? 3 : 1
-                property string pth: exclusionTab === 2 ? modelData.path : modelData
-                property string typ: exclusionTab === 0 ? "static" : exclusionTab === 1 ? "live" : "engine"
-                property bool hidden: (hiddenWalls[typ] || []).indexOf(pth) >= 0
-
-                color: hidden ? Qt.rgba(1,0.08,0.08,0.18) : Qt.rgba(1,1,1,0.055)
-                border.width: 1
-                border.color: hidden ? Qt.rgba(1,0.20,0.20,0.55) : Qt.rgba(1,1,1,0.08)
-
-                Image {
-                    width: 118
-                    height: 72
-                    anchors.left: parent.left
-                    anchors.leftMargin: 10
-                    anchors.verticalCenter: parent.verticalCenter
-                    source: thumbSrc(modelData, exCat)
-                    fillMode: Image.PreserveAspectCrop
-                    asynchronous: true
-                    cache: true
-                    smooth: true
-                    mipmap: true
-                    opacity: hidden ? 0.38 : 1.0
-                }
-
-                Rectangle {
-                    width: 118
-                    height: 72
-                    anchors.left: parent.left
-                    anchors.leftMargin: 10
-                    anchors.verticalCenter: parent.verticalCenter
-                    radius: 14
-                    color: "transparent"
-                    border.width: hidden ? 2 : 1
-                    border.color: hidden ? Qt.rgba(1,0.25,0.25,0.75) : Qt.rgba(1,1,1,0.12)
-                }
-
-                Text {
-                    anchors.left: parent.left
-                    anchors.leftMargin: 144
-                    anchors.right: parent.right
-                    anchors.rightMargin: 118
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: pth.replace(/.*\//, "")
-                    elide: Text.ElideRight
-                    color: hidden ? Qt.rgba(1,0.55,0.55,0.95) : Qt.rgba(1,1,1,0.76)
-                    font.pixelSize: 12
-                    font.bold: hidden
-                }
-
-                Text {
-                    anchors.right: parent.right
-                    anchors.rightMargin: 18
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: hidden ? "OCULTO" : "VISÍVEL"
-                    color: hidden ? Qt.rgba(1,0.42,0.42,1) : cAc
-                    font.pixelSize: 10
-                    font.bold: true
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: toggleHiddenWall(typ, pth)
-                }
-            }
-        }
-
-        Text {
-            visible: (exclusionTab === 0 ? staticWalls.length : exclusionTab === 1 ? liveWalls.length : engineWalls.length) === 0
-            text: "Nenhum wallpaper nessa categoria. Clique em Recarregar lista."
-            color: Qt.rgba(1,1,1,0.35)
-            font.pixelSize: 11
-        }
-    }
-}
-
-
-
-Column {
+                                Column {
                                     id: settingsContent
                                     visible: opacity > 0.01
                                     opacity: cfgTab === 1 ? 1 : 0
@@ -2039,131 +1687,7 @@ Column {
                                     Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
                                     Behavior on y { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
 
-                                    
-
-Column {
-    id: shiraExclusionPageV2
-    visible: cfgTab === 9
-    opacity: cfgTab === 9 ? 1 : 0
-    y: cfgTab === 9 ? 0 : 16
-    width: parent.width
-    spacing: 14
-
-    Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-    Behavior on y { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
-
-    Text {
-        text: "Exclusão"
-        font.pixelSize: 18
-        font.bold: true
-        color: cAc
-    }
-
-    Text {
-        text: "Clique em um wallpaper para ocultar ou mostrar novamente no seletor. Nada será apagado."
-        width: parent.width - 42
-        wrapMode: Text.WordWrap
-        font.pixelSize: 10
-        color: Qt.rgba(1,1,1,0.42)
-    }
-
-    Row {
-        spacing: 8
-
-        Repeater {
-            model: exclusionNames
-
-            Rectangle {
-                width: 116
-                height: 36
-                radius: 14
-                color: exclusionTab === index ? Qt.rgba(cAc.r,cAc.g,cAc.b,0.20) : Qt.rgba(1,1,1,0.055)
-                border.width: 1
-                border.color: exclusionTab === index ? cAc : Qt.rgba(1,1,1,0.08)
-
-                Text {
-                    anchors.centerIn: parent
-                    text: modelData
-                    color: exclusionTab === index ? cAc : Qt.rgba(1,1,1,0.62)
-                    font.pixelSize: 11
-                    font.bold: exclusionTab === index
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: exclusionTab = index
-                }
-            }
-        }
-    }
-
-    Flickable {
-        width: parent.width
-        height: 560
-        clip: true
-        contentHeight: exclusionColumnV2.implicitHeight + 20
-
-        Column {
-            id: exclusionColumnV2
-            width: parent.width
-            spacing: 8
-
-            Repeater {
-                model: exclusionTab === 0 ? staticWalls : exclusionTab === 1 ? liveWalls : engineWalls
-
-                Rectangle {
-                    width: parent.width - 42
-                    height: 58
-                    radius: 18
-
-                    property string pth: exclusionTab === 2 ? modelData.path : modelData
-                    property string typ: exclusionTab === 0 ? "static" : exclusionTab === 1 ? "live" : "engine"
-                    property bool hidden: (hiddenWalls[typ] || []).indexOf(pth) >= 0
-
-                    color: hidden ? Qt.rgba(1,0.20,0.20,0.13) : Qt.rgba(1,1,1,0.055)
-                    border.width: 1
-                    border.color: hidden ? Qt.rgba(1,0.25,0.25,0.24) : Qt.rgba(1,1,1,0.08)
-
-                    Text {
-                        anchors.left: parent.left
-                        anchors.leftMargin: 16
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: parent.width - 130
-                        text: pth.replace(/.*\//, "")
-                        elide: Text.ElideRight
-                        color: Qt.rgba(1,1,1,0.74)
-                        font.pixelSize: 11
-                    }
-
-                    Text {
-                        anchors.right: parent.right
-                        anchors.rightMargin: 16
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: hidden ? "OCULTO" : "VISÍVEL"
-                        color: hidden ? Qt.rgba(1,0.45,0.45,0.95) : cAc
-                        font.pixelSize: 10
-                        font.bold: true
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: toggleHiddenWall(typ, pth)
-                    }
-                }
-            }
-
-            Text {
-                visible: (exclusionTab === 0 ? staticWalls.length : exclusionTab === 1 ? liveWalls.length : engineWalls.length) === 0
-                text: "Nenhum wallpaper nessa categoria. Clique em Recarregar lista."
-                color: Qt.rgba(1,1,1,0.35)
-                font.pixelSize: 11
-            }
-        }
-    }
-}
-
-
-Text { text: "Motion Lab"; font.pixelSize: 18; font.bold: true; color: cAc }
+                                    Text { text: "Motion Lab"; font.pixelSize: 18; font.bold: true; color: cAc }
                                     Text {
                                         text: "Mini-prévias animadas para comparar os estilos antes de aplicar."
                                         font.pixelSize: 10
@@ -3067,6 +2591,130 @@ SliderRow {
                                 }
 
 
+                                    // SHIRA_CAELSTIA_PYWAL_SETTINGS_V1_BEGIN
+                                    Rectangle {
+                                        width: parent.width
+                                        height: 168
+                                        radius: 18
+                                        color: Qt.rgba(cAc.r, cAc.g, cAc.b, 0.08)
+                                        border.width: 1
+                                        border.color: Qt.rgba(cAc.r, cAc.g, cAc.b, 0.22)
+
+                                        Column {
+                                            anchors.fill: parent
+                                            anchors.margins: 14
+                                            spacing: 10
+
+                                            Text {
+                                                text: "Caelestia Shell"
+                                                font.pixelSize: 12
+                                                font.bold: true
+                                                color: cAc
+                                            }
+
+                                            Text {
+                                                text: "Cria um scheme shiraos-pywal usando o cache do pywal/pywal16 e tenta aplicar no Caelestia. Se não puder instalar scheme custom, usa dynamic."
+                                                width: parent.width
+                                                wrapMode: Text.Wrap
+                                                font.pixelSize: 10
+                                                color: Qt.rgba(1, 1, 1, 0.42)
+                                            }
+
+                                            Rectangle {
+                                                width: parent.width
+                                                height: 38
+                                                radius: 14
+                                                color: caelestiaPywalEnabled ? Qt.rgba(cAc.r, cAc.g, cAc.b, 0.18) : Qt.rgba(1, 1, 1, 0.045)
+                                                border.width: 1
+                                                border.color: caelestiaPywalEnabled ? cAc : Qt.rgba(1, 1, 1, 0.08)
+
+                                                Text {
+                                                    anchors.left: parent.left
+                                                    anchors.leftMargin: 14
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    text: "Ativar integração"
+                                                    color: Qt.rgba(1, 1, 1, 0.70)
+                                                    font.pixelSize: 11
+                                                }
+
+                                                Text {
+                                                    anchors.right: parent.right
+                                                    anchors.rightMargin: 14
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    text: caelestiaPywalEnabled ? "ON" : "OFF"
+                                                    color: caelestiaPywalEnabled ? cAc : Qt.rgba(1, 1, 1, 0.38)
+                                                    font.pixelSize: 11
+                                                    font.bold: true
+                                                }
+
+                                                MouseArea {
+                                                    anchors.fill: parent
+                                                    onClicked: {
+                                                        caelestiaPywalEnabled = !caelestiaPywalEnabled
+                                                        scheduleSave()
+                                                        if (caelestiaPywalEnabled)
+                                                            applyCaelestiaPywalScheme()
+                                                    }
+                                                }
+                                            }
+
+                                            Row {
+                                                width: parent.width
+                                                height: 32
+                                                spacing: 8
+
+                                                Rectangle {
+                                                    width: 148
+                                                    height: 30
+                                                    radius: 14
+                                                    color: caelestiaPywalAutoApply ? Qt.rgba(cAc.r, cAc.g, cAc.b, 0.16) : Qt.rgba(1, 1, 1, 0.045)
+                                                    border.width: 1
+                                                    border.color: caelestiaPywalAutoApply ? cAc : Qt.rgba(1, 1, 1, 0.08)
+
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: caelestiaPywalAutoApply ? "Auto aplicar: ON" : "Auto aplicar: OFF"
+                                                        color: caelestiaPywalAutoApply ? cAc : Qt.rgba(1, 1, 1, 0.52)
+                                                        font.pixelSize: 10
+                                                        font.bold: true
+                                                    }
+
+                                                    MouseArea {
+                                                        anchors.fill: parent
+                                                        onClicked: {
+                                                            caelestiaPywalAutoApply = !caelestiaPywalAutoApply
+                                                            scheduleSave()
+                                                        }
+                                                    }
+                                                }
+
+                                                Rectangle {
+                                                    width: 128
+                                                    height: 30
+                                                    radius: 14
+                                                    color: Qt.rgba(cAc.r, cAc.g, cAc.b, 0.14)
+                                                    border.width: 1
+                                                    border.color: Qt.rgba(cAc.r, cAc.g, cAc.b, 0.42)
+
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: "Aplicar agora"
+                                                        color: cAc
+                                                        font.pixelSize: 10
+                                                        font.bold: true
+                                                    }
+
+                                                    MouseArea {
+                                                        anchors.fill: parent
+                                                        onClicked: applyCaelestiaPywalScheme()
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    // SHIRA_CAELSTIA_PYWAL_SETTINGS_V1_END
+
+
                                 Column {
                                     id: engineSettingsTab
                                     visible: cfgTab === 7
@@ -3101,100 +2749,6 @@ SliderRow {
                                         MouseArea { anchors.fill: parent; onClicked: { enginePreviewTheme = !enginePreviewTheme; scheduleSave() } }
                                     }
                                 }
-
-
-                                // SHIRA_ADAPTACOES_TAB_V2_BEGIN
-                                Column {
-                                    visible: opacity > 0.01
-                                    opacity: cfgTab === 8 ? 1 : 0
-                                    y: cfgTab === 8 ? 0 : 16
-                                    width: parent.width
-                                    spacing: 12
-
-                                    Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-                                    Behavior on y { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
-
-                                    Text { text: "Adaptações"; font.pixelSize: 18; font.bold: true; color: cAc }
-                                    Text {
-                                        text: "Integrações extras para adaptar outros shells e temas ao ShiraOS."
-                                        font.pixelSize: 10
-                                        color: Qt.rgba(1,1,1,0.42)
-                                        wrapMode: Text.Wrap
-                                        width: parent.width
-                                    }
-
-                                    Rectangle { width: parent.width; height: 1; color: Qt.rgba(1,1,1,0.08) }
-
-                                    Rectangle {
-                                        width: parent.width
-                                        height: 176
-                                        radius: 18
-                                        color: Qt.rgba(cAc.r, cAc.g, cAc.b, 0.08)
-                                        border.width: 1
-                                        border.color: Qt.rgba(cAc.r, cAc.g, cAc.b, 0.22)
-
-                                        Column {
-                                            anchors.fill: parent
-                                            anchors.margins: 14
-                                            spacing: 10
-
-                                            Text {
-                                                text: "Caelestia Shell"
-                                                font.pixelSize: 12
-                                                font.bold: true
-                                                color: cAc
-                                            }
-
-                                            Text {
-                                                text: "Cria e aplica um scheme shiraos-pywal usando o cache do pywal/pywal16. Auto aplicar tenta reaplicar quando o accent muda."
-                                                width: parent.width
-                                                wrapMode: Text.Wrap
-                                                font.pixelSize: 10
-                                                color: Qt.rgba(1, 1, 1, 0.42)
-                                            }
-
-                                            ToggleRow {
-                                                title: "Ativar integração"
-                                                active: caelestiaPywalEnabled
-                                                onToggle: {
-                                                    caelestiaPywalEnabled = !caelestiaPywalEnabled
-                                                    scheduleSave()
-                                                    if (caelestiaPywalEnabled)
-                                                        applyCaelestiaPywalScheme(true)
-                                                }
-                                            }
-
-                                            ToggleRow {
-                                                title: "Auto aplicar ao mudar accent"
-                                                active: caelestiaPywalAutoApply
-                                                onToggle: {
-                                                    caelestiaPywalAutoApply = !caelestiaPywalAutoApply
-                                                    scheduleSave()
-                                                }
-                                            }
-
-                                            Row {
-                                                width: parent.width
-                                                height: 34
-                                                spacing: 8
-
-                                                SelectButton {
-                                                    label: "Aplicar agora"
-                                                    active: false
-                                                    onPress: applyCaelestiaPywalScheme(true)
-                                                }
-
-                                                Text {
-                                                    anchors.verticalCenter: parent.verticalCenter
-                                                    text: "log: /tmp/shiraos-caelestia-pywal.log"
-                                                    color: Qt.rgba(1,1,1,0.32)
-                                                    font.pixelSize: 9
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                // SHIRA_ADAPTACOES_TAB_V2_END
 
 
 component CatButton: Rectangle {
