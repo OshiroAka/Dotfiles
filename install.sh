@@ -983,6 +983,42 @@ EOF_PATH
 setup_caelestia_pywal_auto_apply
 
 
+
+# ── Instalar helper Caelestia pywal do repo ───────────────────
+# Este bloco NÃO reescreve a lógica do helper.
+# Ele só copia para o tester exatamente o helper versionado no repo.
+step "Instalando helper Caelestia pywal"
+
+install_caelestia_pywal_helper_from_repo() {
+    local helper_name="shiraos-caelestia-pywal-scheme"
+    local src="${DOTFILES:-$HOME/Dotfiles}/ShiraShell/shiraos/scripts/$helper_name"
+    local dest="${BIN_DIR:-$HOME/.local/bin}/$helper_name"
+
+    mkdir -p "${BIN_DIR:-$HOME/.local/bin}"
+
+    if [[ ! -f "$src" ]]; then
+        warn "Helper Caelestia não encontrado no repo: $src"
+        warn "Pulando integração Caelestia/pywal."
+        return 0
+    fi
+
+    # Sempre sobrescreve. Isso evita o tester ficar preso em helper antigo.
+    install -m 755 "$src" "$dest"
+    ok "Helper Caelestia instalado/atualizado: $dest"
+
+    "$dest" --prepare --apply --allow-sudo --force --no-terminal --attempts 3 || {
+        warn "Helper Caelestia rodou com erro."
+        warn "Teste manual:"
+        warn "  $dest --status"
+        warn "  $dest --prepare --apply --allow-sudo --force --no-terminal --attempts 3"
+        return 0
+    }
+
+    "$dest" --status 2>/dev/null | sed 's/^/  /' || true
+}
+
+install_caelestia_pywal_helper_from_repo
+
     echo -e "${GREEN}${BOLD}║   ShiraOS WallpaperSelector pronto!             ║${NC}"
     echo -e "${GREEN}${BOLD}╚══════════════════════════════════════════════════╝${NC}"
 else

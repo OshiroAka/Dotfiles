@@ -1,484 +1,342 @@
-#!/usr/bin/env bash
-set -u
-
-# shiraos-caelestia-pywal-scheme v4
-#
-# v4 muda a estratégia:
-# - escreve o scheme em vários caminhos prováveis do Caelestia;
-# - tenta aplicar com várias formas do CLI;
-# - mostra o último erro do CLI no status.
-#
-# Uso:
-#   shiraos-caelestia-pywal-scheme --prepare --apply --allow-sudo --force --no-terminal --attempts 3
-#   shiraos-caelestia-pywal-scheme --status
-
-PREPARE=0
-APPLY=0
-STATUS=0
-ALLOW_SUDO=0
-FORCE=0
-NO_TERMINAL=0
-ATTEMPTS=1
-
-SLOT_NAME="${SHIRAOS_CAEL_SLOT_NAME:-dynamic}"
-MODE="${SHIRAOS_CAEL_MODE:-dark}"
-USER_NAME="${SUDO_USER:-${USER:-$(id -un)}}"
-USER_HOME="$(getent passwd "$USER_NAME" | cut -d: -f6 2>/dev/null || printf '%s' "$HOME")"
-STATE_DIR="${XDG_STATE_HOME:-$USER_HOME/.local/state}/shiraos"
-LAST_CLI_LOG="$STATE_DIR/caelestia-scheme-apply.log"
-
-mkdir -p "$STATE_DIR" 2>/dev/null || true
-
-ok()   { printf '✓ %s\n' "$*"; }
-warn() { printf '⚠ %s\n' "$*" >&2; }
-fail() { printf '✘ %s\n' "$*" >&2; }
-
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --prepare) PREPARE=1 ;;
-    --apply) APPLY=1 ;;
-    --status) STATUS=1 ;;
-    --allow-sudo) ALLOW_SUDO=1 ;;
-    --force) FORCE=1 ;;
-    --no-terminal) NO_TERMINAL=1 ;;
-    --attempts)
-      shift
-      ATTEMPTS="${1:-1}"
-      ;;
-    --attempts=*)
-      ATTEMPTS="${1#*=}"
-      ;;
-    -h|--help)
-      cat <<EOF
-Uso:
-  $0 --prepare --apply --allow-sudo --force --no-terminal --attempts 3
-  $0 --status
-EOF
-      exit 0
-      ;;
-    *)
-      warn "Ignorando opção desconhecida: $1"
-      ;;
-  esac
-  shift
-done
-
-is_system_path() {
-  [[ "$1" == /etc/* || "$1" == /usr/* || "$1" == /opt/* ]]
-}
-
-make_dir() {
-  local dir="$1"
-  if is_system_path "$dir"; then
-    if [[ "$ALLOW_SUDO" -eq 1 ]]; then
-      sudo install -d "$dir"
-    else
-      mkdir -p "$dir"
-    fi
-  else
-    mkdir -p "$dir"
-  fi
-}
-
-copy_to_path() {
-  local src="$1"
-  local dest="$2"
-  if is_system_path "$dest"; then
-    if [[ "$ALLOW_SUDO" -eq 1 ]]; then
-      sudo cp "$src" "$dest"
-    else
-      cp "$src" "$dest"
-    fi
-  else
-    cp "$src" "$dest"
-  fi
-}
-
-fix_slot_perms() {
-  local slot="$1"
-
-  if is_system_path "$slot"; then
-    if [[ "$ALLOW_SUDO" -eq 1 ]]; then
-      sudo chown "$USER_NAME:$USER_NAME" "$slot" 2>/dev/null || true
-      sudo chmod 664 "$slot" 2>/dev/null || true
-    else
-      chmod 664 "$slot" 2>/dev/null || true
-    fi
-  else
-    chown "$USER_NAME:$USER_NAME" "$slot" 2>/dev/null || true
-    chmod 664 "$slot" 2>/dev/null || true
-  fi
-}
-
-pywal_source() {
-  for f in \
-    "$USER_HOME/.cache/wal/colors" \
-    "$USER_HOME/.cache/wal/colors.json" \
-    "$USER_HOME/.cache/wal/colors.sh"
-  do
-    [[ -s "$f" ]] && {
-      printf '%s\n' "$f"
-      return 0
-    }
-  done
-  return 1
-}
-
-candidate_scheme_dirs() {
-  local root=""
-
-  # Mais provável para a adaptação via Quickshell.
-  printf '%s\n' "$USER_HOME/.config/quickshell/caelestia/schemes"
-
-  # Possíveis caminhos do CLI/python do Caelestia.
-  printf '%s\n' "$USER_HOME/.config/caelestia/schemes"
-  printf '%s\n' "$USER_HOME/.local/share/caelestia/schemes"
-  printf '%s\n' "$USER_HOME/.local/state/caelestia/schemes"
-
-  # Possíveis caminhos globais.
-  printf '%s\n' "/etc/xdg/quickshell/caelestia/schemes"
-  printf '%s\n' "/etc/xdg/caelestia/schemes"
-  printf '%s\n' "/usr/share/quickshell/caelestia/schemes"
-  printf '%s\n' "/usr/share/caelestia/schemes"
-
-  # Se uma raiz existe com pastas de scheme alternativas, inclui.
-  for root in \
-    "$USER_HOME/.config/quickshell/caelestia" \
-    "/etc/xdg/quickshell/caelestia" \
-    "/usr/share/quickshell/caelestia"
-  do
-    [[ -d "$root" ]] || continue
-    printf '%s\n' "$root/scheme"
-    printf '%s\n' "$root/assets/schemes"
-    printf '%s\n' "$root/assets/scheme"
-    printf '%s\n' "$root/services/schemes"
-  done
-}
-
-existing_template_scheme() {
-  local file=""
-  while IFS= read -r dir; do
-    [[ -d "$dir" ]] || continue
-    file="$(find "$dir" -maxdepth 2 -type f -name '*.json' ! -name "$SLOT_NAME.json" 2>/dev/null | head -n 1 || true)"
-    [[ -n "$file" ]] && {
-      printf '%s\n' "$file"
-      return 0
-    }
-  done < <(candidate_scheme_dirs)
-  return 1
-}
-
-generate_scheme_json() {
-  local template="$1"
-  local out="$2"
-
-  USER_HOME="$USER_HOME" SLOT_NAME="$SLOT_NAME" MODE="$MODE" TEMPLATE="$template" OUT="$out" python3 - <<'PY'
-import json
-import os
-import re
+#!/usr/bin/env python3
+import argparse, glob, hashlib, json, os, re, shutil, subprocess, tempfile, time
 from pathlib import Path
 
-home = Path(os.environ["USER_HOME"])
-slot_name = os.environ.get("SLOT_NAME", "dynamic")
-mode = os.environ.get("MODE", "dark")
-template_path = os.environ.get("TEMPLATE", "")
-out_path = Path(os.environ["OUT"])
+CACHE = Path.home() / ".cache/shiraos"
+WAL_JSON = Path.home() / ".cache/wal/colors.json"
+LAST = CACHE / "caelestia-last-apply.json"
 
-def read_pywal_colors():
-    colors_file = home / ".cache/wal/colors"
-    if colors_file.exists():
-        vals = []
-        for line in colors_file.read_text(errors="ignore").splitlines():
-            line = line.strip()
-            if re.match(r"^#[0-9a-fA-F]{6}$", line):
-                vals.append(line)
-        if vals:
-            while len(vals) < 16:
-                vals.append(vals[-1])
-            return vals[:16]
+def sha_text(s):
+    return hashlib.sha256(s.encode()).hexdigest()
 
-    colors_json = home / ".cache/wal/colors.json"
-    if colors_json.exists():
+def sha_file(p):
+    return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+
+def clean_hex(v, fallback="ffffff"):
+    v = str(v or "").strip().replace("#", "")
+    return v.lower() if re.fullmatch(r"[0-9a-fA-F]{6}", v) else fallback
+
+def read_pywal():
+    if not WAL_JSON.exists():
+        return None
+    data = json.loads(WAL_JSON.read_text())
+    special = data.get("special", {})
+    colors = data.get("colors", {})
+    p = {
+        "background": clean_hex(special.get("background"), "101018"),
+        "foreground": clean_hex(special.get("foreground"), "e8e8ec"),
+    }
+    for i in range(16):
+        p[f"color{i}"] = clean_hex(colors.get(f"color{i}"), p["foreground"])
+    return p
+
+def palette_hash(p):
+    return sha_text(json.dumps(p, sort_keys=True))
+
+def scheme_root():
+    for pat in [
+        "/usr/lib/python*/site-packages/caelestia/data/schemes",
+        "/usr/lib64/python*/site-packages/caelestia/data/schemes",
+        str(Path.home() / ".local/lib/python*/site-packages/caelestia/data/schemes"),
+    ]:
+        for d in glob.glob(pat):
+            if Path(d).is_dir():
+                return Path(d)
+    return None
+
+def slot_path(root, slot):
+    p = root / slot
+    if p.exists():
+        return p
+    for x in root.iterdir():
+        if x.name.lower() == slot.lower():
+            return x
+    return None
+
+def valid_slots(root):
+    return [p.name for p in sorted(root.iterdir()) if p.exists()]
+
+def files_inside(path):
+    if path.is_file():
+        return [path]
+    return [f for f in path.rglob("*") if f.is_file() and "__pycache__" not in str(f)]
+
+def read_keys(path):
+    keys = []
+    try:
+        for line in path.read_text(errors="ignore").splitlines():
+            s = line.strip()
+            if not s or s.startswith("#"):
+                continue
+            parts = s.split()
+            if len(parts) >= 2 and re.fullmatch(r"#?[0-9a-fA-F]{6}", parts[1]):
+                keys.append(parts[0])
+    except Exception:
+        pass
+    return keys
+
+def pick_color(k, p, i):
+    n = k.lower()
+    bg, fg = p["background"], p["foreground"]
+    c0 = p.get("color0", bg)
+    c1 = p.get("color1", "ff5555")
+    c2 = p.get("color2", "50fa7b")
+    c3 = p.get("color3", "f1fa8c")
+    c4 = p.get("color4", "8aadf4")
+    c5 = p.get("color5", "f5bde6")
+    c6 = p.get("color6", "8bd5ca")
+    c7 = p.get("color7", fg)
+    c8 = p.get("color8", c0)
+
+    if any(x in n for x in ["background","base","mantle","crust","surface","layer","bar","panel"]): return bg
+    if any(x in n for x in ["foreground","text","content","onsurface","onbackground"]): return fg
+    if any(x in n for x in ["primary","accent","active","selected"]): return c5
+    if "secondary" in n: return c4
+    if "tertiary" in n: return c6
+    if any(x in n for x in ["error","danger","red"]): return c1
+    if any(x in n for x in ["success","green"]): return c2
+    if any(x in n for x in ["warning","yellow"]): return c3
+    if "blue" in n: return c4
+    if any(x in n for x in ["purple","mauve","pink","magenta"]): return c5
+    if any(x in n for x in ["cyan","teal","sky"]): return c6
+    if any(x in n for x in ["outline","border"]): return c8
+    if "white" in n: return c7
+    if any(x in n for x in ["black","shadow"]): return c0
+    return [bg, fg, c5, c4, c6, c1, c2, c3, c8, c7][i % 10]
+
+def generate(path, palette):
+    keys = read_keys(path)
+    if not keys:
+        return None
+    out, seen = [], set()
+    for i, k in enumerate(keys):
+        if k in seen:
+            continue
+        seen.add(k)
+        out.append(f"{k} {pick_color(k, palette, i)}")
+    return "\n".join(out) + "\n"
+
+def backup_slot(path, slot):
+    CACHE.mkdir(parents=True, exist_ok=True)
+    b = CACHE / f"caelestia-{slot}-original-backup"
+    if b.exists():
+        return b
+    if path.is_dir():
+        shutil.copytree(path, b)
+    else:
+        b.write_text(path.read_text(errors="ignore"))
+    return b
+
+def prepare_permissions(path, allow_sudo):
+    if not allow_sudo:
+        return
+    user = os.environ.get("USER")
+    if user:
+        subprocess.run(["sudo", "chown", "-R", f"{user}:{user}", str(path)], check=False)
+
+def write_checked(path, content, allow_sudo=False):
+    if os.access(str(path), os.W_OK):
+        path.write_text(content)
+    elif allow_sudo:
+        with tempfile.NamedTemporaryFile("w", delete=False) as f:
+            f.write(content)
+            tmp = f.name
         try:
-            data = json.loads(colors_json.read_text(errors="ignore"))
-            vals = []
-            special = data.get("special", {})
-            colors = data.get("colors", {})
-            for key in ["background", "foreground", "cursor"]:
-                v = special.get(key)
-                if isinstance(v, str) and re.match(r"^#[0-9a-fA-F]{6}$", v):
-                    vals.append(v)
-            for i in range(16):
-                v = colors.get(f"color{i}")
-                if isinstance(v, str) and re.match(r"^#[0-9a-fA-F]{6}$", v):
-                    vals.append(v)
-            if vals:
-                while len(vals) < 16:
-                    vals.append(vals[-1])
-                return vals[:16]
+            r = subprocess.run(["sudo", "install", "-m", "644", tmp, str(path)])
+            if r.returncode != 0:
+                return False
+        finally:
+            try: os.unlink(tmp)
+            except Exception: pass
+    else:
+        print("ERRO sem permissão:", path)
+        return False
+
+    try:
+        after = path.read_text(errors="ignore")
+        if after != content:
+            print("ERRO verificação falhou:", path)
+            print("esperado:", sha_text(content))
+            print("gravado: ", sha_text(after))
+            return False
+    except Exception as e:
+        print("ERRO lendo de volta:", path, e)
+        return False
+    return True
+
+def restore_terminal():
+    # Volta o terminal para o pywal depois do Caelestia aplicar o scheme.
+    # Isso pode dar uma piscada no terminal, mas impede o Caelestia de dominar as cores.
+    if shutil.which("wal"):
+        subprocess.run(["wal", "-R"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    seq = Path.home() / ".cache/wal/sequences"
+    if seq.exists():
+        try:
+            print(seq.read_text(), end="")
         except Exception:
             pass
 
-    colors_sh = home / ".cache/wal/colors.sh"
-    if colors_sh.exists():
-        vals = re.findall(r"#[0-9a-fA-F]{6}", colors_sh.read_text(errors="ignore"))
-        if vals:
-            while len(vals) < 16:
-                vals.append(vals[-1])
-            return vals[:16]
 
-    return [
-        "#11111b", "#313244", "#f38ba8", "#a6e3a1",
-        "#f9e2af", "#89b4fa", "#cba6f7", "#94e2d5",
-        "#bac2de", "#45475a", "#f38ba8", "#a6e3a1",
-        "#f9e2af", "#89b4fa", "#cba6f7", "#cdd6f4",
-    ]
+def apply_slot(slot, root, attempts=3, no_terminal=True):
+    if not shutil.which("caelestia"):
+        print("ERRO: comando caelestia não encontrado.")
+        return False
 
-c = read_pywal_colors()
-bg = c[0]
-surface = c[1] if len(c) > 1 else bg
-red = c[2] if len(c) > 2 else "#f38ba8"
-green = c[3] if len(c) > 3 else "#a6e3a1"
-yellow = c[4] if len(c) > 4 else "#f9e2af"
-blue = c[5] if len(c) > 5 else "#89b4fa"
-purple = c[6] if len(c) > 6 else "#cba6f7"
-cyan = c[7] if len(c) > 7 else "#94e2d5"
-fg = c[15] if len(c) > 15 else (c[7] if len(c) > 7 else "#cdd6f4")
-accent = blue
+    alt = None
+    for name in valid_slots(root):
+        if name != slot:
+            alt = name
+            break
 
-base = None
-if template_path and Path(template_path).exists():
-    try:
-        base = json.loads(Path(template_path).read_text(errors="ignore"))
-    except Exception:
-        base = None
+    for i in range(1, attempts + 1):
+        print(f"Tentativa de aplicar {i}/{attempts}")
 
-if not isinstance(base, dict):
-    base = {}
+        # Troca para outro slot antes, para forçar o Caelestia a reler o slot principal.
+        if alt:
+            subprocess.run(
+                ["caelestia", "scheme", "set", "-n", alt],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+            time.sleep(0.25)
 
-base["name"] = slot_name
-base["flavour"] = mode
-base["mode"] = mode
+        r = subprocess.run(["caelestia", "scheme", "set", "-n", slot])
 
-roles = {
-    "background": bg, "bg": bg, "base": bg,
-    "foreground": fg, "fg": fg, "text": fg,
-    "surface": surface, "surface0": surface, "mantle": surface, "crust": bg,
-    "accent": accent, "primary": accent, "border": accent,
-    "red": red, "green": green, "yellow": yellow, "blue": blue,
-    "purple": purple, "pink": purple, "mauve": purple,
-    "cyan": cyan, "teal": cyan, "orange": yellow,
-}
+        # Mantém o terminal sob controle do pywal.
+        # Pode piscar, mas não mata o Caelestia.
+        if no_terminal:
+            restore_terminal()
 
-def update_obj(obj):
-    if isinstance(obj, dict):
-        for k, v in list(obj.items()):
-            lk = str(k).lower().replace("_", "").replace("-", "")
-            if isinstance(v, str) and re.match(r"^#[0-9a-fA-F]{6}$", v):
-                for role, val in roles.items():
-                    rk = role.lower().replace("_", "").replace("-", "")
-                    if lk == rk or rk in lk:
-                        obj[k] = val
-                        break
-            else:
-                update_obj(v)
-    elif isinstance(obj, list):
-        for item in obj:
-            update_obj(item)
+        if r.returncode == 0:
+            print("Aplicação retornou OK.")
+            return True
 
-update_obj(base)
+        time.sleep(0.5)
 
-# Escreve múltiplos nomes para cobrir versões que esperam colours/colors/palette.
-for section in ["colours", "colors", "palette"]:
-    if not isinstance(base.get(section), dict):
-        base[section] = {}
-    base[section].update({
-        "background": bg,
-        "foreground": fg,
-        "bg": bg,
-        "fg": fg,
-        "text": fg,
-        "surface": surface,
-        "surface0": surface,
-        "base": bg,
-        "accent": accent,
-        "primary": accent,
-        "border": accent,
-        "red": red,
-        "green": green,
-        "yellow": yellow,
-        "blue": blue,
-        "purple": purple,
-        "pink": purple,
-        "cyan": cyan,
-        "teal": cyan,
-    })
+    print("ERRO: Caelestia não aceitou aplicar o slot.")
+    return False
 
-out_path.write_text(json.dumps(base, indent=2, ensure_ascii=False) + "\n")
-PY
-}
 
-prepare_slot_once() {
-  local template tmp dir slot prepared=0
+def update_slot(path, slot, palette, allow_sudo=False, prepare=False):
+    if prepare:
+        prepare_permissions(path, allow_sudo)
 
-  template="$(existing_template_scheme || true)"
-  tmp="$(mktemp)"
-  generate_scheme_json "$template" "$tmp"
+    backup = backup_slot(path, slot)
+    files = files_inside(path)
 
-  while IFS= read -r dir; do
-    [[ -n "$dir" ]] || continue
+    changed = 0
+    verified = 0
+    failed = 0
+    generated_hashes = {}
 
-    # Evita criar coisas globais sem --allow-sudo.
-    if is_system_path "$dir" && [[ "$ALLOW_SUDO" -ne 1 ]]; then
-      continue
-    fi
+    for f in files:
+        content = generate(f, palette)
+        if content is None:
+            continue
 
-    make_dir "$dir" || continue
-    slot="$dir/$SLOT_NAME.json"
-    copy_to_path "$tmp" "$slot" || continue
-    fix_slot_perms "$slot"
+        h = sha_text(content)
+        generated_hashes[str(f)] = h
 
-    if [[ -f "$slot" ]]; then
-      prepared=$((prepared + 1))
-    fi
-  done < <(candidate_scheme_dirs | awk '!seen[$0]++')
+        CACHE.mkdir(parents=True, exist_ok=True)
+        (CACHE / f"{slot}-{f.name}.generated").write_text(content)
 
-  rm -f "$tmp"
+        before = sha_file(f) if f.exists() else ""
+        if write_checked(f, content, allow_sudo):
+            after = sha_file(f)
+            verified += 1
+            if after != before:
+                changed += 1
+        else:
+            failed += 1
 
-  if [[ "$prepared" -gt 0 ]]; then
-    ok "Slots preparados: $prepared"
+    print("Backup:", backup)
+    print("Arquivos verificados:", verified)
+    print("Arquivos alterados:", changed)
+    if failed:
+        print("Falhas:", failed)
+        return False, changed, generated_hashes
+
+    return verified > 0, changed, generated_hashes
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--slot", default=os.environ.get("SHIRAOS_CAELESTIA_SLOT", "golden-dusk"))
+    ap.add_argument("--status", action="store_true")
+    ap.add_argument("--list", action="store_true")
+    ap.add_argument("--prepare", action="store_true")
+    ap.add_argument("--apply", action="store_true")
+    ap.add_argument("--allow-sudo", action="store_true")
+    ap.add_argument("--no-terminal", action="store_true")
+    ap.add_argument("--force", action="store_true", help="compatibilidade; força reaplicar")
+    ap.add_argument("--attempts", type=int, default=3)
+    args = ap.parse_args()
+
+    root = scheme_root()
+    if not root:
+        print("ERRO: não achei schemes do Caelestia.")
+        return 1
+
+    if args.list:
+        print("Scheme root:", root)
+        for n in valid_slots(root):
+            print(" ", n)
+        return 0
+
+    path = slot_path(root, args.slot)
+    if not path:
+        print("ERRO: slot não encontrado:", args.slot)
+        print("Use --list.")
+        return 1
+
+    pal = read_pywal()
+    phash = palette_hash(pal) if pal else None
+
+    if args.status:
+        print("Scheme root:", root)
+        print("Slot:", args.slot)
+        print("Slot path:", path)
+        print("Writable slot:", os.access(str(path), os.W_OK))
+        print("Pywal cache:", WAL_JSON, "exists=" + str(WAL_JSON.exists()))
+        print("Pywal hash:", phash)
+        if LAST.exists():
+            print("Last:", LAST.read_text())
+        return 0
+
+    if not pal:
+        print("ERRO: não achei ~/.cache/wal/colors.json")
+        print("Rode: wal -i /caminho/do/wallpaper")
+        return 1
+
+    print("Scheme root:", root)
+    print("Slot:", args.slot)
+    print("Slot path:", path)
+    print("Pywal hash:", phash)
+
+    ok, changed, generated = update_slot(path, args.slot, pal, args.allow_sudo, args.prepare)
+    if not ok:
+        print("ERRO: não consegui atualizar/verificar o slot.")
+        return 1
+
+    apply_ok = True
+    if args.apply:
+        apply_ok = apply_slot(args.slot, root, attempts=args.attempts, no_terminal=args.no_terminal)
+
+    LAST.write_text(json.dumps({
+        "slot": args.slot,
+        "pywal_hash": phash,
+        "changed_files": changed,
+        "apply_ok": bool(apply_ok),
+        "generated_files": generated,
+        "time": time.time(),
+    }, indent=2))
+
+    if changed == 0:
+        print("Aviso: arquivos não mudaram. Se você trocou wallpaper, talvez o pywal não tenha sido atualizado.")
+    if not apply_ok:
+        return 1
+
     return 0
-  fi
 
-  warn "Nenhum slot foi preparado."
-  return 1
-}
-
-try_caelestia_cmd() {
-  local desc="$1"
-  shift
-
-  {
-    echo ">>> $desc"
-    printf 'cmd:'
-    printf ' %q' "$@"
-    echo
-    "$@"
-  } >> "$LAST_CLI_LOG" 2>&1
-}
-
-apply_scheme_once() {
-  : > "$LAST_CLI_LOG"
-
-  if ! command -v caelestia >/dev/null 2>&1; then
-    warn "Comando caelestia não encontrado; prepare foi feito, apply foi pulado."
-    return 0
-  fi
-
-  # Tenta variações comuns. Algumas versões aceitam --notify, outras não.
-  try_caelestia_cmd "set notify name mode" caelestia scheme set --notify -n "$SLOT_NAME" -m "$MODE" && {
-    ok "Scheme aplicado: $SLOT_NAME ($MODE)"
-    return 0
-  }
-
-  try_caelestia_cmd "set name mode notify" caelestia scheme set -n "$SLOT_NAME" -m "$MODE" --notify && {
-    ok "Scheme aplicado: $SLOT_NAME ($MODE)"
-    return 0
-  }
-
-  try_caelestia_cmd "set name mode" caelestia scheme set -n "$SLOT_NAME" -m "$MODE" && {
-    ok "Scheme aplicado: $SLOT_NAME ($MODE)"
-    return 0
-  }
-
-  try_caelestia_cmd "set name" caelestia scheme set -n "$SLOT_NAME" && {
-    ok "Scheme aplicado: $SLOT_NAME"
-    return 0
-  }
-
-  try_caelestia_cmd "set positional" caelestia scheme set "$SLOT_NAME" && {
-    ok "Scheme aplicado: $SLOT_NAME"
-    return 0
-  }
-
-  warn "Não consegui aplicar via Caelestia CLI."
-  warn "Log do CLI: $LAST_CLI_LOG"
-  tail -20 "$LAST_CLI_LOG" 2>/dev/null | sed 's/^/  /' >&2 || true
-  return 0
-}
-
-status_slot() {
-  local pywal_file template count writable_any="False" slot
-
-  pywal_file="$(pywal_source || true)"
-  template="$(existing_template_scheme || true)"
-
-  echo "Slot name: $SLOT_NAME"
-  echo "Mode: $MODE"
-  echo "Template scheme: ${template:-None}"
-  echo "Pywal colors: $([[ -n "$pywal_file" ]] && echo True || echo False)"
-  echo "Pywal source: ${pywal_file:-None}"
-  echo "Caelestia CLI: $(command -v caelestia >/dev/null 2>&1 && echo True || echo False)"
-  echo "CLI log: $LAST_CLI_LOG"
-  echo "Slots:"
-
-  count=0
-  while IFS= read -r dir; do
-    [[ -n "$dir" ]] || continue
-    slot="$dir/$SLOT_NAME.json"
-    if [[ -f "$slot" ]]; then
-      count=$((count + 1))
-      if [[ -w "$slot" ]]; then
-        writable_any="True"
-        echo "  - $slot | exists=True | writable=True"
-      else
-        echo "  - $slot | exists=True | writable=False"
-      fi
-    else
-      echo "  - $slot | exists=False | writable=False"
-    fi
-  done < <(candidate_scheme_dirs | awk '!seen[$0]++')
-
-  echo "Slot count: $count"
-  echo "Writable slot: $writable_any"
-}
-
-try_loop() {
-  local n=1
-  local ok_prepare=0
-
-  [[ "$ATTEMPTS" =~ ^[0-9]+$ ]] || ATTEMPTS=1
-  [[ "$ATTEMPTS" -lt 1 ]] && ATTEMPTS=1
-
-  while [[ "$n" -le "$ATTEMPTS" ]]; do
-    ok_prepare=0
-
-    if [[ "$PREPARE" -eq 1 ]]; then
-      prepare_slot_once && ok_prepare=1 || ok_prepare=0
-    fi
-
-    if [[ "$APPLY" -eq 1 ]]; then
-      apply_scheme_once || true
-    fi
-
-    [[ "$ok_prepare" -eq 1 || "$PREPARE" -eq 0 ]] && return 0
-
-    n=$((n + 1))
-    sleep 0.25
-  done
-
-  return 1
-}
-
-if [[ "$STATUS" -eq 1 ]]; then
-  status_slot
-  exit 0
-fi
-
-if [[ "$PREPARE" -eq 0 && "$APPLY" -eq 0 ]]; then
-  status_slot
-  exit 0
-fi
-
-try_loop
-status_slot
+if __name__ == "__main__":
+    raise SystemExit(main())
