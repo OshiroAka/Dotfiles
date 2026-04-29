@@ -1,0 +1,289 @@
+#!/usr/bin/env bash
+set -u
+
+# shiraos-caelestia-pywal-scheme
+#
+# Objetivo:
+# - preparar um "slot" de scheme do Caelestia para ficar editável pelo usuário;
+# - permitir que pywal/auto scheme atualize esse arquivo sem pedir sudo toda hora;
+# - aplicar o scheme no Caelestia quando o comando caelestia existir.
+#
+# Uso comum:
+#   shiraos-caelestia-pywal-scheme --prepare --apply --allow-sudo --force --no-terminal --attempts 3
+#   shiraos-caelestia-pywal-scheme --status
+
+PREPARE=0
+APPLY=0
+STATUS=0
+ALLOW_SUDO=0
+FORCE=0
+ATTEMPTS=1
+NO_TERMINAL=0
+
+SLOT_NAME="${SHIRAOS_CAEL_SLOT_NAME:-shiraos-pywal}"
+USER_NAME="${SUDO_USER:-${USER:-$(id -un)}}"
+USER_HOME="$(getent passwd "$USER_NAME" | cut -d: -f6 2>/dev/null || printf '%s' "$HOME")"
+
+log()  { printf '%s\n' "$*"; }
+ok()   { printf '✓ %s\n' "$*"; }
+warn() { printf '⚠ %s\n' "$*" >&2; }
+fail() { printf '✘ %s\n' "$*" >&2; }
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --prepare) PREPARE=1 ;;
+    --apply) APPLY=1 ;;
+    --status) STATUS=1 ;;
+    --allow-sudo) ALLOW_SUDO=1 ;;
+    --force) FORCE=1 ;;
+    --no-terminal) NO_TERMINAL=1 ;;
+    --attempts)
+      shift
+      ATTEMPTS="${1:-1}"
+      ;;
+    --attempts=*)
+      ATTEMPTS="${1#*=}"
+      ;;
+    -h|--help)
+      cat <<EOF
+Uso:
+  $0 --prepare --apply --allow-sudo --force --no-terminal --attempts 3
+  $0 --status
+
+Opções:
+  --prepare       cria/prepara o slot do scheme
+  --apply         tenta aplicar o scheme via comando caelestia
+  --status        mostra estado e permissão
+  --allow-sudo    permite usar sudo para criar/chown em /etc
+  --force         recria conteúdo inicial do slot
+  --attempts N    tenta prepare/apply N vezes
+EOF
+      exit 0
+      ;;
+    *)
+      warn "Ignorando opção desconhecida: $1"
+      ;;
+  esac
+  shift
+done
+
+is_writable_file() {
+  local file="$1"
+  [[ -f "$file" && -w "$file" ]]
+}
+
+run_sudo() {
+  if [[ "$ALLOW_SUDO" -eq 1 ]]; then
+    sudo "$@"
+  else
+    "$@"
+  fi
+}
+
+find_caelestia_root() {
+  local root=""
+
+  for root in \
+    "${SHIRAOS_CAEL_ROOT:-}" \
+    "$USER_HOME/.config/quickshell/caelestia" \
+    "/etc/xdg/quickshell/caelestia" \
+    "/usr/share/quickshell/caelestia" \
+    "/usr/local/share/quickshell/caelestia"
+  do
+    [[ -n "$root" && -d "$root" ]] && {
+      printf '%s\n' "$root"
+      return 0
+    }
+  done
+
+  # Fallback seguro: se Caelestia não existe no sistema, prepara user-level.
+  printf '%s\n' "$USER_HOME/.config/quickshell/caelestia"
+}
+
+find_scheme_dir() {
+  local root="$1"
+  local dir=""
+
+  for dir in \
+    "${SHIRAOS_CAEL_SCHEME_DIR:-}" \
+    "$root/schemes" \
+    "$root/scheme" \
+    "$root/assets/schemes" \
+    "$root/assets/scheme" \
+    "$root/services/schemes"
+  do
+    [[ -n "$dir" && -d "$dir" ]] && {
+      printf '%s\n' "$dir"
+      return 0
+    }
+  done
+
+  # Caminho preferido para o slot do ShiraOS.
+  printf '%s\n' "$root/schemes"
+}
+
+pywal_color() {
+  local idx="$1"
+  local file="$USER_HOME/.cache/wal/colors"
+  if [[ -f "$file" ]]; then
+    sed -n "$((idx + 1))p" "$file" 2>/dev/null | tr -d '\n'
+  fi
+}
+
+write_default_scheme() {
+  local file="$1"
+
+  local bg fg ac
+  bg="$(pywal_color 0)"
+  fg="$(pywal_color 7)"
+  ac="$(pywal_color 4)"
+
+  [[ -z "$bg" ]] && bg="#11111b"
+  [[ -z "$fg" ]] && fg="#cdd6f4"
+  [[ -z "$ac" ]] && ac="#89b4fa"
+
+  cat > "$file" <<EOF
+{
+  "name": "$SLOT_NAME",
+  "flavour": "dark",
+  "mode": "dark",
+  "colours": {
+    "background": "$bg",
+    "foreground": "$fg",
+    "accent": "$ac",
+    "primary": "$ac",
+    "surface": "$bg"
+  }
+}
+EOF
+}
+
+prepare_slot_once() {
+  local root dir slot tmp
+
+  root="$(find_caelestia_root)"
+  dir="$(find_scheme_dir "$root")"
+  slot="$dir/$SLOT_NAME.json"
+
+  if [[ ! -d "$dir" ]]; then
+    if [[ "$ALLOW_SUDO" -eq 1 && "$dir" == /etc/* || "$dir" == /usr/* ]]; then
+      sudo install -d "$dir"
+    else
+      mkdir -p "$dir"
+    fi
+  fi
+
+  if [[ ! -f "$slot" || "$FORCE" -eq 1 ]]; then
+    tmp="$(mktemp)"
+    write_default_scheme "$tmp"
+
+    if [[ "$ALLOW_SUDO" -eq 1 && "$slot" == /etc/* || "$slot" == /usr/* ]]; then
+      sudo cp "$tmp" "$slot"
+    else
+      cp "$tmp" "$slot"
+    fi
+    rm -f "$tmp"
+  fi
+
+  # O ponto principal: o slot fica editável pelo usuário.
+  if [[ "$ALLOW_SUDO" -eq 1 && "$slot" == /etc/* || "$slot" == /usr/* ]]; then
+    sudo chown "$USER_NAME:$USER_NAME" "$slot" 2>/dev/null || true
+    sudo chmod 664 "$slot" 2>/dev/null || true
+  else
+    chown "$USER_NAME:$USER_NAME" "$slot" 2>/dev/null || true
+    chmod 664 "$slot" 2>/dev/null || true
+  fi
+
+  if is_writable_file "$slot"; then
+    ok "Writable slot: True"
+    return 0
+  fi
+
+  warn "Writable slot: False"
+  return 1
+}
+
+apply_scheme_once() {
+  if ! command -v caelestia >/dev/null 2>&1; then
+    warn "Comando caelestia não encontrado; prepare foi feito, apply foi pulado."
+    return 0
+  fi
+
+  # O CLI do Caelestia variou em versões diferentes, então tenta formas comuns.
+  caelestia scheme set -n "$SLOT_NAME" -m dark >/dev/null 2>&1 && {
+    ok "Scheme aplicado: $SLOT_NAME"
+    return 0
+  }
+
+  caelestia scheme set -n "$SLOT_NAME" >/dev/null 2>&1 && {
+    ok "Scheme aplicado: $SLOT_NAME"
+    return 0
+  }
+
+  warn "Não consegui aplicar via caelestia CLI. O slot foi preparado mesmo assim."
+  return 0
+}
+
+status_slot() {
+  local root dir slot writable
+
+  root="$(find_caelestia_root)"
+  dir="$(find_scheme_dir "$root")"
+  slot="$dir/$SLOT_NAME.json"
+
+  if is_writable_file "$slot"; then
+    writable="True"
+  else
+    writable="False"
+  fi
+
+  cat <<EOF
+Caelestia root: $root
+Scheme dir: $dir
+Slot name: $SLOT_NAME
+Slot file: $slot
+Slot exists: $([[ -f "$slot" ]] && echo True || echo False)
+Writable slot: $writable
+Caelestia CLI: $(command -v caelestia >/dev/null 2>&1 && echo True || echo False)
+EOF
+}
+
+try_loop() {
+  local n=1
+  local ok_prepare=0
+
+  [[ "$ATTEMPTS" =~ ^[0-9]+$ ]] || ATTEMPTS=1
+  [[ "$ATTEMPTS" -lt 1 ]] && ATTEMPTS=1
+
+  while [[ "$n" -le "$ATTEMPTS" ]]; do
+    ok_prepare=0
+
+    if [[ "$PREPARE" -eq 1 ]]; then
+      prepare_slot_once && ok_prepare=1 || ok_prepare=0
+    fi
+
+    if [[ "$APPLY" -eq 1 ]]; then
+      apply_scheme_once || true
+    fi
+
+    [[ "$ok_prepare" -eq 1 || "$PREPARE" -eq 0 ]] && return 0
+
+    n=$((n + 1))
+    sleep 0.25
+  done
+
+  return 1
+}
+
+if [[ "$STATUS" -eq 1 ]]; then
+  status_slot
+  exit 0
+fi
+
+if [[ "$PREPARE" -eq 0 && "$APPLY" -eq 0 ]]; then
+  status_slot
+  exit 0
+fi
+
+try_loop
+status_slot
