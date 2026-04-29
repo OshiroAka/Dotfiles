@@ -883,6 +883,106 @@ prepare_caelestia_pywal_slot() {
 
 prepare_caelestia_pywal_slot
 
+
+# ── Auto apply Caelestia quando pywal mudar ───────────────────
+# O install aplica uma vez, mas ao trocar wallpaper o pywal muda
+# ~/.cache/wal/colors. Este watcher aplica o dynamic scheme de novo
+# sempre que as cores do pywal forem atualizadas.
+step "Ativando auto apply Caelestia/pywal"
+
+setup_caelestia_pywal_auto_apply() {
+    local bin_dir="${BIN_DIR:-$HOME/.local/bin}"
+    local auto_bin="$bin_dir/shiraos-caelestia-pywal-auto"
+    local helper="$bin_dir/shiraos-caelestia-pywal-scheme"
+    local systemd_user_dir="$HOME/.config/systemd/user"
+    local service_file="$systemd_user_dir/shiraos-caelestia-pywal.service"
+    local path_file="$systemd_user_dir/shiraos-caelestia-pywal.path"
+
+    mkdir -p "$bin_dir" "$systemd_user_dir" "$HOME/.cache/wal" "$HOME/.local/state/shiraos"
+
+    if [[ ! -x "$helper" ]]; then
+        warn "Helper Caelestia não encontrado em $helper; auto apply não será ativado."
+        return 0
+    fi
+
+    cat > "$auto_bin" <<'EOF_AUTO'
+#!/usr/bin/env bash
+set -u
+
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/shiraos"
+LOG_FILE="$LOG_DIR/caelestia-pywal-auto.log"
+HELPER="$HOME/.local/bin/shiraos-caelestia-pywal-scheme"
+
+mkdir -p "$LOG_DIR"
+
+{
+  echo "---- $(date '+%Y-%m-%d %H:%M:%S') ----"
+
+  # debounce: pywal pode escrever colors/colors.json/colors.sh em sequência.
+  sleep 0.45
+
+  if [[ ! -x "$HELPER" ]]; then
+    echo "helper ausente: $HELPER"
+    exit 0
+  fi
+
+  if [[ ! -s "$HOME/.cache/wal/colors" && ! -s "$HOME/.cache/wal/colors.json" && ! -s "$HOME/.cache/wal/colors.sh" ]]; then
+    echo "pywal cache ausente; nada para aplicar"
+    exit 0
+  fi
+
+  # Sem --allow-sudo aqui:
+  # o install já preparou o slot como editável. No uso diário não queremos pedir senha.
+  "$HELPER" --prepare --apply --force --no-terminal --attempts 2
+} >> "$LOG_FILE" 2>&1
+EOF_AUTO
+
+    chmod 755 "$auto_bin"
+
+    cat > "$service_file" <<EOF_SERVICE
+[Unit]
+Description=Apply Caelestia dynamic scheme after pywal changes
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=$auto_bin
+EOF_SERVICE
+
+    cat > "$path_file" <<EOF_PATH
+[Unit]
+Description=Watch pywal colors and apply Caelestia dynamic scheme
+
+[Path]
+PathChanged=%h/.cache/wal/colors
+PathChanged=%h/.cache/wal/colors.json
+PathChanged=%h/.cache/wal/colors.sh
+Unit=shiraos-caelestia-pywal.service
+
+[Install]
+WantedBy=default.target
+EOF_PATH
+
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl --user daemon-reload || true
+        systemctl --user enable --now shiraos-caelestia-pywal.path || {
+            warn "Não consegui ativar o watcher systemd user."
+            warn "Teste manual:"
+            warn "  systemctl --user enable --now shiraos-caelestia-pywal.path"
+            return 0
+        }
+
+        ok "Auto apply Caelestia/pywal ativado"
+        info "Watcher: systemctl --user status shiraos-caelestia-pywal.path"
+        info "Log: ~/.local/state/shiraos/caelestia-pywal-auto.log"
+    else
+        warn "systemctl não encontrado; auto apply não ativado."
+    fi
+}
+
+setup_caelestia_pywal_auto_apply
+
+
     echo -e "${GREEN}${BOLD}║   ShiraOS WallpaperSelector pronto!             ║${NC}"
     echo -e "${GREEN}${BOLD}╚══════════════════════════════════════════════════╝${NC}"
 else
