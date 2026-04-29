@@ -107,6 +107,9 @@ fi
 
 mkdir -p "$CACHE_DIR" "$BIN_DIR" "$HOME/.config/quickshell" "$HOME/.config/shiraos"
 
+# Evita erro getcwd se o usuário rodar o install de dentro de ~/Dotfiles.
+cd "$HOME" # shiraos-safe-cwd
+
 # ── Perguntas principais ──────────────────────────────────────
 if [[ "$DO_UPDATE" == true ]]; then
     DO_DEPS=false
@@ -360,147 +363,202 @@ ok "~/Pictures/Wallpapers/{static,live,WallpaperSelector}"
 
 # ── Compilar / instalar módulo QML ShiraOS ─────────────────────
 # Necessário quando shell.qml tem: import ShiraOS
-if $DO_BUILD; then
-    step "Verificando módulo QML ShiraOS"
+#
+# Correção importante:
+# O projeto pode compilar, mas o CMake nem sempre instala automaticamente
+# /usr/lib/qt6/qml/ShiraOS/qmldir. Quando isso acontece, o Quickshell falha com:
+#   module "ShiraOS" is not installed
+#
+# Então este bloco:
+#   1. detecta o QML install dir real do Qt;
+#   2. compila o módulo;
+#   3. tenta ninja install;
+#   4. se o qmldir não aparecer, instala manualmente os artefatos do build.
+step "Instalando módulo QML ShiraOS"
 
-    PLUGIN_SRC=""
+detect_qml_dir() {
+    local candidate=""
+
+    for candidate in \
+        "$(qtpaths6 --query QT_INSTALL_QML 2>/dev/null || true)" \
+        "$(qt6-paths --qt-query QT_INSTALL_QML 2>/dev/null || true)" \
+        "/usr/lib/qt6/qml" \
+        "/usr/lib64/qt6/qml" \
+        "$(qtpaths6 --query QT_INSTALL_PREFIX 2>/dev/null || true)/lib/qt6/qml" \
+        "$(qt6-paths --install-prefix 2>/dev/null || true)/lib/qt6/qml"
+    do
+        [[ -n "$candidate" && "$candidate" != "/lib/qt6/qml" && -d "$candidate" ]] && {
+            echo "$candidate"
+            return 0
+        }
+    done
+
+    echo "/usr/lib/qt6/qml"
+}
+
+find_plugin_source() {
+    local candidate=""
 
     for candidate in \
         "$QS_CFG" \
         "$SRC_QS" \
         "$DOTFILES/ShiraShell/shiraos" \
-        "$DOTFILES/ShiraShell/quickshell" \
-        "$DOTFILES/ShiraShell/quickshell/shiraos"
+        "$DOTFILES/ShiraShell/quickshell/shiraos" \
+        "$DOTFILES/ShiraShell/quickshell"
     do
-        if [[ -f "$candidate/CMakeLists.txt" ]]; then
-            PLUGIN_SRC="$candidate"
-            break
-        fi
+        [[ -f "$candidate/CMakeLists.txt" ]] && {
+            echo "$candidate"
+            return 0
+        }
     done
 
-    if [[ -n "$PLUGIN_SRC" ]]; then
-        info "CMakeLists.txt encontrado em: $PLUGIN_SRC"
+    return 1
+}
 
-        QML_DIR=""
-        for candidate in \
-            "/usr/lib/qt6/qml" \
-            "/usr/lib64/qt6/qml" \
-            "$(qt6-paths --install-prefix 2>/dev/null || true)/lib/qt6/qml" \
-            "$(qtpaths6 --install-prefix 2>/dev/null || true)/lib/qt6/qml"
-        do
-            [[ -n "$candidate" && -d "$candidate" ]] && { QML_DIR="$candidate"; break; }
-        done
+install_qml_module_manually() {
+    local src="$1"
+    local build_dir="$2"
+    local qml_dir="$3"
+    local log="$4"
 
-        [[ -z "$QML_DIR" ]] && QML_DIR="/usr/lib/qt6/qml"
+    local dest="$qml_dir/ShiraOS"
+    local stage="$CACHE_DIR/ShiraOS-module-stage"
+    local qmldir_file=""
+    local plugin_file=""
+    local plugin_base=""
 
-        info "Instalando módulo QML em: $QML_DIR"
+    rm -rf "$stage"
+    mkdir -p "$stage"
 
-        BUILD_DIR="$PLUGIN_SRC/build"
-        BUILD_LOG="$CACHE_DIR/build.log"
-        rm -rf "$BUILD_DIR"
-        mkdir -p "$BUILD_DIR"
-
-        cmake -S "$PLUGIN_SRC" -B "$BUILD_DIR" \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=/usr \
-            -DQT6_INSTALL_QML="$QML_DIR" \
-            -G Ninja > "$BUILD_LOG" 2>&1 || {
-                fail "cmake falhou! Veja: $BUILD_LOG"
-                tail -30 "$BUILD_LOG"
-                exit 1
-            }
-
-        ninja -C "$BUILD_DIR" -j"$(nproc)" >> "$BUILD_LOG" 2>&1 || {
-            fail "Build falhou! Veja: $BUILD_LOG"
-            tail -30 "$BUILD_LOG"
-            exit 1
-        }
-
-        sudo ninja -C "$BUILD_DIR" install >> "$BUILD_LOG" 2>&1 || {
-            fail "Install do módulo ShiraOS falhou! Veja: $BUILD_LOG"
-            tail -30 "$BUILD_LOG"
-            exit 1
-        }
-
-        if [[ -f "$QML_DIR/ShiraOS/qmldir" ]]; then
-            ok "Módulo ShiraOS instalado: $QML_DIR/ShiraOS"
-        else
-            warn "Build terminou, mas não achei $QML_DIR/ShiraOS/qmldir"
-            warn "Se o qs reclamar de 'module ShiraOS is not installed', veja: $BUILD_LOG"
-        fi
-
-    elif grep -q "import ShiraOS" "$QS_CFG/shell.qml" 2>/dev/null; then
-        fail "shell.qml usa 'import ShiraOS', mas não achei CMakeLists.txt para compilar o módulo."
-        info "Procure manualmente com:"
-        info "  find ~/Dotfiles ~/.config/quickshell -maxdepth 7 -name CMakeLists.txt"
-        exit 1
-    else
-        info "CMakeLists.txt não encontrado e shell.qml não importa ShiraOS — build não necessário"
+    # 1) Tenta reaproveitar qmldir gerado pelo Qt/CMake.
+    qmldir_file="$(find "$build_dir" -type f -name qmldir -path '*ShiraOS*' 2>/dev/null | head -n 1 || true)"
+    if [[ -n "$qmldir_file" ]]; then
+        cp "$qmldir_file" "$stage/qmldir"
     fi
-fi
 
+    # 2) Acha o .so do plugin. O nome pode variar:
+    #    libShiraOSPlugin.so, libShiraOSPluginplugin.so, etc.
+    plugin_file="$(find "$build_dir" -type f \( -name '*ShiraOS*.so' -o -name 'lib*plugin*.so' \) 2>/dev/null | head -n 1 || true)"
 
-# ── Compilar / instalar módulo QML ShiraOS ─────────────────────
-step "Instalando módulo QML ShiraOS"
+    if [[ -z "$plugin_file" ]]; then
+        fail "Não achei o .so do plugin ShiraOS no build."
+        info "Build dir: $build_dir"
+        info "Log: $log"
+        find "$build_dir" -maxdepth 5 -type f 2>/dev/null | sed 's/^/  /' | head -80
+        return 1
+    fi
 
-QML_DIR=""
-for candidate in \
-    "/usr/lib/qt6/qml" \
-    "/usr/lib64/qt6/qml" \
-    "$(qtpaths6 --query QT_INSTALL_QML 2>/dev/null || true)" \
-    "$(qt6-paths --install-prefix 2>/dev/null || true)/lib/qt6/qml"
-do
-    [[ -n "$candidate" && -d "$candidate" ]] && {
-        QML_DIR="$candidate"
-        break
+    cp "$plugin_file" "$stage/"
+
+    plugin_base="$(basename "$plugin_file")"
+    plugin_base="${plugin_base#lib}"
+    plugin_base="${plugin_base%.so}"
+
+    # 3) Se CMake não gerou qmldir, cria um qmldir mínimo correto.
+    if [[ ! -f "$stage/qmldir" ]]; then
+        cat > "$stage/qmldir" <<EOF_QMLDIR
+module ShiraOS
+plugin $plugin_base
+EOF_QMLDIR
+    fi
+
+    # 4) Copia qmltypes/metainfo se existirem.
+    find "$build_dir" -type f \( -name '*.qmltypes' -o -name 'plugins.qmltypes' -o -name '*.qmltypes.json' \) -exec cp -f {} "$stage/" \; 2>/dev/null || true
+
+    # 5) Instala módulos QML do projeto, se existirem.
+    if [[ -d "$src/modules" ]]; then
+        mkdir -p "$stage/modules"
+        cp -a "$src/modules/." "$stage/modules/"
+    fi
+
+    # 6) Instala em /usr/lib/qt6/qml/ShiraOS ou equivalente.
+    sudo rm -rf "$dest"
+    sudo install -d "$dest"
+    sudo cp -a "$stage/." "$dest/"
+
+    # 7) Permissões seguras.
+    sudo find "$dest" -type d -exec chmod 755 {} \;
+    sudo find "$dest" -type f -exec chmod 644 {} \;
+    sudo find "$dest" -type f -name '*.so' -exec chmod 755 {} \;
+
+    [[ -f "$dest/qmldir" ]]
+}
+
+build_and_install_shiraos_module() {
+    local plugin_src="$1"
+    local qml_dir="$2"
+    local build_dir="$plugin_src/build"
+    local build_log="$CACHE_DIR/build-shiraos-module.log"
+
+    info "Fonte do módulo: $plugin_src"
+    info "QML dir: $qml_dir"
+    info "Log: $build_log"
+
+    rm -rf "$build_dir"
+    mkdir -p "$build_dir" "$CACHE_DIR" "$qml_dir" 2>/dev/null || true
+
+    cmake -S "$plugin_src" -B "$build_dir" \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DQT6_INSTALL_QML="$qml_dir" \
+        -DQT_QML_OUTPUT_DIRECTORY="$build_dir/qml" \
+        -G Ninja > "$build_log" 2>&1 || {
+            fail "cmake falhou. Veja: $build_log"
+            tail -60 "$build_log"
+            return 1
+        }
+
+    ninja -C "$build_dir" -j"$(nproc)" >> "$build_log" 2>&1 || {
+        fail "Build falhou. Veja: $build_log"
+        tail -60 "$build_log"
+        return 1
     }
-done
 
-[[ -z "$QML_DIR" ]] && QML_DIR="/usr/lib/qt6/qml"
+    # O install do CMake pode funcionar em alguns layouts, então tentamos.
+    # Mas não confiamos somente nele.
+    sudo ninja -C "$build_dir" install >> "$build_log" 2>&1 || {
+        warn "ninja install falhou ou não instalou tudo. Vou tentar instalação manual."
+    }
+
+    if [[ -f "$qml_dir/ShiraOS/qmldir" ]]; then
+        ok "Módulo ShiraOS instalado via CMake: $qml_dir/ShiraOS"
+        return 0
+    fi
+
+    warn "qmldir não apareceu após ninja install; instalando manualmente..."
+    install_qml_module_manually "$plugin_src" "$build_dir" "$qml_dir" "$build_log" || return 1
+
+    if [[ -f "$qml_dir/ShiraOS/qmldir" ]]; then
+        ok "Módulo ShiraOS instalado manualmente: $qml_dir/ShiraOS"
+        return 0
+    fi
+
+    fail "Mesmo após instalação manual, $qml_dir/ShiraOS/qmldir não apareceu."
+    return 1
+}
+
+QML_DIR="$(detect_qml_dir)"
 
 if grep -q "import ShiraOS" "$QS_CFG/shell.qml" 2>/dev/null; then
+    PLUGIN_SRC="$(find_plugin_source || true)"
+
+    if [[ -z "$PLUGIN_SRC" ]]; then
+        fail "shell.qml usa import ShiraOS, mas não achei CMakeLists.txt para compilar o módulo."
+        info "Debug:"
+        info "  find ~/Dotfiles ~/.config/quickshell -maxdepth 7 -name CMakeLists.txt"
+        exit 1
+    fi
+
+    build_and_install_shiraos_module "$PLUGIN_SRC" "$QML_DIR" || exit 1
+
+    # Correção opcional: remove caminhos hardcoded do seu usuário nos QML/scripts instalados.
+    grep -RIlE '/home/(shira|oshiro|harunelinux)' "$QS_CFG" 2>/dev/null \
+        | xargs -r sed -i "s#/home/shira#$HOME#g; s#/home/oshiro#$HOME#g; s#/home/harunelinux#$HOME#g" || true
+
     if [[ -f "$QML_DIR/ShiraOS/qmldir" ]]; then
-        ok "Módulo ShiraOS já instalado em $QML_DIR/ShiraOS"
-    elif [[ -f "$SRC_QS/CMakeLists.txt" ]]; then
-        info "Compilando módulo de: $SRC_QS"
-        info "Instalando em: $QML_DIR"
-
-        BUILD_DIR="$SRC_QS/build"
-        BUILD_LOG="$CACHE_DIR/build-shiraos-module.log"
-
-        rm -rf "$BUILD_DIR"
-        mkdir -p "$BUILD_DIR" "$CACHE_DIR"
-
-        cmake -S "$SRC_QS" -B "$BUILD_DIR" \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=/usr \
-            -DQT6_INSTALL_QML="$QML_DIR" \
-            -G Ninja > "$BUILD_LOG" 2>&1 || {
-                fail "cmake falhou. Veja: $BUILD_LOG"
-                tail -40 "$BUILD_LOG"
-                exit 1
-            }
-
-        ninja -C "$BUILD_DIR" -j"$(nproc)" >> "$BUILD_LOG" 2>&1 || {
-            fail "Build falhou. Veja: $BUILD_LOG"
-            tail -40 "$BUILD_LOG"
-            exit 1
-        }
-
-        sudo ninja -C "$BUILD_DIR" install >> "$BUILD_LOG" 2>&1 || {
-            fail "Install do módulo falhou. Veja: $BUILD_LOG"
-            tail -40 "$BUILD_LOG"
-            exit 1
-        }
-
-        if [[ -f "$QML_DIR/ShiraOS/qmldir" ]]; then
-            ok "Módulo ShiraOS instalado em $QML_DIR/ShiraOS"
-        else
-            fail "Build terminou, mas $QML_DIR/ShiraOS/qmldir não apareceu."
-            exit 1
-        fi
+        ok "Verificação final do módulo: $QML_DIR/ShiraOS/qmldir"
     else
-        fail "shell.qml usa import ShiraOS, mas $SRC_QS/CMakeLists.txt não existe."
+        fail "Verificação final falhou: $QML_DIR/ShiraOS/qmldir não existe"
         exit 1
     fi
 else
