@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -u
 
-# shiraos-caelestia-pywal-scheme v3
+# shiraos-caelestia-pywal-scheme v4
 #
-# v3 muda a estratégia:
+# v4 muda a estratégia:
 # - escreve o scheme em vários caminhos prováveis do Caelestia;
 # - tenta aplicar com várias formas do CLI;
 # - mostra o último erro do CLI no status.
@@ -20,7 +20,7 @@ FORCE=0
 NO_TERMINAL=0
 ATTEMPTS=1
 
-SLOT_NAME="${SHIRAOS_CAEL_SLOT_NAME:-shiraos-pywal}"
+SLOT_NAME="${SHIRAOS_CAEL_SLOT_NAME:-dynamic}"
 MODE="${SHIRAOS_CAEL_MODE:-dark}"
 USER_NAME="${SUDO_USER:-${USER:-$(id -un)}}"
 USER_HOME="$(getent passwd "$USER_NAME" | cut -d: -f6 2>/dev/null || printf '%s' "$HOME")"
@@ -179,7 +179,7 @@ import re
 from pathlib import Path
 
 home = Path(os.environ["USER_HOME"])
-slot_name = os.environ.get("SLOT_NAME", "shiraos-pywal")
+slot_name = os.environ.get("SLOT_NAME", "dynamic")
 mode = os.environ.get("MODE", "dark")
 template_path = os.environ.get("TEMPLATE", "")
 out_path = Path(os.environ["OUT"])
