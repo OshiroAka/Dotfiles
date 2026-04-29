@@ -805,6 +805,98 @@ if [[ "$CHECKS_OK" == true ]]; then
 # ── Caelestia pywal scheme slot ─────────────────────────────
 # Prepara o slot do Caelestia para o usuário conseguir escrever nele.
 # Isso evita pedir sudo toda hora quando o auto scheme/pywal atualizar o tema.
+
+# ── Instalar slots Caelestia do repo ──────────────────────────
+# Alguns helpers dependem de slots existentes, ex: golden-dusk.
+# O helper do Caelestia pode listar slots vindos do pacote Python:
+#   /usr/lib/python*/site-packages/caelestia/data/schemes
+# Então copiamos os slots versionados também para esse root quando existir.
+step "Instalando slots Caelestia"
+
+find_caelestia_python_scheme_roots() {
+    python3 - <<'PYROOT'
+from pathlib import Path
+import glob
+import importlib.util
+
+roots = []
+
+spec = importlib.util.find_spec("caelestia")
+if spec and spec.origin:
+    p = Path(spec.origin).parent / "data" / "schemes"
+    roots.append(p)
+
+for pat in [
+    "/usr/lib/python*/site-packages/caelestia/data/schemes",
+    "/usr/lib/python*/dist-packages/caelestia/data/schemes",
+    "/usr/local/lib/python*/site-packages/caelestia/data/schemes",
+]:
+    for item in glob.glob(pat):
+        roots.append(Path(item))
+
+seen = set()
+for r in roots:
+    s = str(r)
+    if s not in seen:
+        seen.add(s)
+        print(s)
+PYROOT
+}
+
+install_caelestia_slots_from_repo() {
+    local src_dir="${DOTFILES:-$HOME/Dotfiles}/ShiraShell/shiraos/caelestia/schemes"
+    local user_dir="$HOME/.config/quickshell/caelestia/schemes"
+    local system_dir="/etc/xdg/quickshell/caelestia/schemes"
+    local f=""
+    local name=""
+    local root=""
+
+    [[ -d "$src_dir" ]] || {
+        info "Nenhum slot Caelestia versionado em: $src_dir"
+        return 0
+    }
+
+    mkdir -p "$user_dir"
+
+    for f in "$src_dir"/*; do
+        [[ -e "$f" ]] || continue
+        name="$(basename "$f")"
+
+        # User-level.
+        rm -rf "$user_dir/$name"
+        cp -a "$f" "$user_dir/$name"
+        find "$user_dir/$name" -type d -exec chmod 755 {} \; 2>/dev/null || true
+        find "$user_dir/$name" -type f -exec chmod 644 {} \; 2>/dev/null || true
+        [[ -f "$user_dir/$name" ]] && chmod 644 "$user_dir/$name" 2>/dev/null || true
+        ok "Slot Caelestia instalado no usuário: $user_dir/$name"
+
+        # /etc fallback.
+        sudo install -d "$system_dir"
+        sudo rm -rf "$system_dir/$name"
+        sudo cp -a "$f" "$system_dir/$name"
+        sudo chown -R "$USER:$USER" "$system_dir/$name" 2>/dev/null || true
+        sudo find "$system_dir/$name" -type d -exec chmod 755 {} \; 2>/dev/null || true
+        sudo find "$system_dir/$name" -type f -exec chmod 664 {} \; 2>/dev/null || true
+        [[ -f "$system_dir/$name" ]] && sudo chmod 664 "$system_dir/$name" 2>/dev/null || true
+        ok "Slot Caelestia instalado globalmente: $system_dir/$name"
+
+        # Python package root used by the Caelestia CLI.
+        while IFS= read -r root; do
+            [[ -n "$root" ]] || continue
+            sudo install -d "$root"
+            sudo rm -rf "$root/$name"
+            sudo cp -a "$f" "$root/$name"
+            sudo chown -R "$USER:$USER" "$root/$name" 2>/dev/null || true
+            sudo find "$root/$name" -type d -exec chmod 755 {} \; 2>/dev/null || true
+            sudo find "$root/$name" -type f -exec chmod 664 {} \; 2>/dev/null || true
+            [[ -f "$root/$name" ]] && sudo chmod 664 "$root/$name" 2>/dev/null || true
+            ok "Slot Caelestia instalado no root do CLI: $root/$name"
+        done < <(find_caelestia_python_scheme_roots)
+    done
+}
+
+install_caelestia_slots_from_repo
+
 step "Preparando slot Caelestia para pywal"
 
 install_caelestia_pywal_helper_if_found() {
