@@ -815,33 +815,38 @@ install_caelestia_pywal_helper_if_found() {
 
     mkdir -p "${BIN_DIR:-$HOME/.local/bin}"
 
-    # Se já existe, só garante permissão.
-    if [[ -f "$dest" ]]; then
-        chmod 755 "$dest" 2>/dev/null || true
-        return 0
-    fi
-
-    # Tenta achar o helper em locais comuns do repo.
+    # IMPORTANTE:
+    # Não mantenha helper antigo se existe uma versão nova no repo.
+    # Antes o install fazia "se já existe, só chmod e retorna", então o tester
+    # continuava usando a versão antiga e não criava o log da v3.
     for src in \
-        "$dotfiles/$helper_name" \
-        "$dotfiles/.local/bin/$helper_name" \
-        "$dotfiles/bin/$helper_name" \
-        "$dotfiles/scripts/$helper_name" \
-        "$dotfiles/ShiraShell/$helper_name" \
-        "$dotfiles/ShiraShell/bin/$helper_name" \
-        "$dotfiles/ShiraShell/scripts/$helper_name" \
         "$dotfiles/ShiraShell/shiraos/scripts/$helper_name" \
         "$dotfiles/ShiraShell/quickshell/scripts/$helper_name" \
+        "$dotfiles/ShiraShell/scripts/$helper_name" \
+        "$dotfiles/ShiraShell/bin/$helper_name" \
+        "$dotfiles/scripts/$helper_name" \
+        "$dotfiles/bin/$helper_name" \
+        "$dotfiles/.local/bin/$helper_name" \
+        "$dotfiles/$helper_name" \
         "${QS_CFG:-$HOME/.config/quickshell/shiraos}/scripts/$helper_name"
     do
         if [[ -f "$src" ]]; then
             install -m 755 "$src" "$dest"
+            ok "Helper Caelestia atualizado: $dest"
             return 0
         fi
     done
 
+    # Se não achou no repo, mas já existe localmente, mantém como fallback.
+    if [[ -f "$dest" ]]; then
+        chmod 755 "$dest" 2>/dev/null || true
+        warn "Helper Caelestia não encontrado no repo; usando helper local existente: $dest"
+        return 0
+    fi
+
     return 1
 }
+
 
 prepare_caelestia_pywal_slot() {
     local helper="${BIN_DIR:-$HOME/.local/bin}/shiraos-caelestia-pywal-scheme"
