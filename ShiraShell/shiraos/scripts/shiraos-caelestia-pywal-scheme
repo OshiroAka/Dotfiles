@@ -1,14 +1,11 @@
 #!/usr/bin/env bash
 set -u
 
-# shiraos-caelestia-pywal-scheme
+# shiraos-caelestia-pywal-scheme v2
 #
-# Objetivo:
-# - preparar um "slot" de scheme do Caelestia para ficar editável pelo usuário;
-# - permitir que pywal/auto scheme atualize esse arquivo sem pedir sudo toda hora;
-# - aplicar o scheme no Caelestia quando o comando caelestia existir.
+# Prepara e aplica um scheme do Caelestia usando cores do pywal.
 #
-# Uso comum:
+# Uso:
 #   shiraos-caelestia-pywal-scheme --prepare --apply --allow-sudo --force --no-terminal --attempts 3
 #   shiraos-caelestia-pywal-scheme --status
 
@@ -17,10 +14,11 @@ APPLY=0
 STATUS=0
 ALLOW_SUDO=0
 FORCE=0
-ATTEMPTS=1
 NO_TERMINAL=0
+ATTEMPTS=1
 
 SLOT_NAME="${SHIRAOS_CAEL_SLOT_NAME:-shiraos-pywal}"
+MODE="${SHIRAOS_CAEL_MODE:-dark}"
 USER_NAME="${SUDO_USER:-${USER:-$(id -un)}}"
 USER_HOME="$(getent passwd "$USER_NAME" | cut -d: -f6 2>/dev/null || printf '%s' "$HOME")"
 
@@ -52,10 +50,10 @@ Uso:
 
 Opções:
   --prepare       cria/prepara o slot do scheme
-  --apply         tenta aplicar o scheme via comando caelestia
-  --status        mostra estado e permissão
-  --allow-sudo    permite usar sudo para criar/chown em /etc
-  --force         recria conteúdo inicial do slot
+  --apply         tenta aplicar o scheme via Caelestia CLI
+  --status        mostra estado, slot e cores encontradas
+  --allow-sudo    permite usar sudo quando o slot fica em /etc ou /usr
+  --force         reescreve o slot mesmo se ele já existir
   --attempts N    tenta prepare/apply N vezes
 EOF
       exit 0
@@ -67,17 +65,22 @@ EOF
   shift
 done
 
-is_writable_file() {
-  local file="$1"
-  [[ -f "$file" && -w "$file" ]]
+have_pywal_colors() {
+  [[ -s "$USER_HOME/.cache/wal/colors" || -s "$USER_HOME/.cache/wal/colors.json" || -s "$USER_HOME/.cache/wal/colors.sh" ]]
 }
 
-run_sudo() {
-  if [[ "$ALLOW_SUDO" -eq 1 ]]; then
-    sudo "$@"
-  else
-    "$@"
-  fi
+pywal_colors_file() {
+  for f in \
+    "$USER_HOME/.cache/wal/colors" \
+    "$USER_HOME/.cache/wal/colors.json" \
+    "$USER_HOME/.cache/wal/colors.sh"
+  do
+    [[ -s "$f" ]] && {
+      printf '%s\n' "$f"
+      return 0
+    }
+  done
+  return 1
 }
 
 find_caelestia_root() {
@@ -96,7 +99,7 @@ find_caelestia_root() {
     }
   done
 
-  # Fallback seguro: se Caelestia não existe no sistema, prepara user-level.
+  # Fallback user-level. Mesmo se Caelestia não existir, o status fica claro.
   printf '%s\n' "$USER_HOME/.config/quickshell/caelestia"
 }
 
@@ -110,7 +113,9 @@ find_scheme_dir() {
     "$root/scheme" \
     "$root/assets/schemes" \
     "$root/assets/scheme" \
-    "$root/services/schemes"
+    "$root/services/schemes" \
+    "$USER_HOME/.config/caelestia/schemes" \
+    "$USER_HOME/.local/share/caelestia/schemes"
   do
     [[ -n "$dir" && -d "$dir" ]] && {
       printf '%s\n' "$dir"
@@ -118,83 +123,283 @@ find_scheme_dir() {
     }
   done
 
-  # Caminho preferido para o slot do ShiraOS.
+  # Se não houver pasta de schemes, criaremos esta.
   printf '%s\n' "$root/schemes"
 }
 
-pywal_color() {
-  local idx="$1"
-  local file="$USER_HOME/.cache/wal/colors"
-  if [[ -f "$file" ]]; then
-    sed -n "$((idx + 1))p" "$file" 2>/dev/null | tr -d '\n'
+find_template_scheme() {
+  local dir="$1"
+  local file=""
+
+  for file in \
+    "$dir/default.json" \
+    "$dir/dark.json" \
+    "$dir/catppuccin-mocha.json" \
+    "$dir/mocha.json" \
+    "$dir/gruvbox.json"
+  do
+    [[ -f "$file" ]] && {
+      printf '%s\n' "$file"
+      return 0
+    }
+  done
+
+  file="$(find "$dir" -maxdepth 2 -type f -name '*.json' ! -name "$SLOT_NAME.json" 2>/dev/null | head -n 1 || true)"
+  [[ -n "$file" ]] && printf '%s\n' "$file"
+}
+
+is_system_path() {
+  [[ "$1" == /etc/* || "$1" == /usr/* || "$1" == /opt/* ]]
+}
+
+copy_to_path() {
+  local src="$1"
+  local dest="$2"
+
+  if is_system_path "$dest"; then
+    if [[ "$ALLOW_SUDO" -eq 1 ]]; then
+      sudo cp "$src" "$dest"
+    else
+      cp "$src" "$dest"
+    fi
+  else
+    cp "$src" "$dest"
   fi
 }
 
-write_default_scheme() {
-  local file="$1"
-
-  local bg fg ac
-  bg="$(pywal_color 0)"
-  fg="$(pywal_color 7)"
-  ac="$(pywal_color 4)"
-
-  [[ -z "$bg" ]] && bg="#11111b"
-  [[ -z "$fg" ]] && fg="#cdd6f4"
-  [[ -z "$ac" ]] && ac="#89b4fa"
-
-  cat > "$file" <<EOF
-{
-  "name": "$SLOT_NAME",
-  "flavour": "dark",
-  "mode": "dark",
-  "colours": {
-    "background": "$bg",
-    "foreground": "$fg",
-    "accent": "$ac",
-    "primary": "$ac",
-    "surface": "$bg"
-  }
-}
-EOF
-}
-
-prepare_slot_once() {
-  local root dir slot tmp
-
-  root="$(find_caelestia_root)"
-  dir="$(find_scheme_dir "$root")"
-  slot="$dir/$SLOT_NAME.json"
-
-  if [[ ! -d "$dir" ]]; then
-    if [[ "$ALLOW_SUDO" -eq 1 && "$dir" == /etc/* || "$dir" == /usr/* ]]; then
+make_dir() {
+  local dir="$1"
+  if is_system_path "$dir"; then
+    if [[ "$ALLOW_SUDO" -eq 1 ]]; then
       sudo install -d "$dir"
     else
       mkdir -p "$dir"
     fi
+  else
+    mkdir -p "$dir"
   fi
+}
 
-  if [[ ! -f "$slot" || "$FORCE" -eq 1 ]]; then
-    tmp="$(mktemp)"
-    write_default_scheme "$tmp"
+fix_slot_perms() {
+  local slot="$1"
 
-    if [[ "$ALLOW_SUDO" -eq 1 && "$slot" == /etc/* || "$slot" == /usr/* ]]; then
-      sudo cp "$tmp" "$slot"
+  if is_system_path "$slot"; then
+    if [[ "$ALLOW_SUDO" -eq 1 ]]; then
+      sudo chown "$USER_NAME:$USER_NAME" "$slot" 2>/dev/null || true
+      sudo chmod 664 "$slot" 2>/dev/null || true
     else
-      cp "$tmp" "$slot"
+      chmod 664 "$slot" 2>/dev/null || true
     fi
-    rm -f "$tmp"
-  fi
-
-  # O ponto principal: o slot fica editável pelo usuário.
-  if [[ "$ALLOW_SUDO" -eq 1 && "$slot" == /etc/* || "$slot" == /usr/* ]]; then
-    sudo chown "$USER_NAME:$USER_NAME" "$slot" 2>/dev/null || true
-    sudo chmod 664 "$slot" 2>/dev/null || true
   else
     chown "$USER_NAME:$USER_NAME" "$slot" 2>/dev/null || true
     chmod 664 "$slot" 2>/dev/null || true
   fi
+}
 
-  if is_writable_file "$slot"; then
+generate_scheme_json() {
+  local template="$1"
+  local out="$2"
+
+  USER_HOME="$USER_HOME" SLOT_NAME="$SLOT_NAME" MODE="$MODE" TEMPLATE="$template" OUT="$out" python3 - <<'PY'
+import json
+import os
+import re
+from pathlib import Path
+
+home = Path(os.environ["USER_HOME"])
+slot_name = os.environ.get("SLOT_NAME", "shiraos-pywal")
+mode = os.environ.get("MODE", "dark")
+template_path = os.environ.get("TEMPLATE", "")
+out_path = Path(os.environ["OUT"])
+
+def read_pywal_colors():
+    # Preferred: ~/.cache/wal/colors = one hex per line.
+    colors_file = home / ".cache/wal/colors"
+    if colors_file.exists():
+        vals = []
+        for line in colors_file.read_text(errors="ignore").splitlines():
+            line = line.strip()
+            if re.match(r"^#[0-9a-fA-F]{6}$", line):
+                vals.append(line)
+        if vals:
+            while len(vals) < 16:
+                vals.append(vals[-1])
+            return vals[:16]
+
+    # colors.json fallback.
+    colors_json = home / ".cache/wal/colors.json"
+    if colors_json.exists():
+        try:
+            data = json.loads(colors_json.read_text(errors="ignore"))
+            vals = []
+            special = data.get("special", {})
+            colors = data.get("colors", {})
+            for key in ["background", "foreground", "cursor"]:
+                v = special.get(key)
+                if isinstance(v, str) and re.match(r"^#[0-9a-fA-F]{6}$", v):
+                    vals.append(v)
+            for i in range(16):
+                v = colors.get(f"color{i}")
+                if isinstance(v, str) and re.match(r"^#[0-9a-fA-F]{6}$", v):
+                    vals.append(v)
+            if vals:
+                while len(vals) < 16:
+                    vals.append(vals[-1])
+                return vals[:16]
+        except Exception:
+            pass
+
+    # colors.sh fallback.
+    colors_sh = home / ".cache/wal/colors.sh"
+    if colors_sh.exists():
+        text = colors_sh.read_text(errors="ignore")
+        vals = re.findall(r"#[0-9a-fA-F]{6}", text)
+        if vals:
+            while len(vals) < 16:
+                vals.append(vals[-1])
+            return vals[:16]
+
+    # fallback palette
+    return [
+        "#11111b", "#313244", "#f38ba8", "#a6e3a1",
+        "#f9e2af", "#89b4fa", "#cba6f7", "#94e2d5",
+        "#bac2de", "#45475a", "#f38ba8", "#a6e3a1",
+        "#f9e2af", "#89b4fa", "#cba6f7", "#cdd6f4",
+    ]
+
+c = read_pywal_colors()
+bg = c[0]
+fg = c[15] if len(c) > 15 else c[7]
+accent = c[4] if len(c) > 4 else c[5]
+surface = c[1] if len(c) > 1 else bg
+
+base_scheme = None
+if template_path and Path(template_path).exists():
+    try:
+        base_scheme = json.loads(Path(template_path).read_text(errors="ignore"))
+    except Exception:
+        base_scheme = None
+
+if not isinstance(base_scheme, dict):
+    base_scheme = {
+        "name": slot_name,
+        "flavour": mode,
+        "mode": mode,
+        "colours": {},
+        "colors": {},
+    }
+
+roles = {
+    "background": bg,
+    "bg": bg,
+    "base": bg,
+    "crust": bg,
+    "mantle": surface,
+    "surface": surface,
+    "surface0": surface,
+    "surface1": c[8] if len(c) > 8 else surface,
+    "surface2": c[9] if len(c) > 9 else surface,
+    "foreground": fg,
+    "fg": fg,
+    "text": fg,
+    "subtext": fg,
+    "subtext0": c[7] if len(c) > 7 else fg,
+    "subtext1": fg,
+    "accent": accent,
+    "primary": accent,
+    "secondary": c[5] if len(c) > 5 else accent,
+    "border": accent,
+    "blue": c[5] if len(c) > 5 else accent,
+    "red": c[2] if len(c) > 2 else accent,
+    "green": c[3] if len(c) > 3 else accent,
+    "yellow": c[4] if len(c) > 4 else accent,
+    "purple": c[6] if len(c) > 6 else accent,
+    "pink": c[6] if len(c) > 6 else accent,
+    "mauve": c[6] if len(c) > 6 else accent,
+    "teal": c[7] if len(c) > 7 else accent,
+    "cyan": c[7] if len(c) > 7 else accent,
+    "orange": c[3] if len(c) > 3 else accent,
+}
+
+def update_obj(obj):
+    if isinstance(obj, dict):
+        for k in list(obj.keys()):
+            lk = str(k).lower().replace("_", "").replace("-", "")
+            if isinstance(obj[k], str) and re.match(r"^#[0-9a-fA-F]{6}$", obj[k]):
+                # key-based replacement
+                replaced = False
+                for role, val in roles.items():
+                    role_key = role.lower().replace("_", "").replace("-", "")
+                    if lk == role_key or role_key in lk:
+                        obj[k] = val
+                        replaced = True
+                        break
+                # If unknown hex role, keep it. Better preserve structure than destroy it.
+            else:
+                update_obj(obj[k])
+    elif isinstance(obj, list):
+        for item in obj:
+            update_obj(item)
+
+update_obj(base_scheme)
+
+base_scheme["name"] = slot_name
+base_scheme["flavour"] = mode
+base_scheme["mode"] = mode
+
+# Ensure common sections exist, because some Caelestia versions expect "colours",
+# while other scripts use "colors".
+for key in ["colours", "colors"]:
+    if not isinstance(base_scheme.get(key), dict):
+        base_scheme[key] = {}
+    base_scheme[key].update({
+        "background": bg,
+        "foreground": fg,
+        "accent": accent,
+        "primary": accent,
+        "surface": surface,
+        "base": bg,
+        "text": fg,
+        "border": accent,
+        "red": roles["red"],
+        "green": roles["green"],
+        "yellow": roles["yellow"],
+        "blue": roles["blue"],
+        "purple": roles["purple"],
+        "pink": roles["pink"],
+        "cyan": roles["cyan"],
+    })
+
+out_path.write_text(json.dumps(base_scheme, indent=2, ensure_ascii=False) + "\n")
+PY
+}
+
+prepare_slot_once() {
+  local root dir slot template tmp
+
+  root="$(find_caelestia_root)"
+  dir="$(find_scheme_dir "$root")"
+  slot="$dir/$SLOT_NAME.json"
+  template="$(find_template_scheme "$dir" || true)"
+
+  make_dir "$dir"
+
+  if [[ ! -f "$slot" || "$FORCE" -eq 1 ]]; then
+    tmp="$(mktemp)"
+    generate_scheme_json "$template" "$tmp"
+    copy_to_path "$tmp" "$slot"
+    rm -f "$tmp"
+  else
+    # Mesmo sem --force, atualiza o conteúdo com as cores atuais do pywal.
+    tmp="$(mktemp)"
+    generate_scheme_json "$slot" "$tmp"
+    copy_to_path "$tmp" "$slot"
+    rm -f "$tmp"
+  fi
+
+  fix_slot_perms "$slot"
+
+  if [[ -f "$slot" && -w "$slot" ]]; then
     ok "Writable slot: True"
     return 0
   fi
@@ -209,9 +414,9 @@ apply_scheme_once() {
     return 0
   fi
 
-  # O CLI do Caelestia variou em versões diferentes, então tenta formas comuns.
-  caelestia scheme set -n "$SLOT_NAME" -m dark >/dev/null 2>&1 && {
-    ok "Scheme aplicado: $SLOT_NAME"
+  # Variações conhecidas do CLI.
+  caelestia scheme set -n "$SLOT_NAME" -m "$MODE" >/dev/null 2>&1 && {
+    ok "Scheme aplicado: $SLOT_NAME ($MODE)"
     return 0
   }
 
@@ -220,30 +425,43 @@ apply_scheme_once() {
     return 0
   }
 
-  warn "Não consegui aplicar via caelestia CLI. O slot foi preparado mesmo assim."
+  caelestia scheme set "$SLOT_NAME" >/dev/null 2>&1 && {
+    ok "Scheme aplicado: $SLOT_NAME"
+    return 0
+  }
+
+  warn "Não consegui aplicar via Caelestia CLI. O slot foi preparado mesmo assim."
+  warn "Teste manual:"
+  warn "  caelestia scheme set -n $SLOT_NAME -m $MODE"
   return 0
 }
 
 status_slot() {
-  local root dir slot writable
+  local root dir slot writable pywal_file template
 
   root="$(find_caelestia_root)"
   dir="$(find_scheme_dir "$root")"
   slot="$dir/$SLOT_NAME.json"
+  template="$(find_template_scheme "$dir" || true)"
 
-  if is_writable_file "$slot"; then
+  if [[ -f "$slot" && -w "$slot" ]]; then
     writable="True"
   else
     writable="False"
   fi
 
+  pywal_file="$(pywal_colors_file || true)"
+
   cat <<EOF
 Caelestia root: $root
 Scheme dir: $dir
+Template scheme: ${template:-None}
 Slot name: $SLOT_NAME
 Slot file: $slot
 Slot exists: $([[ -f "$slot" ]] && echo True || echo False)
 Writable slot: $writable
+Pywal colors: $([[ -n "$pywal_file" ]] && echo True || echo False)
+Pywal source: ${pywal_file:-None}
 Caelestia CLI: $(command -v caelestia >/dev/null 2>&1 && echo True || echo False)
 EOF
 }
