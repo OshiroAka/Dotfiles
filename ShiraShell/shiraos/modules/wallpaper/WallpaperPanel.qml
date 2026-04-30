@@ -37,12 +37,12 @@ PanelWindow {
     property int thumbRadius: 14
     property real pillOpacity: 0.60
     property int cfgTab: 0
-    property int settingsSidebarWidth: 236
+    property int settingsSidebarWidth: 256
     property real settingsTabAnim: 1.0
-    property real settingsBackdropOpacity: 0.035
-    property real settingsPanelOpacity: 0.92
+    property real settingsBackdropOpacity: 0.22
+    property real settingsPanelOpacity: 0.97
     property real settingsPanelScale: 1.0
-   property string settingsPlace: "center" // center | bottom
+    property string settingsPlace: "center" // center | bottom
 
     property string swwwTransition: "grow"
     property string engineShotScript: "/home/shira/.config/quickshell/shiraos/scripts/wp-engine-cache-shot"
@@ -362,6 +362,9 @@ function rebuildFavSet() {
     }
 
     function setHighlight(cat, idx) {
+        var old = highlightIdx
+        if (idx > old) navDir = 1
+        else if (idx < old) navDir = -1
         if (cat === 0) favHl = idx
         else if (cat === 1) engineHl = idx
         else if (cat === 2) staticHl = idx
@@ -386,6 +389,9 @@ function rebuildFavSet() {
     property real shootFY: 0
     property real shootTX: 0
     property real shootTY: 0
+    property real navProg: 1
+    property int navDir: 0
+    property bool navActive: false
 
     // SHIRA_MAX_ANIM_V29_BEGIN
     property bool shiraCardIntroEnabled: true
@@ -401,6 +407,84 @@ function rebuildFavSet() {
         v = shiraClamp01V29(v)
         return v * v * (3 - 2 * v)
     }
+
+    function openBaseDuration(style) {
+        if (style === "cinema") return 620
+        if (style === "bloom") return 580
+        if (style === "iris") return 560
+        if (style === "bounce") return 560
+        if (style === "wave") return 590
+        if (style === "flip") return 560
+        if (style === "float") return 520
+        if (style === "ritual") return 880
+        if (style === "portal") return 820
+        if (style === "cascade") return 760
+        if (style === "zoom") return 540
+        if (style === "unfold") return 500
+        if (style === "rise") return 460
+        if (style === "scale") return 430
+        if (style === "slide") return 410
+        if (style === "soft") return 390
+        if (style === "fade") return 360
+        return 420
+    }
+
+    function openEasing(style) {
+        if (style === "cinema" || style === "bloom" || style === "bounce" || style === "zoom" || style === "wave" || style === "flip" || style === "ritual" || style === "portal")
+            return Easing.OutBack
+        if (style === "float" || style === "cascade")
+            return Easing.OutExpo
+        return Easing.OutCubic
+    }
+
+    function moveDuration(style) {
+        if (style === "snap") return 210
+        if (style === "fichas") return 860
+        if (style === "elastic") return 520
+        if (style === "trail" || style === "shooter") return 430
+        if (style === "fade") return 300
+        if (style === "none") return 1
+        return 360
+    }
+
+    function moveEasing(style) {
+        if (style === "fichas") return Easing.InOutCubic
+        if (style === "elastic") return Easing.OutBack
+        if (style === "snap") return Easing.OutCubic
+        if (style === "trail" || style === "shooter") return Easing.OutExpo
+        return Easing.InOutCubic
+    }
+
+    function tightCardSpacingMode() {
+        return moveStyle === "fichas"
+            || openStyle === "portal"
+            || openStyle === "ritual"
+            || openStyle === "cascade"
+    }
+
+    function replayOpenAnimation() {
+        if (!AppState.wallpaperOpen) return
+
+        shootActive = false
+        navActive = false
+        closeAnim.stop()
+        openAnim.stop()
+        shimmerAnim.stop()
+        shootProg = 0
+        navProg = 0
+        shimmerProg = -0.5
+        animProg = 0
+        openAnim.restart()
+        shimmerAnim.restart()
+    }
+
+    function returnToPreview() {
+        settingsOpen = false
+        Qt.callLater(function() {
+            replayOpenAnimation()
+            smoothCenterIndex(highlightIdx)
+        })
+    }
     // SHIRA_MAX_ANIM_V29_END
 
     NumberAnimation {
@@ -409,8 +493,8 @@ function rebuildFavSet() {
         property: "animProg"
         from: 0
         to: 1
-        duration: Math.round((openStyle === "cinema" ? 620 : openStyle === "bloom" ? 580 : openStyle === "iris" ? 560 : openStyle === "bounce" ? 560 : openStyle === "zoom" ? 540 : openStyle === "unfold" ? 500 : openStyle === "rise" ? 460 : openStyle === "scale" ? 430 : openStyle === "slide" ? 410 : openStyle === "soft" ? 390 : openStyle === "fade" ? 360 : 420) * shiraAnimStrength)
-        easing.type: (openStyle === "cinema" || openStyle === "bloom" || openStyle === "bounce" || openStyle === "zoom") ? Easing.OutBack : Easing.OutCubic
+        duration: Math.round(openBaseDuration(openStyle) * shiraAnimStrength)
+        easing.type: openEasing(openStyle)
     }
 
     NumberAnimation {
@@ -436,6 +520,13 @@ function rebuildFavSet() {
         ScriptAction { script: win.shimmerProg = -0.5 }
     }
 
+    Timer {
+        id: delayedCenterTimer
+        interval: 720
+        repeat: false
+        onTriggered: centerIndexAfterLayout(highlightIdx)
+    }
+
     SequentialAnimation {
         id: shootAnim
         NumberAnimation {
@@ -449,6 +540,30 @@ function rebuildFavSet() {
         ScriptAction { script: win.shootActive = false }
     }
 
+    SequentialAnimation {
+        id: navAnim
+        ScriptAction {
+            script: {
+                win.navActive = true
+                win.navProg = 0
+            }
+        }
+        NumberAnimation {
+            target: win
+            property: "navProg"
+            from: 0
+            to: 1
+            duration: Math.round(moveDuration(moveStyle) * shiraAnimStrength)
+            easing.type: moveEasing(moveStyle)
+        }
+        ScriptAction {
+            script: {
+                win.navProg = 1
+                win.navActive = false
+            }
+        }
+    }
+
     onPanelPositionChanged: {
         if (moveStyle === "none") return
         shootFX = pillX + pillW / 2
@@ -457,7 +572,7 @@ function rebuildFavSet() {
             shootTX = pillX + pillW / 2
             shootTY = pillY + pillH / 2
             shootProg = 0
-            shootActive = moveStyle === "shooter"
+            shootActive = moveStyle === "shooter" || moveStyle === "trail"
             if (shootActive) shootAnim.restart()
         })
     }
@@ -953,30 +1068,107 @@ function doApply(item, cat) {
         Qt.callLater(function() { smoothCenterIndex(highlightIdx) })
     }
 
-    function smoothCenterIndex(idx) {
+    function smoothCenterIndex(idx, oldIdxOverride) {
         if (idx < 0) return
         if (!wallList || wallList.count <= 0) return
 
         var oldX = wallList.contentX
         var oldY = wallList.contentY
+        var oldIdx = oldIdxOverride === undefined ? highlightIdx : oldIdxOverride
+        var targetX = oldX
+        var targetY = oldY
 
-        // Calcula o destino usando o método nativo, mas volta imediatamente
-        // para a posição antiga e anima manualmente até o destino.
-        wallList.positionViewAtIndex(idx, ListView.Center)
+        if (moveStyle === "fichas") {
+            var item = wallList.itemAtIndex(idx)
+            if (item && wallList.orientation === ListView.Horizontal) {
+                targetX = Math.max(0, Math.min(wallList.contentWidth - wallList.width, item.x + item.width / 2 - wallList.width / 2))
+            } else if (item) {
+                targetY = Math.max(0, Math.min(wallList.contentHeight - wallList.height, item.y + item.height / 2 - wallList.height / 2))
+            }
+        } else {
+            // Calcula o destino usando o método nativo, mas volta imediatamente
+            // para a posição antiga e anima manualmente até o destino.
+            wallList.positionViewAtIndex(idx, ListView.Center)
 
-        var targetX = wallList.contentX
-        var targetY = wallList.contentY
+            targetX = wallList.contentX
+            targetY = wallList.contentY
 
-        wallList.contentX = oldX
-        wallList.contentY = oldY
+            wallList.contentX = oldX
+            wallList.contentY = oldY
+        }
+
+        if (idx > oldIdx) navDir = 1
+        else if (idx < oldIdx) navDir = -1
+        if (moveStyle !== "none") {
+            navProg = 0
+            if (moveStyle === "shooter" || moveStyle === "trail") {
+                var cx = pillX + pillW / 2
+                var cy = pillY + pillH / 2
+                var dist = isVertical ? Math.min(170, pillH * 0.32) : Math.min(220, pillW * 0.28)
+                shootFX = cx - (isVertical ? 0 : navDir * dist)
+                shootFY = cy - (isVertical ? navDir * dist : 0)
+                shootTX = cx + (isVertical ? 0 : navDir * dist)
+                shootTY = cy + (isVertical ? navDir * dist : 0)
+                shootProg = 0
+                shootActive = true
+                shootAnim.restart()
+            }
+            navAnim.restart()
+        }
 
         if (wallList.orientation === ListView.Horizontal) {
             scrollXAnim.stop()
+            scrollXAnim.duration = Math.round((moveStyle === "fichas" ? 920 : moveDuration(moveStyle)) * shiraAnimStrength)
+            scrollXAnim.easing.type = moveEasing(moveStyle)
             scrollXAnim.from = oldX
             scrollXAnim.to = targetX
             scrollXAnim.restart()
         } else {
             scrollYAnim.stop()
+            scrollYAnim.duration = Math.round((moveStyle === "fichas" ? 920 : moveDuration(moveStyle)) * shiraAnimStrength)
+            scrollYAnim.easing.type = moveEasing(moveStyle)
+            scrollYAnim.from = oldY
+            scrollYAnim.to = targetY
+            scrollYAnim.restart()
+        }
+
+    }
+
+    function centerIndexAfterLayout(idx) {
+        if (idx < 0) return
+        if (!wallList || wallList.count <= 0) return
+
+        var oldX = wallList.contentX
+        var oldY = wallList.contentY
+        var targetX = oldX
+        var targetY = oldY
+        var item = wallList.itemAtIndex(idx)
+
+        if (item && wallList.orientation === ListView.Horizontal) {
+            targetX = Math.max(0, Math.min(wallList.contentWidth - wallList.width, item.x + item.width / 2 - wallList.width / 2))
+        } else if (item) {
+            targetY = Math.max(0, Math.min(wallList.contentHeight - wallList.height, item.y + item.height / 2 - wallList.height / 2))
+        } else {
+            wallList.positionViewAtIndex(idx, ListView.Center)
+            targetX = wallList.contentX
+            targetY = wallList.contentY
+            wallList.contentX = oldX
+            wallList.contentY = oldY
+        }
+
+        if (wallList.orientation === ListView.Horizontal) {
+            if (Math.abs(targetX - oldX) < 2) return
+            scrollXAnim.stop()
+            scrollXAnim.duration = Math.round(620 * shiraAnimStrength)
+            scrollXAnim.easing.type = Easing.InOutCubic
+            scrollXAnim.from = oldX
+            scrollXAnim.to = targetX
+            scrollXAnim.restart()
+        } else {
+            if (Math.abs(targetY - oldY) < 2) return
+            scrollYAnim.stop()
+            scrollYAnim.duration = Math.round(620 * shiraAnimStrength)
+            scrollYAnim.easing.type = Easing.InOutCubic
             scrollYAnim.from = oldY
             scrollYAnim.to = targetY
             scrollYAnim.restart()
@@ -986,9 +1178,10 @@ function doApply(item, cat) {
     function navigate(dir) {
         var walls = currentWalls
         if (!walls.length) return
+        var old = highlightIdx
         var n = Math.max(0, Math.min(highlightIdx + dir, walls.length - 1))
         setHighlight(activeCategory, n)
-        smoothCenterIndex(n)
+        smoothCenterIndex(n, old)
     }
 
     function toggleFav() {
@@ -1026,8 +1219,7 @@ function doApply(item, cat) {
             if (AppState.wallpaperOpen) {
                 if (!_loaded) { _loaded = true; loadProc.running = true }
                 settingsOpen = false
-                animProg = 0
-                openAnim.restart()
+                replayOpenAnimation()
                 scanWallpapers()
                 Qt.callLater(function() { keyItem.forceActiveFocus() })
             } else {
@@ -1043,11 +1235,13 @@ function doApply(item, cat) {
 
         Item {
             id: pill
+            z: settingsOpen ? -100000 : 0
             x: pillX
             y: pillY
             width: pillW
             height: pillH
             visible: !settingsOpen && (AppState.wallpaperOpen || closeAnim.running || animProg > 0.01)
+            enabled: !settingsOpen
             opacity: settingsOpen ? 0 : (openStyle === "fade" ? Math.min(1, animProg * 1.15) : animProg)
             Behavior on x { NumberAnimation { duration: 310; easing.type: Easing.InOutCubic } }
             Behavior on y { NumberAnimation { duration: 310; easing.type: Easing.InOutCubic } }
@@ -1058,6 +1252,12 @@ function doApply(item, cat) {
                 Translate {
                     x: openStyle === "slide" ? (panelPosition === "right" ? (1 - animProg) * 54 : panelPosition === "left" ? -(1 - animProg) * 54 : 0)
                         : openStyle === "unfold" ? -(1 - animProg) * pill.width * 0.18
+                        : openStyle === "wave" ? Math.sin((1 - animProg) * 3.14159) * (panelPosition === "left" ? -24 : panelPosition === "right" ? 24 : 0)
+                        : openStyle === "flip" ? (1 - animProg) * (panelPosition === "left" ? -36 : panelPosition === "right" ? 36 : 0)
+                        : openStyle === "float" ? 0
+                        : openStyle === "ritual" ? Math.sin(animProg * 9.42477) * (1 - animProg) * 18
+                        : openStyle === "portal" ? Math.sin(animProg * 6.28318) * (1 - animProg) * 12
+                        : openStyle === "cascade" ? -(1 - animProg) * pill.width * 0.10
                         : openStyle === "cinema" ? 0
                         : openStyle === "bloom" ? 0
                         : openStyle === "iris" ? 0
@@ -1065,6 +1265,12 @@ function doApply(item, cat) {
                     y: openStyle === "slide" || openStyle === "rise" ? (panelPosition === "bottom" ? (1 - animProg) * 54 : panelPosition === "top" ? -(1 - animProg) * 54 : (1 - animProg) * 28)
                         : openStyle === "soft" ? (1 - animProg) * 16
                         : openStyle === "dock" ? (1 - animProg) * 18
+                        : openStyle === "wave" ? (1 - animProg) * (panelPosition === "top" ? -42 : 42) + Math.sin(animProg * 6.28318) * 7
+                        : openStyle === "flip" ? (1 - animProg) * 18
+                        : openStyle === "float" ? (1 - animProg) * 38
+                        : openStyle === "ritual" ? (1 - animProg) * 34 + Math.sin(animProg * 12.56636) * (1 - animProg) * 8
+                        : openStyle === "portal" ? (1 - animProg) * 20
+                        : openStyle === "cascade" ? (1 - animProg) * 48
                         : openStyle === "cinema" ? (1 - animProg) * 22
                         : openStyle === "bloom" ? (1 - animProg) * 14
                         : openStyle === "iris" ? 0
@@ -1074,24 +1280,42 @@ function doApply(item, cat) {
                     xScale: openStyle === "iris" ? Math.max(0.03, animProg)
                         : openStyle === "cinema" ? (0.18 + 0.82 * animProg)
                         : openStyle === "bloom" ? (0.12 + 0.88 * animProg)
+                        : openStyle === "wave" ? (0.76 + 0.24 * animProg + Math.sin(animProg * 3.14159) * 0.05)
+                        : openStyle === "flip" ? (0.72 + 0.28 * animProg)
+                        : openStyle === "float" ? (0.94 + 0.06 * animProg)
+                        : openStyle === "ritual" ? (0.52 + 0.48 * animProg + Math.sin(animProg * 9.42477) * 0.035)
+                        : openStyle === "portal" ? Math.max(0.10, 0.24 + 0.76 * animProg)
+                        : openStyle === "cascade" ? (0.72 + 0.28 * animProg)
                         : openStyle === "unfold" ? Math.max(0.08, animProg)
                         : (openStyle === "scale" || openStyle === "bounce" || openStyle === "zoom" ? 0.88 + 0.12 * animProg : 1)
                     yScale: openStyle === "iris" ? Math.max(0.10, 0.22 + 0.78 * animProg)
                         : openStyle === "cinema" ? Math.max(0.04, 0.08 + 0.92 * animProg)
                         : openStyle === "bloom" ? Math.max(0.08, 0.16 + 0.84 * animProg)
+                        : openStyle === "wave" ? (0.82 + 0.18 * animProg - Math.sin(animProg * 3.14159) * 0.04)
+                        : openStyle === "flip" ? (0.90 + 0.10 * animProg)
+                        : openStyle === "float" ? (0.92 + 0.08 * animProg)
+                        : openStyle === "ritual" ? (0.42 + 0.58 * animProg)
+                        : openStyle === "portal" ? Math.max(0.05, 0.10 + 0.90 * animProg)
+                        : openStyle === "cascade" ? (0.62 + 0.38 * animProg)
                         : openStyle === "unfold" ? 0.92 + 0.08 * animProg
                         : xScale
                     origin.x: pill.width / 2
                     origin.y: pill.height / 2
                 }
             ]
+            rotation: openStyle === "flip" ? (1 - animProg) * (panelPosition === "left" ? -5 : 5)
+                : openStyle === "wave" ? Math.sin((1 - animProg) * 3.14159) * 2.4
+                : openStyle === "ritual" ? Math.sin((1 - animProg) * 12.56636) * 3.2
+                : openStyle === "cascade" ? (1 - animProg) * -2.0
+                : 0
+            Behavior on rotation { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
 
 
             Item {
                 id: openDramaFx
                 anchors.fill: parent
-                visible: AppState.wallpaperOpen && (openStyle === "bloom" || openStyle === "cinema" || openStyle === "iris" || openStyle === "zoom" || openStyle === "bounce" || openStyle === "unfold")
-                opacity: Math.max(0, 1 - Math.abs(animProg - 0.42) * 2.3)
+                visible: AppState.wallpaperOpen && (openStyle === "bloom" || openStyle === "cinema" || openStyle === "iris" || openStyle === "zoom" || openStyle === "bounce" || openStyle === "unfold" || openStyle === "wave" || openStyle === "flip" || openStyle === "float" || openStyle === "ritual" || openStyle === "portal" || openStyle === "cascade")
+                opacity: openStyle === "ritual" || openStyle === "portal" || openStyle === "cascade" ? Math.max(0, 1 - Math.abs(animProg - 0.48) * 1.65) : Math.max(0, 1 - Math.abs(animProg - 0.42) * 2.3)
                 z: 20
                 clip: true
 
@@ -1106,13 +1330,60 @@ function doApply(item, cat) {
                     antialiasing: true
                 }
 
+                Repeater {
+                    model: openStyle === "ritual" || openStyle === "portal" ? 3 : 0
+
+                    delegate: Rectangle {
+                        anchors.centerIn: parent
+                        width: parent.width * (0.16 + animProg * (0.50 + index * 0.18))
+                        height: parent.height * (0.24 + animProg * (0.30 + index * 0.14))
+                        radius: Math.min(width, height) / 2
+                        color: "transparent"
+                        border.width: 1
+                        border.color: Qt.rgba(cAc.r, cAc.g, cAc.b, Math.max(0, 0.32 - index * 0.07) * Math.max(0, 1 - animProg * 0.55))
+                        rotation: (animProg * 26) * (index % 2 === 0 ? 1 : -1)
+                        opacity: Math.max(0, 1 - Math.abs(animProg - 0.48) * 1.55)
+                        antialiasing: true
+                    }
+                }
+
+                Repeater {
+                    model: openStyle === "cascade" || openStyle === "ritual" ? 5 : 0
+
+                    delegate: Rectangle {
+                        width: parent.width * (0.10 + index * 0.10)
+                        height: 2
+                        radius: 1
+                        x: parent.width * (0.10 + index * 0.16) - width / 2
+                        y: parent.height * (0.18 + index * 0.14) + Math.sin(animProg * 6.28318 + index) * 8
+                        color: Qt.rgba(cAc.r, cAc.g, cAc.b, 0.26 - index * 0.025)
+                        opacity: Math.max(0, Math.sin(animProg * 3.14159)) * 0.85
+                    }
+                }
+
+                Repeater {
+                    model: openStyle === "ritual" ? 10 : openStyle === "portal" ? 8 : 0
+
+                    delegate: Rectangle {
+                        property real angle: (index / Math.max(1, parent.children.length)) * 6.28318 + animProg * 1.7
+                        property real rad: Math.min(parent.width, parent.height) * (0.12 + animProg * 0.36 + (index % 3) * 0.018)
+                        width: 4 + (index % 3)
+                        height: width
+                        radius: width / 2
+                        x: parent.width / 2 + Math.cos(angle) * rad - width / 2
+                        y: parent.height / 2 + Math.sin(angle) * rad * 0.42 - height / 2
+                        color: cAc
+                        opacity: Math.max(0, 1 - animProg) * (0.50 + (index % 4) * 0.08)
+                    }
+                }
+
                 Rectangle {
                     anchors.centerIn: parent
                     width: parent.width * (0.02 + animProg * 0.98)
                     height: 2
                     radius: 1
                     color: Qt.rgba(1, 1, 1, 0.24)
-                    visible: openStyle === "cinema"
+                    visible: openStyle === "cinema" || openStyle === "cascade"
                 }
             }
 
@@ -1236,11 +1507,15 @@ function doApply(item, cat) {
 
                 ListView {
                     id: wallList
+                    property real gluedOverlap: selectorStyle === "skew" ? Math.round(sw * 0.145) : 128
                     anchors.fill: parent
                     orientation: isVertical ? ListView.Vertical : ListView.Horizontal
-                    spacing: selectorStyle === "skew" ? skewItemSpacing : selectorStyle === "varal" ? 8 : 10
+                    spacing: !isVertical && tightCardSpacingMode() ? (moveStyle === "fichas" ? -gluedOverlap : selectorStyle === "skew" ? Math.min(skewItemSpacing, -24) : 2)
+                        : selectorStyle === "skew" ? skewItemSpacing
+                        : selectorStyle === "varal" ? 8
+                        : 10
                     clip: selectorStyle === "skew" ? false : true
-                    cacheBuffer: 240
+                    cacheBuffer: moveStyle === "fichas" ? 2200 : 640
                     model: currentWalls
                     currentIndex: highlightIdx
                     snapMode: ListView.NoSnap
@@ -1266,6 +1541,16 @@ function doApply(item, cat) {
                         id: card
                         property bool selected: index === highlightIdx
                         property bool fav: isFav(modelData)
+                        property real navWave: navActive ? Math.max(0, 1 - Math.abs(index - highlightIdx) * 0.22) * (1 - navProg) : 0
+                        property real selectDist: Math.abs(index - highlightIdx)
+                        property bool chipMode: moveStyle === "fichas" && !isVertical && selectorStyle !== "varal"
+                        property real chipEdgeBoost: chipMode && selected && currentWalls.length < 10 ? (10 - currentWalls.length) * 0.06 : 0
+                        property real chipRatio: selected ? ((selectorStyle === "skew" ? 2.04 : 1.74) + chipEdgeBoost) : selectorStyle === "skew" ? 0.92 : 0.72
+                        property real chipSide: index < highlightIdx ? 1 : index > highlightIdx ? -1 : 0
+                        property real chipPullToFocus: selectorStyle === "skew" ? Math.round(sw * 0.205) : 150
+                        property real chipGroupTighten: selectorStyle === "skew" ? Math.round(sw * 0.042) : 34
+                        property real chipCloseShift: chipMode && !selected ? chipSide * (chipPullToFocus + Math.max(0, selectDist - 1) * chipGroupTighten) : 0
+                        z: chipMode ? (selected ? 1000 : 1) : 0
 
                         // SHIRA_MAX_ANIM_CARD_V29_BEGIN
                         property real shiraIntroOrderV29: Math.min(index, 8)
@@ -1273,6 +1558,32 @@ function doApply(item, cat) {
                             ? shiraClamp01V29((animProg - shiraIntroOrderV29 * shiraCardIntroStagger) / shiraCardIntroSpan)
                             : 1
                         property real shiraIntroEaseV29: shiraEaseSmoothV29(shiraIntroRawV29)
+                        property real picIntro: shiraCardIntroEnabled ? (1 - shiraIntroEaseV29) : 0
+                        property real picWave: Math.sin(shiraIntroEaseV29 * 3.14159)
+                        property real picIntroX: openStyle === "cascade" ? -picIntro * (90 + index * 10)
+                            : openStyle === "ritual" ? Math.sin(index * 1.7 + animProg * 8.0) * picIntro * 34
+                            : openStyle === "portal" ? (index % 2 === 0 ? -1 : 1) * picIntro * 62
+                            : openStyle === "wave" ? Math.sin(index * 0.9 + animProg * 6.28318) * picIntro * 24
+                            : openStyle === "flip" ? (index % 2 === 0 ? -1 : 1) * picIntro * 32
+                            : 0
+                        property real picIntroY: openStyle === "cascade" ? picIntro * (70 + index * 8)
+                            : openStyle === "ritual" ? Math.cos(index * 1.4 + animProg * 7.0) * picIntro * 28
+                            : openStyle === "portal" ? picIntro * 46
+                            : openStyle === "float" ? picIntro * 54
+                            : openStyle === "wave" ? Math.cos(index * 0.8 + animProg * 6.28318) * picIntro * 14
+                            : 0
+                        property real picIntroRot: openStyle === "ritual" ? Math.sin(index + animProg * 10.0) * picIntro * 9
+                            : openStyle === "portal" ? (index % 2 === 0 ? -1 : 1) * picIntro * 10
+                            : openStyle === "cascade" ? -picIntro * 5
+                            : openStyle === "flip" ? (index % 2 === 0 ? -1 : 1) * picIntro * 14
+                            : openStyle === "wave" ? Math.sin(index + animProg * 5.0) * picIntro * 5
+                            : 0
+                        property real picIntroScale: openStyle === "portal" ? 0.70 + shiraIntroEaseV29 * 0.30
+                            : openStyle === "ritual" ? 0.78 + shiraIntroEaseV29 * 0.22 + picWave * 0.035
+                            : openStyle === "cascade" ? 0.76 + shiraIntroEaseV29 * 0.24
+                            : openStyle === "float" ? 0.90 + shiraIntroEaseV29 * 0.10
+                            : openStyle === "flip" ? 0.82 + shiraIntroEaseV29 * 0.18
+                            : 1
                         // SHIRA_MAX_ANIM_CARD_V29_END
                         property real baseW: {
                             if (isVertical) return wallList.width - 12
@@ -1288,27 +1599,49 @@ function doApply(item, cat) {
                             return wallList.height - 14
                         }
 
-                        width: isVertical ? wallList.width : baseW + 12
+                        width: isVertical ? wallList.width : (chipMode ? Math.round(baseW * chipRatio) + 8 : baseW + 12)
                         height: isVertical ? baseH + 12 : (selectorStyle === "skew" ? Math.max(wallList.height, Math.round(baseH * skewShapeHeight) + 32) : wallList.height)
-                        scale: (selectorStyle === "skew" ? skewCardScale : 1.0) * (selected ? (selectorStyle === "skew" ? 1.025 : 1.0) : 0.92) * (shiraCardIntroEnabled ? (0.82 + shiraIntroEaseV29 * 0.18) : 1)
-                        opacity: (selected ? 1.0 : 0.56) * (shiraCardIntroEnabled ? shiraIntroEaseV29 : 1)
+                        scale: (selectorStyle === "skew" ? skewCardScale : 1.0)
+                            * (chipMode ? (selected ? 1.0 : 0.965) : (selected ? (selectorStyle === "skew" ? 1.025 : 1.0) : 0.92))
+                            * (shiraCardIntroEnabled ? (0.82 + shiraIntroEaseV29 * 0.18) : 1)
+                            * picIntroScale
+                            * (moveStyle === "elastic" ? (1 + navWave * 0.075) : moveStyle === "snap" && selected && navActive ? 1 + (1 - navProg) * 0.045 : 1)
+                        opacity: (selected ? 1.0 : (chipMode ? 0.86 : 0.56))
+                            * (shiraCardIntroEnabled ? shiraIntroEaseV29 : 1)
+                            * (moveStyle === "fade" && navActive && !selected ? 0.72 + navProg * 0.28 : 1)
 
-                        Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
-                        Behavior on opacity { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                        Behavior on width { NumberAnimation { duration: Math.round((moveStyle === "fichas" ? 900 : 360) * shiraAnimStrength); easing.type: moveStyle === "fichas" ? Easing.InOutCubic : Easing.OutBack } }
+                        Behavior on scale { NumberAnimation { duration: moveStyle === "fichas" ? 520 : 140; easing.type: Easing.InOutCubic } }
+                        Behavior on opacity { NumberAnimation { duration: moveStyle === "fichas" ? 260 : 140; easing.type: Easing.OutCubic } }
 
                         Item {
                             id: holder
                             property real swingBase: selectorStyle === "varal" ? ((index % 2 === 0 ? -2.4 : 2.4) + (selected ? 0 : (index % 3 - 1) * 1.0)) : 0
                             property real swingOffset: 0
-                            property real frameW: selectorStyle === "varal" ? Math.round(varalPhotoWidth * varalScale) : baseW
-                            property real frameH: selectorStyle === "varal" ? Math.round(varalPhotoHeight * varalScale) : (selectorStyle === "skew" ? Math.round(baseH * skewShapeHeight) : baseH)
+                            property real frameW: selectorStyle === "varal" ? Math.round(varalPhotoWidth * varalScale) : (card.chipMode ? Math.max(64, card.width - 8) : baseW)
+                            property real frameH: selectorStyle === "varal" ? Math.round(varalPhotoHeight * varalScale) : (selectorStyle === "skew" ? Math.round(baseH * skewShapeHeight) : (card.chipMode && !card.selected ? Math.round(baseH * 0.94) : baseH))
                             width: frameW
                             height: frameH + (selectorStyle === "varal" ? (Math.round(varalDrop) + 24) : 0)
                             anchors.centerIn: parent
                             // SHIRA_SKEW_GROW_UP_FIXED
-                            anchors.verticalCenterOffset: selectorStyle === "skew" ? -Math.max(0, (holder.frameH - baseH) / 2) : 0
+                            anchors.verticalCenterOffset: (selectorStyle === "skew" ? -Math.max(0, (holder.frameH - baseH) / 2) : 0)
+                                + (moveStyle === "elastic" && navActive ? Math.sin((1 - navProg) * 3.14159) * 8 * (selected ? 1 : 0.45) : 0)
+                                + (moveStyle === "snap" && navActive && selected ? (1 - navProg) * -4 : 0)
                             transformOrigin: Item.Top
-                            rotation: selectorStyle === "varal" ? swingBase : (shiraCardIntroEnabled ? (1 - card.shiraIntroEaseV29) * (index % 2 === 0 ? -2.8 : 2.8) : 0)
+                            rotation: selectorStyle === "varal" ? swingBase
+                                : (shiraCardIntroEnabled ? (1 - card.shiraIntroEaseV29) * (index % 2 === 0 ? -2.8 : 2.8) : 0)
+                                  + card.picIntroRot
+                                  + (moveStyle === "elastic" && navActive ? navDir * card.navWave * 4.5 : 0)
+                                  + ((moveStyle === "trail" || moveStyle === "shooter") && navActive ? navDir * card.navWave * 2.2 : 0)
+                            transform: Translate {
+                                x: card.picIntroX + card.chipCloseShift
+                                   + (moveStyle === "elastic" && navActive ? -navDir * card.navWave * 18
+                                   : (moveStyle === "trail" || moveStyle === "shooter") && navActive ? -navDir * card.navWave * 28
+                                   : moveStyle === "snap" && navActive ? -navDir * card.navWave * 8
+                                   : 0)
+                                y: card.picIntroY
+                                   + ((moveStyle === "trail" || moveStyle === "shooter") && navActive ? Math.sin((1 - navProg) * 3.14159) * 6 * card.navWave : 0)
+                            }
                             Behavior on rotation { NumberAnimation { duration: 120; easing.type: Easing.InOutSine } }
 
                             SequentialAnimation {
@@ -1449,6 +1782,16 @@ function doApply(item, cat) {
                                     playing: visible
                                     paused: !visible
                                     smooth: true
+                                    transformOrigin: Item.Center
+                                    scale: openStyle === "ritual" ? 1.10 - card.shiraIntroEaseV29 * 0.10 + card.picWave * 0.025
+                                        : openStyle === "portal" ? 1.22 - card.shiraIntroEaseV29 * 0.22
+                                        : openStyle === "cascade" ? 1.16 - card.shiraIntroEaseV29 * 0.16
+                                        : openStyle === "float" ? 1.06 - card.shiraIntroEaseV29 * 0.06
+                                        : 1
+                                    rotation: openStyle === "ritual" ? Math.sin(animProg * 10.0 + index) * card.picIntro * 3.5
+                                        : openStyle === "portal" ? (index % 2 === 0 ? -1 : 1) * card.picIntro * 4.5
+                                        : openStyle === "cascade" ? -card.picIntro * 2.5
+                                        : 0
                                 }
 
                                 Image {
@@ -1462,10 +1805,63 @@ function doApply(item, cat) {
                                     cache: true
                                     smooth: true
                                     mipmap: true
-                                    sourceSize.width: Math.max(1200, Math.round(parent.width * 3.0))
-                                    sourceSize.height: Math.max(800, Math.round(parent.height * 3.0))
+                                    sourceSize.width: moveStyle === "fichas" ? 1800 : Math.max(1200, Math.round(parent.width * 3.0))
+                                    sourceSize.height: moveStyle === "fichas" ? 1100 : Math.max(800, Math.round(parent.height * 3.0))
                                     opacity: status === Image.Ready ? 1 : 0
                                     Behavior on opacity { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                                    transformOrigin: Item.Center
+                                    scale: openStyle === "ritual" ? 1.10 - card.shiraIntroEaseV29 * 0.10 + card.picWave * 0.025
+                                        : openStyle === "portal" ? 1.22 - card.shiraIntroEaseV29 * 0.22
+                                        : openStyle === "cascade" ? 1.16 - card.shiraIntroEaseV29 * 0.16
+                                        : openStyle === "float" ? 1.06 - card.shiraIntroEaseV29 * 0.06
+                                        : openStyle === "wave" ? 1.04 + Math.sin(animProg * 6.28318 + index) * card.picIntro * 0.025
+                                        : 1
+                                    rotation: openStyle === "ritual" ? Math.sin(animProg * 10.0 + index) * card.picIntro * 3.5
+                                        : openStyle === "portal" ? (index % 2 === 0 ? -1 : 1) * card.picIntro * 4.5
+                                        : openStyle === "cascade" ? -card.picIntro * 2.5
+                                        : openStyle === "flip" ? card.picIntro * (index % 2 === 0 ? -3 : 3)
+                                        : 0
+                                }
+
+                                Rectangle {
+                                    visible: openStyle === "ritual" || openStyle === "portal" || openStyle === "cascade" || openStyle === "wave"
+                                    anchors.fill: parent
+                                    color: Qt.rgba(cAc.r, cAc.g, cAc.b, openStyle === "portal" ? 0.12 : 0.07)
+                                    opacity: card.picIntro * (openStyle === "cascade" ? 0.42 : 0.28)
+                                }
+
+                                Rectangle {
+                                    visible: openStyle === "cascade" || openStyle === "ritual"
+                                    width: parent.width * 0.34
+                                    height: parent.height * 1.8
+                                    radius: 10
+                                    rotation: -32
+                                    x: -width + card.shiraIntroEaseV29 * (parent.width + width * 1.6) + index * 5
+                                    y: -parent.height * 0.40
+                                    gradient: Gradient {
+                                        orientation: Gradient.Horizontal
+                                        GradientStop { position: 0.0; color: "transparent" }
+                                        GradientStop { position: 0.50; color: Qt.rgba(1, 1, 1, 0.24) }
+                                        GradientStop { position: 1.0; color: "transparent" }
+                                    }
+                                    opacity: Math.sin(card.shiraIntroEaseV29 * 3.14159) * 0.90
+                                }
+
+                                Repeater {
+                                    model: openStyle === "portal" ? 2 : openStyle === "ritual" ? 3 : 0
+
+                                    delegate: Rectangle {
+                                        anchors.centerIn: parent
+                                        width: parent.width * (0.32 + index * 0.24 + card.shiraIntroEaseV29 * 0.50)
+                                        height: parent.height * (0.36 + index * 0.18 + card.shiraIntroEaseV29 * 0.34)
+                                        radius: Math.min(width, height) / 2
+                                        color: "transparent"
+                                        border.width: 1
+                                        border.color: Qt.rgba(cAc.r, cAc.g, cAc.b, Math.max(0, 0.34 - index * 0.08) * card.picIntro)
+                                        rotation: animProg * 28 * (index % 2 === 0 ? 1 : -1)
+                                        opacity: card.picIntro
+                                        antialiasing: true
+                                    }
                                 }
 
                                 Text {
@@ -1566,8 +1962,9 @@ function doApply(item, cat) {
                         MouseArea {
                             anchors.fill: parent
                             onClicked: {
+                                var old = highlightIdx
                                 setHighlight(activeCategory, index)
-                                smoothCenterIndex(index)
+                                smoothCenterIndex(index, old)
                                 doApply(modelData, activeCategory)
                             }
                         }
@@ -1629,34 +2026,51 @@ function doApply(item, cat) {
                 id: cfgBtnMouse
                 anchors.fill: parent
                 hoverEnabled: true
-                onClicked: settingsOpen = !settingsOpen
+                onClicked: {
+                    shootActive = false
+                    navActive = false
+                    animProg = 0
+                    settingsOpen = !settingsOpen
+                }
             }
         }
 
-Item {
+        Item {
+            z: 10000
             anchors.fill: parent
             visible: AppState.wallpaperOpen && (settingsOpen || opacity > 0.01)
             opacity: settingsOpen ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: 170; easing.type: Easing.OutCubic } }
 
-            Rectangle { anchors.fill: parent; color: Qt.rgba(0, 0, 0, settingsBackdropOpacity); MouseArea { anchors.fill: parent; onClicked: settingsOpen = false } }
+            Rectangle {
+                anchors.fill: parent
+                color: Qt.rgba(0, 0, 0, settingsBackdropOpacity)
+                MouseArea { anchors.fill: parent; onClicked: returnToPreview() }
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                color: Qt.rgba(0.010, 0.012, 0.022, 0.62)
+                visible: settingsOpen
+            }
 
             Rectangle {
                 id: settingsPanel
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                anchors.rightMargin: 24
-                anchors.bottomMargin: 24
-                width: Math.min(sw - 96, 1120)
+                x: settingsPlace === "center" ? Math.round((parent.width - width) / 2) : parent.width - width - 24
+                y: settingsPlace === "center" ? Math.round((parent.height - height) / 2) : parent.height - height - 24
+                width: Math.min(sw - 96, 1160)
                 height: Math.min(sh - 96, 820)
-                radius: 30
+                radius: 24
                 antialiasing: true
-                color: Qt.rgba(0.025, 0.028, 0.052, settingsPanelOpacity)
-                border.color: Qt.rgba(cAc.r, cAc.g, cAc.b, 0.28)
+                clip: true
+                color: Qt.rgba(0.018, 0.021, 0.036, settingsPanelOpacity)
+                border.color: Qt.rgba(cAc.r, cAc.g, cAc.b, 0.18)
                 border.width: 1
                 scale: settingsOpen ? settingsPanelScale : 0.985
                 opacity: settingsOpen ? 1 : 0
-                transformOrigin: Item.BottomRight
+                transformOrigin: settingsPlace === "center" ? Item.Center : Item.BottomRight
+                Behavior on x { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+                Behavior on y { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
                 Behavior on scale { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
                 Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
                 MouseArea { anchors.fill: parent }
@@ -1664,7 +2078,7 @@ Item {
                 Rectangle {
                     anchors.fill: parent
                     anchors.margins: 1
-                    radius: 29
+                    radius: 23
                     color: Qt.rgba(1, 1, 1, 0.018)
                     border.width: 0
                 }
@@ -1697,14 +2111,14 @@ Item {
                         id: closeMouseV3
                         anchors.fill: parent
                         hoverEnabled: true
-                        onClicked: settingsOpen = false
+                        onClicked: returnToPreview()
                     }
                 }
 
                 Rectangle {
                     id: epicOpenLine
                     z: 9999
-                    width: Math.max(64, openPreviewGrid.width * 0.82)
+                    width: Math.max(64, settingsPanel.width * 0.54)
                     height: 2
                     radius: 1
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -1726,141 +2140,81 @@ Item {
                     Rectangle {
                         width: settingsSidebarWidth
                         height: parent.height
-                        radius: 28
-                        color: Qt.rgba(cAc.r * 0.11, cAc.g * 0.11, cAc.b * 0.15, 0.94)
+                        radius: 0
+                        color: Qt.rgba(0.026, 0.030, 0.052, 0.96)
+                        border.width: 0
 
                         Column {
                             anchors.fill: parent
                             anchors.margins: 16
-                            spacing: 9
+                            spacing: 8
                             Rectangle {
                                 width: parent.width
-                                height: 72
-                                radius: 18
-                                color: Qt.rgba(cAc.r * 0.10, cAc.g * 0.10, cAc.b * 0.12, 0.92)
+                                height: 82
+                                radius: 16
+                                color: Qt.rgba(cAc.r, cAc.g, cAc.b, 0.085)
                                 border.width: 1
-                                border.color: Qt.rgba(cAc.r, cAc.g, cAc.b, 0.18)
+                                border.color: Qt.rgba(cAc.r, cAc.g, cAc.b, 0.20)
                                 Column {
                                     anchors.fill: parent
                                     anchors.margins: 14
-                                    spacing: 3
-                                    Text { text: "ShiraOS"; font.pixelSize: 22; font.bold: true; color: cAc }
-                                    Text { text: "Wallpaper Studio"; font.pixelSize: 11; color: Qt.rgba(1, 1, 1, 0.52) }
-                                    Text { text: "Configuração avançada do seletor"; font.pixelSize: 10; color: Qt.rgba(1, 1, 1, 0.34) }
+                                    spacing: 4
+                                    Text { text: "ShiraOS"; font.pixelSize: 22; font.bold: true; color: Qt.rgba(1,1,1,0.94) }
+                                    Text { text: "Wallpaper Studio"; font.pixelSize: 11; color: cAc; font.bold: true }
+                                    Text { text: "Organizacao do seletor"; font.pixelSize: 10; color: Qt.rgba(1, 1, 1, 0.42) }
                                 }
                             }
-                            Item { height: 6 }
-                            CatButton { label: "Posição"; tab: 0 }
-                            CatButton { label: "Animação"; tab: 1 }
-                            CatButton { label: "Abertura"; tab: 5 }
-                            CatButton { label: "Aparência"; tab: 2 }
-                            CatButton { label: "Modelo"; tab: 3 }
-                            CatButton { label: "Presets"; tab: 6 }
-                            CatButton { label: "Tema"; tab: 4 }
-                            CatButton { label: "Adaptações"; tab: 8 }
-                            CatButton { label: "Engine"; tab: 7 }
-                            CatButton { label: "Exclusão"; tab: 9 }
-                            CatButton { label: "Visualização"; tab: -1 }
                             Item { height: 8 }
+
+                            Text { text: "Essencial"; font.pixelSize: 9; font.bold: true; color: Qt.rgba(1,1,1,0.30) }
+                            CatButton { label: "Layout"; tab: 0 }
+                            CatButton { label: "Aparência"; tab: 2 }
+                            CatButton { label: "Modelos"; tab: 3 }
+
+                            Item { height: 4 }
+                            Text { text: "Movimento"; font.pixelSize: 9; font.bold: true; color: Qt.rgba(1,1,1,0.30) }
+                            CatButton { label: "Animações"; tab: 1 }
+                            CatButton { label: "Entrada"; tab: 5 }
+                            CatButton { label: "Presets visuais"; tab: 6 }
+
+                            Item { height: 4 }
+                            Text { text: "Sistema"; font.pixelSize: 9; font.bold: true; color: Qt.rgba(1,1,1,0.30) }
+                            CatButton { label: "Tema & Pywal"; tab: 4 }
+                            CatButton { label: "Adaptações"; tab: 8 }
+                            CatButton { label: "Engine / MPV"; tab: 7 }
+
+                            Item { height: 4 }
+                            Text { text: "Biblioteca"; font.pixelSize: 9; font.bold: true; color: Qt.rgba(1,1,1,0.30) }
+                            CatButton { label: "Ocultar wallpapers"; tab: 9 }
+
+                            Item { height: 8 }
+                            MiniButton { label: "Voltar ao preview"
+                                onPress: returnToPreview() }
                             MiniButton { label: "Recarregar lista"
                                 onPress: scanWallpapers(true) }
                             MiniButton { label: "Salvar agora"
                                 onPress: saveSettingsNow() }
                             Item { height: 8 }
-                            Text { text: "savedata: ~/.config/quickshell/shiraos/wp_settings.json"; width: parent.width; wrapMode: Text.WordWrap; font.pixelSize: 9; color: Qt.rgba(1, 1, 1, 0.24) }
-
-Column {
-    visible: cfgTab === 9
-    width: parent.width
-    spacing: 14
-
-    Text { text: "Exclusão"; font.pixelSize: 18; font.bold: true; color: cAc }
-
-    Flickable {
-        width: parent.width
-        height: 560
-        clip: true
-        contentHeight: exclusionColumn.implicitHeight + 20
-
-        Column {
-            id: exclusionColumn
-            width: parent.width
-            spacing: 8
-
-            Row {
-                spacing: 8
-
-                Repeater {
-                    model: exclusionNames
-                    delegate: Rectangle {
-                        width: 110
-                        height: 36
-                        radius: 14
-                        color: exclusionTab === index ? Qt.rgba(cAc.r,cAc.g,cAc.b,0.18) : Qt.rgba(1,1,1,0.05)
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: modelData
-                            color: exclusionTab === index ? cAc : "white"
-                            font.pixelSize: 11
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: exclusionTab = index
-                        }
-                    }
-                }
-            }
-
-            Repeater {
-                model: exclusionTab === 0 ? staticWalls : exclusionTab === 1 ? liveWalls : engineWalls
-
-                delegate: Rectangle {
-                    width: parent.width - 24
-                    height: 56
-                    radius: 16
-                    color: Qt.rgba(1,1,1,0.05)
-
-                    property string pth: exclusionTab === 2 ? modelData.path : modelData
-                    property string typ: exclusionTab === 0 ? "static" : exclusionTab === 1 ? "live" : "engine"
-
-                    Text {
-                        anchors.left: parent.left
-                        anchors.leftMargin: 14
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: parent.width - 110
-                        text: pth.replace(/.*\//,"")
-                        elide: Text.ElideRight
-                        color: "white"
-                        font.pixelSize: 10
-                    }
-
-                    Text {
-                        anchors.right: parent.right
-                        anchors.rightMargin: 14
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: (hiddenWalls[typ] || []).indexOf(pth) >= 0 ? "OCULTO" : "VISÍVEL"
-                        color: cAc
-                        font.pixelSize: 9
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: toggleHiddenWall(typ, pth)
-                    }
-                }
-            }
-        }
-    }
-}
+                            Text {
+                                text: "wp_settings.json"
+                                width: parent.width
+                                wrapMode: Text.WordWrap
+                                font.pixelSize: 9
+                                color: Qt.rgba(1, 1, 1, 0.24)
+                            }
 
                         }
+                    }
+
+                    Rectangle {
+                        width: 1
+                        height: parent.height
+                        color: Qt.rgba(1, 1, 1, 0.07)
                     }
 
                     Flickable {
                         id: settingsFlick
-                        width: parent.width - settingsSidebarWidth
+                        width: parent.width - settingsSidebarWidth - 1
                         height: parent.height
                         clip: true
                         opacity: 0.55 + settingsTabAnim * 0.45
@@ -1875,14 +2229,14 @@ Column {
     visible: cfgTab === 9
     opacity: cfgTab === 9 ? 1 : 0
     y: 0
-    x: 0
-    width: settingsFlick.width
+    x: 28
+    width: settingsFlick.width - 56
     spacing: 14
 
     Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
 
     Text {
-        text: "Exclusão"
+        text: "Ocultar wallpapers"
         font.pixelSize: 20
         font.bold: true
         color: cAc
@@ -2017,12 +2371,12 @@ Column {
 
 Column {
                                     id: settingsContent
-                                    visible: opacity > 0.01
-                                    opacity: cfgTab === 1 ? 1 : 0
+                                    visible: cfgTab !== 9
+                                    opacity: cfgTab === 9 ? 0 : 1
                 transform: Scale {
                     id: epicSettingsScale
-                    origin.x: openPreviewGrid.width / 2
-                    origin.y: settingsPlace === "bottom" ? openPreviewGrid.height : openPreviewGrid.height / 2
+                    origin.x: width / 2
+                    origin.y: settingsPlace === "bottom" ? height : height / 2
                     xScale: 1.0
                     yScale: settingsOpen ? 1.0 : 0.035
                     Behavior on yScale {
@@ -2032,9 +2386,10 @@ Column {
                         }
                     }
                 }
-                                    y: cfgTab === 1 ? 0 : 16
-                                    width: parent.width
-                                    spacing: 12
+                                    y: 0
+                                    x: 28
+                                    width: parent.width - 56
+                                    spacing: 14
 
                                     Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
                                     Behavior on y { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
@@ -2042,130 +2397,14 @@ Column {
                                     
 
 Column {
-    id: shiraExclusionPageV2
-    visible: cfgTab === 9
-    opacity: cfgTab === 9 ? 1 : 0
-    y: cfgTab === 9 ? 0 : 16
+    id: motionSettingsTab
+    visible: cfgTab === 1
     width: parent.width
     spacing: 14
 
-    Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-    Behavior on y { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
-
-    Text {
-        text: "Exclusão"
-        font.pixelSize: 18
-        font.bold: true
-        color: cAc
-    }
-
-    Text {
-        text: "Clique em um wallpaper para ocultar ou mostrar novamente no seletor. Nada será apagado."
-        width: parent.width - 42
-        wrapMode: Text.WordWrap
-        font.pixelSize: 10
-        color: Qt.rgba(1,1,1,0.42)
-    }
-
-    Row {
-        spacing: 8
-
-        Repeater {
-            model: exclusionNames
-
-            Rectangle {
-                width: 116
-                height: 36
-                radius: 14
-                color: exclusionTab === index ? Qt.rgba(cAc.r,cAc.g,cAc.b,0.20) : Qt.rgba(1,1,1,0.055)
-                border.width: 1
-                border.color: exclusionTab === index ? cAc : Qt.rgba(1,1,1,0.08)
-
-                Text {
-                    anchors.centerIn: parent
-                    text: modelData
-                    color: exclusionTab === index ? cAc : Qt.rgba(1,1,1,0.62)
-                    font.pixelSize: 11
-                    font.bold: exclusionTab === index
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: exclusionTab = index
-                }
-            }
-        }
-    }
-
-    Flickable {
-        width: parent.width
-        height: 560
-        clip: true
-        contentHeight: exclusionColumnV2.implicitHeight + 20
-
-        Column {
-            id: exclusionColumnV2
-            width: parent.width
-            spacing: 8
-
-            Repeater {
-                model: exclusionTab === 0 ? staticWalls : exclusionTab === 1 ? liveWalls : engineWalls
-
-                Rectangle {
-                    width: parent.width - 42
-                    height: 58
-                    radius: 18
-
-                    property string pth: exclusionTab === 2 ? modelData.path : modelData
-                    property string typ: exclusionTab === 0 ? "static" : exclusionTab === 1 ? "live" : "engine"
-                    property bool hidden: (hiddenWalls[typ] || []).indexOf(pth) >= 0
-
-                    color: hidden ? Qt.rgba(1,0.20,0.20,0.13) : Qt.rgba(1,1,1,0.055)
-                    border.width: 1
-                    border.color: hidden ? Qt.rgba(1,0.25,0.25,0.24) : Qt.rgba(1,1,1,0.08)
-
-                    Text {
-                        anchors.left: parent.left
-                        anchors.leftMargin: 16
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: parent.width - 130
-                        text: pth.replace(/.*\//, "")
-                        elide: Text.ElideRight
-                        color: Qt.rgba(1,1,1,0.74)
-                        font.pixelSize: 11
-                    }
-
-                    Text {
-                        anchors.right: parent.right
-                        anchors.rightMargin: 16
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: hidden ? "OCULTO" : "VISÍVEL"
-                        color: hidden ? Qt.rgba(1,0.45,0.45,0.95) : cAc
-                        font.pixelSize: 10
-                        font.bold: true
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: toggleHiddenWall(typ, pth)
-                    }
-                }
-            }
-
-            Text {
-                visible: (exclusionTab === 0 ? staticWalls.length : exclusionTab === 1 ? liveWalls.length : engineWalls.length) === 0
-                text: "Nenhum wallpaper nessa categoria. Clique em Recarregar lista."
-                color: Qt.rgba(1,1,1,0.35)
-                font.pixelSize: 11
-            }
-        }
-    }
-}
-
-
-Text { text: "Motion Lab"; font.pixelSize: 18; font.bold: true; color: cAc }
+Text { text: "Animações dos cards"; font.pixelSize: 18; font.bold: true; color: cAc }
                                     Text {
-                                        text: "Mini-prévias animadas para comparar os estilos antes de aplicar."
+                                        text: "Controle a cascata, velocidade e intensidade das animações internas do seletor."
                                         font.pixelSize: 10
                                         color: Qt.rgba(1,1,1,0.42)
                                         wrapMode: Text.Wrap
@@ -2331,208 +2570,9 @@ Text { text: "Motion Lab"; font.pixelSize: 18; font.bold: true; color: cAc }
                                     }
                                     // SHIRA_MAX_ANIM_SETTINGS_V29_END
 
-
-Text { text: "Abertura do seletor"; font.pixelSize: 11; font.bold: true; color: Qt.rgba(1,1,1,0.78) }
-
-                                    Grid {
-                                        id: openPreviewGrid
-                                        columns: 2
-                                        columnSpacing: 10
-                                        rowSpacing: 10
-                                        width: parent.width
-
-                                        Repeater {
-                                            model: [
-                                                {k:"slide",  l:"Deslizar"},
-                                                {k:"rise",   l:"Subir"},
-                                                {k:"fade",   l:"Fade"},
-                                                {k:"soft",   l:"Soft"},
-                                                {k:"scale",  l:"Escala"},
-                                                {k:"zoom",   l:"Zoom"},
-                                                {k:"bounce", l:"Bounce"},
-                                                {k:"dock",   l:"Dock"},
-                                                {k:"unfold", l:"Unfold"},
-                                                {k:"cinema", l:"Cinema"},
-                                                {k:"bloom",  l:"Bloom"},
-                                                {k:"iris",   l:"Iris"}
-                                            ]
-
-                                            delegate: Rectangle {
-                                                property bool act: openStyle === modelData.k
-                                                property real prog: 0
-
-                                                width: (openPreviewGrid.width - 10) / 2
-                                                height: 126
-                                                radius: 16
-                                                antialiasing: true
-                                                color: act ? Qt.rgba(cAc.r,cAc.g,cAc.b,0.18) : Qt.rgba(1,1,1,0.05)
-                                                border.color: act ? cAc : Qt.rgba(1,1,1,0.07)
-                                                border.width: 1
-
-                                                Behavior on color { ColorAnimation { duration: 180 } }
-                                                Behavior on border.color { ColorAnimation { duration: 180 } }
-
-                                                SequentialAnimation on prog {
-                                                    loops: Animation.Infinite
-                                                    NumberAnimation { from: 0; to: 1; duration: 950; easing.type: Easing.InOutCubic }
-                                                    PauseAnimation { duration: 180 }
-                                                }
-
-                                                Rectangle {
-                                                    anchors.left: parent.left
-                                                    anchors.right: parent.right
-                                                    anchors.top: parent.top
-                                                    anchors.margins: 10
-                                                    height: 76
-                                                    radius: 14
-                                                    color: Qt.rgba(0.02,0.03,0.07,0.78)
-                                                    border.color: Qt.rgba(1,1,1,0.04)
-                                                    border.width: 1
-                                                    clip: true
-
-                                                    Rectangle {
-                                                        anchors.fill: parent
-                                                        opacity: 0.25
-                                                        gradient: Gradient {
-                                                            GradientStop { position: 0; color: Qt.rgba(1,1,1,0.04) }
-                                                            GradientStop { position: 1; color: Qt.rgba(cAc.r,cAc.g,cAc.b,0.10) }
-                                                        }
-                                                    }
-
-                                                    Rectangle {
-                                                        width: 26
-                                                        height: 4
-                                                        radius: 2
-                                                        anchors.horizontalCenter: parent.horizontalCenter
-                                                        y: 10
-                                                        color: Qt.rgba(1,1,1,0.12)
-                                                    }
-
-                                                    Rectangle {
-                                                        width: 50
-                                                        height: 16
-                                                        radius: 8
-                                                        y: modelData.k === "slide" ? (30 + (1-prog)*16) : 30
-                                                        x: modelData.k === "slide" ? (-54 + prog*(parent.width+8)) : (parent.width-width)/2
-                                                        opacity: modelData.k === "fade" ? (0.15 + 0.85*Math.sin(prog*3.1415926)) : 0.94
-                                                        scale: modelData.k === "scale" ? (0.62 + 0.38*prog) : (modelData.k === "bounce" ? (0.94 + 0.12*Math.sin(prog*3.1415926)) : 1.0)
-                                                        rotation: modelData.k === "bounce" ? Math.sin(prog*6.28318)*2.0 : 0
-                                                        color: cAc
-                                                        antialiasing: true
-                                                    }
-                                                }
-
-                                                Column {
-                                                    anchors.left: parent.left
-                                                    anchors.right: parent.right
-                                                    anchors.bottom: parent.bottom
-                                                    anchors.leftMargin: 12
-                                                    anchors.rightMargin: 12
-                                                    anchors.bottomMargin: 10
-                                                    spacing: 2
-
-                                                    Text { text: modelData.l; font.pixelSize: 11; font.bold: true; color: act ? cAc : Qt.rgba(1,1,1,0.78) }
-                                                    Text { text: modelData.k; font.pixelSize: 9; color: Qt.rgba(1,1,1,0.34) }
-                                                }
-
-                                                MouseArea { anchors.fill: parent; onClicked: openStyle = modelData.k }
-                                            }
-                                        }
-                                    }
-
-                                    Rectangle { width: parent.width; height: 1; color: Qt.rgba(1,1,1,0.08) }
-                                    Text { text: "Navegação ao trocar de lado"; font.pixelSize: 11; font.bold: true; color: Qt.rgba(1,1,1,0.78) }
-
-                                    Grid {
-                                        id: movePreviewGrid
-                                        columns: 3
-                                        columnSpacing: 10
-                                        rowSpacing: 10
-                                        width: parent.width
-
-                                        Repeater {
-                                            model: [
-                                                {k:"shooter", l:"Rastro"},
-                                                {k:"fade",    l:"Fade"},
-                                                {k:"none",    l:"Instantâneo"}
-                                            ]
-
-                                            delegate: Rectangle {
-                                                property bool act: moveStyle === modelData.k
-                                                property real prog: 0
-
-                                                width: (movePreviewGrid.width - 20) / 3
-                                                height: 120
-                                                radius: 16
-                                                antialiasing: true
-                                                color: act ? Qt.rgba(cAc.r,cAc.g,cAc.b,0.18) : Qt.rgba(1,1,1,0.05)
-                                                border.color: act ? cAc : Qt.rgba(1,1,1,0.07)
-                                                border.width: 1
-
-                                                SequentialAnimation on prog {
-                                                    loops: Animation.Infinite
-                                                    NumberAnimation { from: 0; to: 1; duration: 900; easing.type: Easing.InOutCubic }
-                                                    PauseAnimation { duration: 220 }
-                                                }
-
-                                                Rectangle {
-                                                    id: moveStage
-                                                    anchors.left: parent.left
-                                                    anchors.right: parent.right
-                                                    anchors.top: parent.top
-                                                    anchors.margins: 10
-                                                    height: 70
-                                                    radius: 14
-                                                    color: Qt.rgba(0.02,0.03,0.07,0.78)
-                                                    clip: true
-
-                                                    Rectangle {
-                                                        width: 34
-                                                        height: 12
-                                                        radius: 6
-                                                        color: cAc
-                                                        antialiasing: true
-                                                        x: modelData.k === "none" ? 12 + Math.round(prog)*Math.max(0, parent.width-46) : 12 + prog*Math.max(0, parent.width-46)
-                                                        y: 28
-                                                        opacity: modelData.k === "fade" ? (0.25 + 0.75*Math.sin(prog*3.1415926)) : 1.0
-                                                    }
-
-                                                    Repeater {
-                                                        model: modelData.k === "shooter" ? 3 : 0
-
-                                                        delegate: Rectangle {
-                                                            width: 22 - index*5
-                                                            height: 8 - index*2
-                                                            radius: 4
-                                                            color: Qt.rgba(cAc.r,cAc.g,cAc.b,0.18-index*0.04)
-                                                            x: 12 + Math.max(0, prog*Math.max(0, moveStage.width-46) - (index+1)*14)
-                                                            y: 30 + index
-                                                        }
-                                                    }
-                                                }
-
-                                                Column {
-                                                    anchors.left: parent.left
-                                                    anchors.right: parent.right
-                                                    anchors.bottom: parent.bottom
-                                                    anchors.leftMargin: 12
-                                                    anchors.rightMargin: 12
-                                                    anchors.bottomMargin: 10
-                                                    spacing: 2
-
-                                                    Text { text: modelData.l; font.pixelSize: 11; font.bold: true; color: act ? cAc : Qt.rgba(1,1,1,0.78) }
-                                                    Text { text: modelData.k; font.pixelSize: 9; color: Qt.rgba(1,1,1,0.34) }
-                                                }
-
-                                                MouseArea { anchors.fill: parent; onClicked: moveStyle = modelData.k }
-                                            }
-                                        }
-                                    }
-
-                                    Rectangle { width: parent.width; height: 1; color: Qt.rgba(1,1,1,0.08) }
-                                    Text { text: "Dica"; font.pixelSize: 10; color: Qt.rgba(1,1,1,0.60) }
+                                    Text { text: "A abertura do painel agora fica na aba Entrada. Aqui ficam apenas as animações dos cards para evitar opções repetidas."; font.pixelSize: 10; color: Qt.rgba(1,1,1,0.38); wrapMode: Text.Wrap; width: parent.width }
                                     Text {
-                                        text: "Use bounce para uma abertura dramática e rastro para navegação mais viva. Para algo limpo, use fade + fade."
+                                        text: "Use valores menores para um seletor mais discreto, ou aumente a força para um movimento mais vivo."
                                         font.pixelSize: 10
                                         color: Qt.rgba(1,1,1,0.34)
                                         wrapMode: Text.Wrap
@@ -2550,7 +2590,7 @@ Text { text: "Abertura do seletor"; font.pixelSize: 11; font.bold: true; color: 
                                     width: parent.width
                                     spacing: 12
 
-                                    Text { text: "Posição"; font.pixelSize: 13; font.bold: true; color: cAc }
+                                    Text { text: "Layout"; font.pixelSize: 13; font.bold: true; color: cAc }
                                     Text { text: "Controle onde o seletor e a janela de settings aparecem."; font.pixelSize: 10; color: Qt.rgba(1,1,1,0.42); wrapMode: Text.Wrap; width: parent.width }
 
                                     Rectangle { width: parent.width; height: 1; color: Qt.rgba(1,1,1,0.08) }
@@ -2642,10 +2682,12 @@ Text { text: "Abertura do seletor"; font.pixelSize: 11; font.bold: true; color: 
                                     id: openingSettingsTab
                                     visible: cfgTab === 5
                                     width: parent.width
-                                    spacing: 12
+                                    spacing: 14
 
-                                    Text { text: "Abertura do seletor"; font.pixelSize: 13; font.bold: true; color: cAc }
-                                    Text { text: "Essas opções mudam a entrada real da pill/card quando você abre o seletor."; font.pixelSize: 10; color: Qt.rgba(1,1,1,0.42); wrapMode: Text.Wrap; width: parent.width }
+                                    Text { text: "Entrada do seletor"; font.pixelSize: 18; font.bold: true; color: cAc }
+                                    Text { text: "Escolha apenas como o painel aparece ao abrir. As animações internas dos cards ficam na aba Animações."; font.pixelSize: 10; color: Qt.rgba(1,1,1,0.42); wrapMode: Text.Wrap; width: parent.width }
+
+                                    Rectangle { width: parent.width; height: 1; color: Qt.rgba(1,1,1,0.08) }
 
                                     Grid {
                                         id: openPresetGrid
@@ -2660,6 +2702,12 @@ Text { text: "Abertura do seletor"; font.pixelSize: 11; font.bold: true; color: 
                                                 {k:"soft",   l:"Soft",   d:"leve e limpo"},
                                                 {k:"scale",  l:"Scale",  d:"cresce suave"},
                                                 {k:"bounce", l:"Bounce", d:"elástico"},
+                                                {k:"wave",   l:"Wave",   d:"onda suave"},
+                                                {k:"flip",   l:"Flip",   d:"giro curto"},
+                                                {k:"float",  l:"Float",  d:"flutua"},
+                                                {k:"ritual", l:"Ritual", d:"círculos e pulso"},
+                                                {k:"portal", l:"Portal", d:"anel radial"},
+                                                {k:"cascade",l:"Cascade",d:"varredura lenta"},
                                                 {k:"cinema", l:"Cinema", d:"dramático"},
                                                 {k:"bloom",  l:"Bloom",  d:"abre com brilho"},
                                                 {k:"iris",   l:"Iris",   d:"abre do centro"},
@@ -2671,11 +2719,11 @@ Text { text: "Abertura do seletor"; font.pixelSize: 11; font.bold: true; color: 
                                                 property real p: 0
 
                                                 width: (openPresetGrid.width - 16) / 3
-                                                height: 92
-                                                radius: 16
+                                                height: 98
+                                                radius: 14
                                                 antialiasing: true
-                                                color: act ? Qt.rgba(cAc.r,cAc.g,cAc.b,0.20) : Qt.rgba(1,1,1,0.055)
-                                                border.color: act ? cAc : Qt.rgba(1,1,1,0.075)
+                                                color: act ? Qt.rgba(cAc.r,cAc.g,cAc.b,0.18) : Qt.rgba(1,1,1,0.040)
+                                                border.color: act ? Qt.rgba(cAc.r,cAc.g,cAc.b,0.88) : Qt.rgba(1,1,1,0.070)
                                                 border.width: 1
 
                                                 SequentialAnimation on p {
@@ -2693,7 +2741,7 @@ Text { text: "Abertura do seletor"; font.pixelSize: 11; font.bold: true; color: 
                                                     height: 48
                                                     radius: 12
                                                     clip: true
-                                                    color: Qt.rgba(0.02,0.03,0.07,0.70)
+                                                    color: Qt.rgba(0.02,0.03,0.07,0.48)
 
                                                     Rectangle {
                                                         width: modelData.k === "cinema" ? 46 : 42
@@ -2708,9 +2756,49 @@ Text { text: "Abertura do seletor"; font.pixelSize: 11; font.bold: true; color: 
                                                         scale: modelData.k === "scale" || modelData.k === "bounce" ? (0.65 + p*0.35)
                                                             : modelData.k === "bloom" ? (0.45 + p*0.55)
                                                             : modelData.k === "iris" ? Math.max(0.12, p)
+                                                            : modelData.k === "wave" ? (0.76 + p*0.24 + Math.sin(p*3.14159)*0.05)
+                                                            : modelData.k === "flip" ? (0.72 + p*0.28)
+                                                            : modelData.k === "float" ? (0.90 + p*0.10)
+                                                            : modelData.k === "ritual" ? (0.54 + p*0.46 + Math.sin(p*9.42477)*0.03)
+                                                            : modelData.k === "portal" ? (0.24 + p*0.76)
+                                                            : modelData.k === "cascade" ? (0.68 + p*0.32)
                                                             : 1.0
-                                                        rotation: modelData.k === "bounce" ? Math.sin(p*6.28318)*3.0 : 0
+                                                        rotation: modelData.k === "bounce" ? Math.sin(p*6.28318)*3.0
+                                                            : modelData.k === "wave" ? Math.sin(p*6.28318)*4.0
+                                                            : modelData.k === "flip" ? (1-p)*-12
+                                                            : modelData.k === "ritual" ? Math.sin((1-p)*12.56636)*6
+                                                            : modelData.k === "cascade" ? (1-p)*-5
+                                                            : 0
                                                         antialiasing: true
+                                                    }
+
+                                                    Repeater {
+                                                        model: modelData.k === "ritual" || modelData.k === "portal" ? 2 : 0
+
+                                                        delegate: Rectangle {
+                                                            anchors.centerIn: parent
+                                                            width: parent.width * (0.22 + p * (0.56 + index * 0.18))
+                                                            height: parent.height * (0.24 + p * (0.42 + index * 0.14))
+                                                            radius: Math.min(width, height) / 2
+                                                            color: "transparent"
+                                                            border.width: 1
+                                                            border.color: Qt.rgba(cAc.r, cAc.g, cAc.b, 0.26 - index * 0.08)
+                                                            opacity: Math.max(0, 1 - p * 0.48)
+                                                        }
+                                                    }
+
+                                                    Repeater {
+                                                        model: modelData.k === "cascade" ? 3 : 0
+
+                                                        delegate: Rectangle {
+                                                            width: parent.width * (0.22 + index * 0.16)
+                                                            height: 2
+                                                            radius: 1
+                                                            x: parent.width * (0.18 + index * 0.22) - width / 2
+                                                            y: parent.height * (0.24 + index * 0.18)
+                                                            color: Qt.rgba(cAc.r, cAc.g, cAc.b, 0.26 - index * 0.04)
+                                                            opacity: Math.sin(p * 3.14159)
+                                                        }
                                                     }
 
                                                     Rectangle {
@@ -2725,24 +2813,82 @@ Text { text: "Abertura do seletor"; font.pixelSize: 11; font.bold: true; color: 
                                                     }
                                                 }
 
-                                                Text { anchors.left: parent.left; anchors.leftMargin: 10; anchors.bottom: parent.bottom; anchors.bottomMargin: 23; text: modelData.l; color: act ? cAc : Qt.rgba(1,1,1,0.72); font.pixelSize: 11; font.bold: act }
-                                                Text { anchors.left: parent.left; anchors.leftMargin: 10; anchors.bottom: parent.bottom; anchors.bottomMargin: 9; text: modelData.d; color: Qt.rgba(1,1,1,0.34); font.pixelSize: 9 }
+                                                Text { anchors.left: parent.left; anchors.leftMargin: 10; anchors.bottom: parent.bottom; anchors.bottomMargin: 25; text: modelData.l; color: act ? cAc : Qt.rgba(1,1,1,0.74); font.pixelSize: 11; font.bold: act }
+                                                Text { anchors.left: parent.left; anchors.leftMargin: 10; anchors.right: parent.right; anchors.rightMargin: 10; anchors.bottom: parent.bottom; anchors.bottomMargin: 9; text: modelData.d; color: Qt.rgba(1,1,1,0.36); font.pixelSize: 9; elide: Text.ElideRight }
 
-                                                MouseArea { anchors.fill: parent; onClicked: { openStyle = modelData.k; scheduleSave() } }
+                                                MouseArea {
+                                                    anchors.fill: parent
+                                                    onClicked: {
+                                                        openStyle = modelData.k
+                                                        scheduleSave()
+                                                        Qt.callLater(function() { replayOpenAnimation() })
+                                                    }
+                                                }
                                             }
                                         }
                                     }
 
                                     Rectangle { width: parent.width; height: 1; color: Qt.rgba(1,1,1,0.08) }
-                                    Text { text: "Dica: Cinema, Bloom e Iris usam efeito extra de abertura; Slide e Soft são mais leves."; font.pixelSize: 10; color: Qt.rgba(1,1,1,0.42); wrapMode: Text.Wrap; width: parent.width }
+
+                                    Text { text: "Navegação lateral"; font.pixelSize: 12; font.bold: true; color: Qt.rgba(1,1,1,0.76) }
+                                    Text { text: "Define a sensação ao mudar de wallpaper com setas, clique ou categorias."; font.pixelSize: 10; color: Qt.rgba(1,1,1,0.40); wrapMode: Text.Wrap; width: parent.width }
+
+                                    Flow {
+                                        width: parent.width
+                                        spacing: 8
+
+                                        Repeater {
+                                            model: [
+                                                {k:"glide",   l:"Glide",   d:"desliza suave"},
+                                                {k:"elastic", l:"Elastic", d:"puxa e solta"},
+                                                {k:"fichas",  l:"Fichas",  d:"gruda e comprime"},
+                                                {k:"trail",   l:"Trail",   d:"rastro lateral"},
+                                                {k:"shooter", l:"Shooter", d:"partículas"},
+                                                {k:"snap",    l:"Snap",    d:"rápido"},
+                                                {k:"fade",    l:"Fade",    d:"discreto"},
+                                                {k:"none",    l:"None",    d:"sem efeito"}
+                                            ]
+
+                                            delegate: Rectangle {
+                                                property bool act: moveStyle === modelData.k
+                                                width: 128
+                                                height: 54
+                                                radius: 14
+                                                antialiasing: true
+                                                color: act ? Qt.rgba(cAc.r,cAc.g,cAc.b,0.18) : Qt.rgba(1,1,1,0.040)
+                                                border.color: act ? Qt.rgba(cAc.r,cAc.g,cAc.b,0.86) : Qt.rgba(1,1,1,0.070)
+                                                border.width: 1
+
+                                                Column {
+                                                    anchors.fill: parent
+                                                    anchors.leftMargin: 12
+                                                    anchors.rightMargin: 12
+                                                    anchors.topMargin: 9
+                                                    spacing: 4
+                                                    Text { text: modelData.l; color: act ? cAc : Qt.rgba(1,1,1,0.74); font.pixelSize: 11; font.bold: act }
+                                                    Text { text: modelData.d; color: Qt.rgba(1,1,1,0.36); font.pixelSize: 9; elide: Text.ElideRight; width: parent.width }
+                                                }
+
+                                                MouseArea {
+                                                    anchors.fill: parent
+                                                    onClicked: {
+                                                        moveStyle = modelData.k
+                                                        scheduleSave()
+                                                        Qt.callLater(function() { smoothCenterIndex(highlightIdx) })
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    Rectangle { width: parent.width; height: 1; color: Qt.rgba(1,1,1,0.08) }
+                                    Text { text: "Dica: Wave, Float e Bloom são mais satisfatórios; Soft e Fade são mais leves."; font.pixelSize: 10; color: Qt.rgba(1,1,1,0.42); wrapMode: Text.Wrap; width: parent.width }
                                 }
 
                                 Column {
                                     id: appearanceSettingsTab
                                     visible: cfgTab === 2
-                                    x: 18
-                                    y: 18
-                                    width: parent.width - 36
+                                    width: parent.width
                                     spacing: 12
 
                                     Text { text: "Aparência"; font.pixelSize: 12; font.bold: true; color: cAc }
@@ -2790,9 +2936,7 @@ Text { text: "Abertura do seletor"; font.pixelSize: 11; font.bold: true; color: 
                                 Column {
                                     id: modelSettingsTab
                                     visible: cfgTab === 3
-                                    x: 18
-                                    y: 18
-                                    width: parent.width - 36
+                                    width: parent.width
                                     spacing: 12
 
                                     Text { text: "Modelo do seletor"; font.pixelSize: 12; font.bold: true; color: cAc }
@@ -3204,13 +3348,13 @@ component CatButton: Rectangle {
                     property bool hovered: area.containsMouse
 
                     width: parent ? parent.width : (settingsSidebarWidth - 28)
-                    height: 48
-                    radius: 15
+                    height: 40
+                    radius: 12
                     antialiasing: true
-                    color: active ? Qt.rgba(cAc.r, cAc.g, cAc.b, 0.18) : hovered ? Qt.rgba(1,1,1,0.065) : Qt.rgba(1,1,1,0.035)
-                    border.color: active ? Qt.rgba(cAc.r, cAc.g, cAc.b, 0.92) : hovered ? Qt.rgba(1,1,1,0.11) : Qt.rgba(1,1,1,0.06)
+                    color: active ? Qt.rgba(cAc.r, cAc.g, cAc.b, 0.20) : hovered ? Qt.rgba(1,1,1,0.070) : Qt.rgba(1,1,1,0.030)
+                    border.color: active ? Qt.rgba(cAc.r, cAc.g, cAc.b, 0.82) : hovered ? Qt.rgba(1,1,1,0.12) : Qt.rgba(1,1,1,0.055)
                     border.width: 1
-                    scale: active ? 1.0 : (hovered ? 0.996 : 0.988)
+                    scale: active ? 1.0 : (hovered ? 1.006 : 0.992)
 
                     Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
                     Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.OutCubic } }
@@ -3254,7 +3398,7 @@ component CatButton: Rectangle {
                         hoverEnabled: true
                         onClicked: {
                             if (tab < 0) {
-                                settingsOpen = false
+                                returnToPreview()
                             } else {
                                 cfgTab = tab
                             }
@@ -3453,20 +3597,22 @@ component SelectButton: Rectangle {
                 component MiniButton: Rectangle {
                     property string label: "Button"
                     signal press()
-                    width: 162
-                    height: 28
-                    radius: 10
-                    color: ma.containsMouse ? Qt.rgba(cAc.r,cAc.g,cAc.b,0.16) : Qt.rgba(1,1,1,0.055)
-                    border.color: Qt.rgba(1,1,1,0.07)
+                    width: parent ? parent.width : 180
+                    height: 30
+                    radius: 11
+                    color: ma.containsMouse ? Qt.rgba(cAc.r,cAc.g,cAc.b,0.16) : Qt.rgba(1,1,1,0.045)
+                    border.color: ma.containsMouse ? Qt.rgba(cAc.r,cAc.g,cAc.b,0.22) : Qt.rgba(1,1,1,0.07)
                     border.width: 1
                     Text { anchors.centerIn: parent; text: label; color: Qt.rgba(1,1,1,0.62); font.pixelSize: 10 }
+                    Behavior on color { ColorAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                    Behavior on border.color { ColorAnimation { duration: 140; easing.type: Easing.OutCubic } }
                     MouseArea { id: ma; anchors.fill: parent; hoverEnabled: true; onClicked: press() }
                 }
             }
         }
 
         Repeater {
-            model: (moveStyle === "shooter" && shootActive) ? 14 : 0
+            model: (!settingsOpen && (moveStyle === "shooter" || moveStyle === "trail") && shootActive) ? 14 : 0
             delegate: Rectangle {
                 property real prog: Math.max(0, Math.min(1, shootProg - index * 0.055))
                 property real fade: Math.pow(1 - prog, 2.0)
@@ -3483,5 +3629,7 @@ component SelectButton: Rectangle {
 }
 }
 
+
+}
 
 }
